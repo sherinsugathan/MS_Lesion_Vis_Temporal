@@ -1,0 +1,5 @@
+Bg Color : 22, 22, 37
+Foreground color:
+	border:  22,112,159 (dark)
+	text color : 22, 157, 221 (bright)
+=========================================

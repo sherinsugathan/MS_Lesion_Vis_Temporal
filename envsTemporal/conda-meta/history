@@ -1,0 +1,16 @@
+==> 2021-01-11 19:51:50 <==
+# cmd: C:\ProgramData\Anaconda3\Scripts\conda-script.py create --prefix ./envsTemporal python=3.8.3
+# conda version: 4.8.3
++defaults/noarch::wheel-0.36.2-pyhd3eb1b0_0
++defaults/win-64::ca-certificates-2020.12.8-haa95532_0
++defaults/win-64::certifi-2020.12.5-py38haa95532_0
++defaults/win-64::openssl-1.1.1i-h2bbff1b_0
++defaults/win-64::pip-20.3.3-py38haa95532_0
++defaults/win-64::python-3.8.3-he1778fa_2
++defaults/win-64::setuptools-51.1.2-py38haa95532_3
++defaults/win-64::sqlite-3.33.0-h2a8f88b_0
++defaults/win-64::vc-14.2-h21ff451_1
++defaults/win-64::vs2015_runtime-14.27.29016-h5e58377_2
++defaults/win-64::wincertstore-0.2-py38_0
++defaults/win-64::zlib-1.2.11-h62dcd97_4
+# update specs: ['python=3.8.3']
