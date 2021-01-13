@@ -27,7 +27,7 @@ color:white;</string>
      <number>0</number>
     </property>
     <property name="topMargin">
-     <number>0</number>
+     <number>9</number>
     </property>
     <property name="rightMargin">
      <number>0</number>
@@ -35,200 +35,7 @@ color:white;</string>
     <property name="bottomMargin">
      <number>0</number>
     </property>
-    <item row="1" column="1">
-     <layout class="QGridLayout" name="gridLayout_2">
-      <property name="horizontalSpacing">
-       <number>0</number>
-      </property>
-      <property name="verticalSpacing">
-       <number>6</number>
-      </property>
-      <item row="2" column="1">
-       <widget class="QFrame" name="frame_MPRA">
-        <property name="minimumSize">
-         <size>
-          <width>300</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>300</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(6, 16, 9);
-border-color: rgb(67,67,67);
-border-style: solid;
-border-width: 1px;
-border-radius: 10px;</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QSlider" name="mprA_Slice_Slider">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">.QSlider::handle:vertical {
-    background: #ffffff;
-    border: 9px solid #474747;
-    height: 5px;
-    /*margin: -30px -30px;*/
-	border-radius: 10px;
-}
-
-.QSlider::groove:vertical {
-    border: 1px solid #434343;
-    width: 5px;
-    background: rgb(46,46,46);
-    margin: 0 0px;
-}</string>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="invertedAppearance">
-         <bool>false</bool>
-        </property>
-        <property name="tickInterval">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QFrame" name="frame_MPRC">
-        <property name="minimumSize">
-         <size>
-          <width>300</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>300</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(6, 16, 9);
-border-color: rgb(67,67,67);
-border-style: solid;
-border-width: 1px;
-border-radius: 10px;</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QFrame" name="frame_MPRB">
-        <property name="minimumSize">
-         <size>
-          <width>300</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>300</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(6, 16, 9);
-border-color: rgb(67,67,67);
-border-style: solid;
-border-width: 1px;
-border-radius: 10px;</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QSlider" name="mprB_Slice_Slider">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">.QSlider::handle:vertical {
-    background: #ffffff;
-    border: 9px solid #474747;
-    height: 5px;
-    /*margin: -30px -30px;*/
-	border-radius: 10px;
-}
-
-.QSlider::groove:vertical {
-    border: 1px solid #434343;
-    width: 5px;
-    background: rgb(46,46,46);
-    margin: 0 0px;
-}</string>
-        </property>
-        <property name="maximum">
-         <number>99</number>
-        </property>
-        <property name="tracking">
-         <bool>true</bool>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QSlider" name="mprC_Slice_Slider">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">.QSlider::handle:vertical {
-    background: #ffffff;
-    border: 9px solid #474747;
-    height: 5px;
-    /*margin: -30px -30px;*/
-	border-radius: 10px;
-}
-
-.QSlider::groove:vertical {
-    border: 1px solid #434343;
-    width: 5px;
-    background: rgb(46,46,46);
-    margin: 0 0px;
-}</string>
-        </property>
-        <property name="value">
-         <number>0</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="tickPosition">
-         <enum>QSlider::NoTicks</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="0">
+    <item row="0" column="0">
      <widget class="QGroupBox" name="groupBox">
       <property name="minimumSize">
        <size>
@@ -522,7 +329,7 @@ background: rgb(70,121,85);
       </layout>
      </widget>
     </item>
-    <item row="1" column="2">
+    <item row="0" column="2">
      <widget class="QStackedWidget" name="stackedWidget_MainRenderers">
       <property name="minimumSize">
        <size>
@@ -1086,7 +893,7 @@ border-style: solid;
            </size>
           </property>
           <property name="styleSheet">
-           <string notr="true">background-color: rgb(6, 16, 9);
+           <string notr="true">background-color: rgb(16,16,16);
 border-color: rgb(67,67,67);
 border-style: solid;
 border-width: 1px;
@@ -1218,133 +1025,198 @@ border-style: solid;
       </widget>
      </widget>
     </item>
-    <item row="0" column="0" colspan="3">
-     <widget class="QFrame" name="frame_3">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+    <item row="0" column="1">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <property name="horizontalSpacing">
+       <number>0</number>
       </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>25</height>
-       </size>
+      <property name="verticalSpacing">
+       <number>6</number>
       </property>
-      <property name="styleSheet">
-       <string notr="true">background-color:rgb(51,51,51);</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="styleSheet">
-          <string notr="true">color: rgb(200,200,200);
-font: 10pt &quot;Google Sans&quot;;
-font-weight: normal;</string>
-         </property>
-         <property name="text">
-          <string>MuScLeVis Longitudinal - Not For Clinical Use</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_Minimize">
-         <property name="maximumSize">
-          <size>
-           <width>40</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton:hover#pushButton_Minimize
-{
-background-color: rgb(71,71,71);
+      <item row="2" column="0">
+       <widget class="QSlider" name="mprA_Slice_Slider">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">.QSlider::handle:vertical {
+    background: #ffffff;
+    border: 9px solid #474747;
+    height: 5px;
+    /*margin: -30px -30px;*/
+	border-radius: 10px;
 }
-QPushButton:pressed#pushButton_Minimize {background-color:rgb(150,150,150);}
-QPushButton:checked#pushButton_Minimize {background-color:rgb(100,100,100);color: rgb(10,10,10);}
-QPushButton#pushButton_Minimize
-{
-background-color: rgb(46,46,46);
-color: rgb(231,231,231);
-border-style: outset;
-border-width: 1px;
-border-radius: 4px;
-border-color: rgb(67,67,67);
-font: bold 11px;
-padding: 6px;
-font: 9pt &quot;Google Sans&quot;;
-border-style: solid;
+
+.QSlider::groove:vertical {
+    border: 1px solid #434343;
+    width: 5px;
+    background: rgb(46,46,46);
+    margin: 0 0px;
 }</string>
-         </property>
-         <property name="text">
-          <string>_</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_Quit">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>40</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton:hover#pushButton_Quit
-{
-background-color: rgb(255,0,0);
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="invertedAppearance">
+         <bool>false</bool>
+        </property>
+        <property name="tickInterval">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QFrame" name="frame_MPRA">
+        <property name="minimumSize">
+         <size>
+          <width>300</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>300</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(67,67,67);
+border-style: solid;
+border-width: 1px;
+border-radius: 10px;</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QFrame" name="frame_MPRB">
+        <property name="minimumSize">
+         <size>
+          <width>300</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>300</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(67,67,67);
+border-style: solid;
+border-width: 1px;
+border-radius: 10px;</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QSlider" name="mprB_Slice_Slider">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">.QSlider::handle:vertical {
+    background: #ffffff;
+    border: 9px solid #474747;
+    height: 5px;
+    /*margin: -30px -30px;*/
+	border-radius: 10px;
 }
-QPushButton:pressed#pushButton_Quit {background-color:rgb(150,150,150);}
-QPushButton:checked#pushButton_Quit {background-color:rgb(100,100,100);color: rgb(10,10,10);}
-QPushButton#pushButton_Quit
-{
-background-color: rgb(46,46,46);
-color: rgb(231,231,231);
-border-style: outset;
-border-width: 1px;
-border-radius: 4px;
-border-color: rgb(67,67,67);
-font: bold 11px;
-padding: 6px;
-font: 9pt &quot;Google Sans&quot;;
-border-style: solid;
+
+.QSlider::groove:vertical {
+    border: 1px solid #434343;
+    width: 5px;
+    background: rgb(46,46,46);
+    margin: 0 0px;
 }</string>
-         </property>
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
+        </property>
+        <property name="maximum">
+         <number>99</number>
+        </property>
+        <property name="tracking">
+         <bool>true</bool>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QSlider" name="mprC_Slice_Slider">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">.QSlider::handle:vertical {
+    background: #ffffff;
+    border: 9px solid #474747;
+    height: 5px;
+    /*margin: -30px -30px;*/
+	border-radius: 10px;
+}
+
+.QSlider::groove:vertical {
+    border: 1px solid #434343;
+    width: 5px;
+    background: rgb(46,46,46);
+    margin: 0 0px;
+}</string>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="tickPosition">
+         <enum>QSlider::NoTicks</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QFrame" name="frame_MPRC">
+        <property name="minimumSize">
+         <size>
+          <width>300</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>300</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(67,67,67);
+border-style: solid;
+border-width: 1px;
+border-radius: 10px;</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

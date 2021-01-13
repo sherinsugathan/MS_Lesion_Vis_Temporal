@@ -28,12 +28,10 @@ class mainWindow(QtWidgets.QMainWindow):
     def showDialog(self):
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
-        msgBox.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         msgBox.setText("Loading Data...Please wait...")
         msgBox.setStyleSheet("background-color: rgb(46,46,46); color:rgb(200,200,200); font: 10pt 'Google Sans';")
         msgBox.setEscapeButton(None)
         msgBox.exec()
-
         dlg = QDialog(self)
         dlg.setWindowTitle("HELLO!")
         dlg.exec_()
@@ -48,8 +46,6 @@ class mainWindow(QtWidgets.QMainWindow):
         # Handlers
         self.pushButton_LoadFolder.clicked.connect(self.on_click_browseFolder) # Attaching button click handler.
         self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
-        self.pushButton_Quit.clicked.connect(self.quitApp)
-        self.pushButton_Minimize.clicked.connect(self.minimizeApp)
 
         #fileName = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\surfaces\\lesions\\l0.obj"
 
@@ -89,20 +85,9 @@ class mainWindow(QtWidgets.QMainWindow):
     def renderData(self):
         numberOfActors = len(self.LesionActorList)
         self.horizontalSlider_TimePoint.setMaximum(numberOfActors-1)
-
-        # self.actor = vtk.vtkActor()
-        # self.actor.SetMapper(self.LesionMapperList[0])
-        # self.actor.SetUserTransform(self.transform)
         self.ren.AddActor(self.LesionActorList[0])
         self.ren.ResetCamera()
         self.iren.Render()
-
-        # print("MAPPERQ", id(self.LesionActorList[0].GetMapper()))
-        # print("ACTORQ", id(self.LesionActorList[0]))
-        # print("MAPPERQ", id(self.LesionActorList[1].GetMapper()))
-        # print("ACTORQ", id(self.LesionActorList[1]))
-        # print("MAPPERQ", id(self.LesionActorList[2].GetMapper()))
-        # print("ACTORQ", id(self.LesionActorList[2]))
 
     # Handler for time point slider change
     @pyqtSlot()
@@ -110,7 +95,6 @@ class mainWindow(QtWidgets.QMainWindow):
         sliderValue = self.horizontalSlider_TimePoint.value()
         self.label_currentDataIndex.setText(str(sliderValue))
         self.ren.RemoveAllViewProps()
-        #self.actor.SetMapper(self.LesionMapperList[sliderValue])
         self.ren.AddActor(self.LesionActorList[sliderValue])
         self.iren.Render()
 
@@ -138,24 +122,8 @@ class mainWindow(QtWidgets.QMainWindow):
             self.worker.finished.connect(self.renderData)
             self.readThread.start()
 
-
-            #self.comboBox_AvailableSubjects.clear()
-            #dataFolders = [ name for name in os.listdir(file) if os.path.isdir(os.path.join(file, name)) ]
-            #for dataFolderName in dataFolders:
-            #    self.comboBox_AvailableSubjects.addItem(dataFolderName)
-    
-    @pyqtSlot()
-    def quitApp(self):
-        sys.exit(0)
-
-    @pyqtSlot()
-    def minimizeApp(self):
-        self.showMinimized()
-
 app = QtWidgets.QApplication(sys.argv)
-
 window = mainWindow()
-window.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 window.setupUI()
 window.show()
 sys.exit(app.exec_())

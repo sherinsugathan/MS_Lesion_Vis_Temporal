@@ -1,12 +1,33 @@
 import vtk
 import numpy as np
 import os
-import LesionUtils
 import math
 import SimpleITK as sitk
 
 rootFolder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_SegmentationChallengeDataset\\DTIDATA\\"
 referenceMaskDataVolume = rootFolder + "\\lesionMask\\consensus.nii"
+outputFileName = "D:\\shr3.nii"
+# Read reference image.
+imagereferenceImage = sitk.ReadImage(referenceMaskDataVolume)
+l = imagereferenceImage.GetSize()[0]
+w = imagereferenceImage.GetSize()[1]
+h = imagereferenceImage.GetSize()[2]
+
+
+lessImageFilter = sitk.LessImageFilter()
+result = lessImageFilter.Execute(imagereferenceImage,0.0)
+
+
+# for i in range(l):
+#      for j in range(w):
+#           for k in range(h):
+#                imagereferenceImage[i,j,k] = 0
+# Write result to file.
+sitk.WriteImage(result, outputFileName)
+print("SUCCESS")
+quit()
+
+
 
 
 
