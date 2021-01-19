@@ -121,12 +121,15 @@ border-style: solid;
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: rgb(75,75,124);
+          <string notr="true">color: rgb(149,189,149);
 border-color: rgb(67,67,67);
 border-style: solid;
 border-width: 1px;
 border-radius: 4px;
 </string>
+         </property>
+         <property name="text">
+          <string>D:\OneDrive - University of Bergen\Datasets\MS_Longitudinal\Subject1</string>
          </property>
         </widget>
        </item>

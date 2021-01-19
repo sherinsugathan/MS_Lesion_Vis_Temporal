@@ -1,3 +1,5 @@
+# Read blender generated lesion surface files and create binary mask volumes data from it. Uses existing consensus data for a reference.
+
 import vtk
 import numpy as np
 import os
@@ -5,241 +7,84 @@ import math
 import SimpleITK as sitk
 
 rootFolder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_SegmentationChallengeDataset\\DTIDATA\\"
-referenceMaskDataVolume = rootFolder + "\\lesionMask\\consensus.nii"
-outputFileName = "D:\\shr3.nii"
-# Read reference image.
-imagereferenceImage = sitk.ReadImage(referenceMaskDataVolume)
-l = imagereferenceImage.GetSize()[0]
-w = imagereferenceImage.GetSize()[1]
-h = imagereferenceImage.GetSize()[2]
+referenceMaskDataVolume = rootFolder + "\\lesionMask\\Consensus.nii"
+dataCount = 81
 
-
-lessImageFilter = sitk.LessImageFilter()
-result = lessImageFilter.Execute(imagereferenceImage,0.0)
-
-
-# for i in range(l):
-#      for j in range(w):
-#           for k in range(h):
-#                imagereferenceImage[i,j,k] = 0
-# Write result to file.
-sitk.WriteImage(result, outputFileName)
-print("SUCCESS")
-quit()
-
-
-
-
-
-rootPath = os.path.dirname(os.path.realpath(__file__))
-nodifBrainMaskFile = rootPath + "\\dataFiles\\nodif_brain_mask.nii"
-
-# Read lesions
-informationUniqueKey = vtk.vtkInformationStringKey.MakeKey("type", "vtkActor")
-lesionActors = LesionUtils.extractLesions2(rootFolder, informationUniqueKey)
-
-# Append lesions to form one polydata 
-appendFilter = vtk.vtkAppendPolyData()
-for lesionActor in lesionActors:
-	appendFilter.AddInputData(lesionActor.GetMapper().GetInput())
-
-appendFilter.Update()
-
-niftiReader = vtk.vtkNIFTIImageReader()
-niftiReader.SetFileName(nodifBrainMaskFile)
-niftiReader.Update()
-
-readerBrainMask = sitk.ImageFileReader()
-readerBrainMask.SetFileName(nodifBrainMaskFile)
-readerBrainMask.LoadPrivateTagsOn()
-readerBrainMask.ReadImageInformation()
-readerBrainMask.LoadPrivateTagsOn()
-imageBrainMask = sitk.ReadImage(nodifBrainMaskFile)
-#print("Mask GetOrigin(): {0}".format(readerMask.GetBounds("qoffset_z")))
-
-
-spacing = [0] * 3  # desired volume spacing
-spacing[0] = 1.25
-spacing[1] = 1.25
-spacing[2] = 1.25
-bounds = [0]*6
-appendFilter.GetOutput().GetBounds(bounds)
-#print(bounds)
-sphereVolumeImage = vtk.vtkImageData()
-sphereVolumeImage.SetSpacing(spacing)
-sphereDims = [0]*3
-# for i in range(3):
-#      sphereDims[i] = int(math.ceil((bounds[i * 2 + 1] - bounds[i * 2]) / spacing[i]))
-sphereDims[0] = 145
-sphereDims[1] = 174
-sphereDims[2] = 145
-sphereVolumeImage.SetDimensions(sphereDims)
-sphereVolumeImage.SetExtent(0, sphereDims[0] - 1, 0, sphereDims[1] - 1, 0, sphereDims[2] - 1)
-streamOrigin = [0]*3
-streamOrigin[0] = bounds[0] + spacing[0] / 2
-streamOrigin[1] = bounds[2] + spacing[1] / 2
-streamOrigin[2] = bounds[4] + spacing[2] / 2
-# streamOrigin[0] = float(readerMask.GetMetaData("qoffset_x"))
-# streamOrigin[1] = float(readerMask.GetMetaData("qoffset_y"))
-# streamOrigin[2] = float(readerMask.GetMetaData("qoffset_z"))
-sphereVolumeImage.SetOrigin(streamOrigin)
-#sphereVolumeImage.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
-sphereVolumeImage.AllocateScalars(vtk.VTK_FLOAT, 1)
-inVal = 0
-outVal = 255
-count = sphereVolumeImage.GetNumberOfPoints()
-for i in range(count):
-     sphereVolumeImage.GetPointData().GetScalars().SetTuple1(i, inVal)
-pol2stencil = vtk.vtkPolyDataToImageStencil()   
-pol2stencil.SetInputData(appendFilter.GetOutput())
-pol2stencil.SetOutputOrigin(streamOrigin)
-pol2stencil.SetOutputSpacing(spacing)
-pol2stencil.SetOutputWholeExtent(sphereVolumeImage.GetExtent())
-pol2stencil.Update()
-imgStencil = vtk.vtkImageStencil()
-imgStencil.SetInputData(sphereVolumeImage)
-imgStencil.SetStencilConnection(pol2stencil.GetOutputPort())
-imgStencil.ReverseStencilOff()
-imgStencil.SetBackgroundValue(outVal)
-imgStencil.Update()
-
-writer = vtk.vtkMetaImageWriter()
-writer.SetFileName("D:\\lesionHoleMask.mhd")
-writer.SetInputData(imgStencil.GetOutput())
-writer.Write() 
-
-
-readerLesionHoles = sitk.ImageFileReader()
-readerLesionHoles.SetFileName("D:\\lesionHoleMask.mhd")
-readerLesionHoles.LoadPrivateTagsOn()
-readerLesionHoles.ReadImageInformation()
-readerLesionHoles.LoadPrivateTagsOn()
-imageHoles = sitk.ReadImage("D:\\lesionHoleMask.mhd")
-
-
-#brainMaskArray = sitk.GetArrayFromImage(imageBrainMask)
-lesionHolesArray = sitk.GetArrayFromImage(imageHoles)
-print(lesionHolesArray.shape[0])
-print(lesionHolesArray.shape[1])
-print(lesionHolesArray.shape[2])
-
-for i in range(lesionHolesArray.shape[0]):
-     for j in range(lesionHolesArray.shape[1]):
-          for k in range(lesionHolesArray.shape[2]):
-               if(imageHoles[i,j,k]==0):
-                    pt = imageHoles.TransformIndexToPhysicalPoint((i,j,k))
-                    index = imageBrainMask.TransformPhysicalPointToIndex(pt)
-                    imageBrainMask[index[0], index[1], index[2]] = 0 
-
-sitk.WriteImage(imageBrainMask, "D:\\finalBrainMask.nii")
-
-print("done")
-quit()
-
-
-
-
-
-
-
-
-
-
-
-
-fileNameLh = rootFolder + "surfaces\\lh.white.obj"
-fileNameRh = rootFolder + "surfaces\\rh.white.obj"
-SDMFilePath = rootFolder + "surfaces\\ProjectionSDM\\"
-LhMappingPolyData, RhMappingPolyData = readDistanceMapPolyData(SDMFilePath)
-print(LhMappingPolyData)
-
-translationFilePath = os.path.join(rootFolder, "meta\\cras.txt")
-f = open(translationFilePath, "r")
-t_vector = []
-for t in f:
-    t_vector.append(t)
-t_vector = list(map(float, t_vector))
-transform = vtk.vtkTransform()
-transform.PostMultiply()
-transform.Translate(t_vector[0], t_vector[1], t_vector[2])
-f.close()
-
-# Reader Lh inflated
-LhReader = vtk.vtkOBJReader()
-LhReader.SetFileName(fileNameLh)
-LhReader.Update()
-Lh_mapper = vtk.vtkOpenGLPolyDataMapper()
-Lh_mapper.SetInputConnection(LhReader.GetOutputPort())
-Lh_actor = vtk.vtkActor()
-Lh_actor.SetMapper(Lh_mapper)
-Lh_actor.SetUserTransform(transform)
-Lh_actor.GetProperty().SetOpacity(0.5)
-#Lh_actor.GetProperty().SetColor(203/255, 147/255, 121/255)
-
-# Reader Rh inflated
-RhReader = vtk.vtkOBJReader()
-RhReader.SetFileName(fileNameRh)
-RhReader.Update()
-Rh_mapper = vtk.vtkOpenGLPolyDataMapper()
-Rh_mapper.SetInputConnection(RhReader.GetOutputPort())
-Rh_actor = vtk.vtkActor()
-Rh_actor.SetMapper(Rh_mapper)
-Rh_actor.SetUserTransform(transform)
-Rh_actor.GetProperty().SetOpacity(0.5)
-#Rh_actor.GetProperty().SetColor(0.0, 1.0, 0.0)
-
-# Read lesions
-informationUniqueKey = vtk.vtkInformationStringKey.MakeKey("type", "vtkActor")
-lesionActors = LesionUtils.extractLesions2(rootFolder, informationUniqueKey)
-
-# Display essentials
-ren = vtk.vtkRenderer()
-renWin = vtk.vtkRenderWindow()
-renWin.AddRenderer(ren)
-iren = vtk.vtkRenderWindowInteractor()
-iren.SetRenderWindow(renWin)
-
-# add the custom style
-style = MouseInteractorHighLightActor()
-style.lh = Lh_actor
-style.rh = Rh_actor
-style.mappingLh = LhMappingPolyData
-style.mappingRh = RhMappingPolyData
-style.informationKeyID = informationUniqueKey
-style.initPickList(lesionActors)
-style.SetDefaultRenderer(ren)
-iren.SetInteractorStyle(style)
-
-# Add the actors to the renderer, set the background and size
-Rh_actor.GetMapper().ScalarVisibilityOn()
-Lh_actor.GetMapper().ScalarVisibilityOn()
-ren.AddActor(Rh_actor)
-ren.AddActor(Lh_actor)
-
-for actor in lesionActors:
-	actor.GetMapper().ScalarVisibilityOff()
-	actor.GetProperty().SetColor(0.0, 1.0, 0.0)
-	ren.AddActor(actor)
-
-ren.SetBackground(1, 229/255, 204/255)
-ren.SetUseDepthPeeling(True)
-ren.SetMaximumNumberOfPeels(6)
-renWin.SetSize(800, 800)
-
-# This allows the interactor to initalize itself. It has to be
-# called before an event loop.
-iren.Initialize()
-
-# We'll zoom in a little by accessing the camera and invoking a "Zoom"
-# method on it.
-ren.ResetCamera()
-ren.GetActiveCamera().Zoom(1)
-renWin.Render()
-
-# Start the event loop.
-iren.Start()
-
-
-
-
+for i in range(dataCount):
+    lesionMeshFileName = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\surfaces\\lesions\\l" + str(i) + ".obj"
+    outputFileName = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\lesionMask\\Consensus" + str(i) + ".nii"
+    
+    objReader = vtk.vtkOBJReader()
+    objReader.SetFileName(lesionMeshFileName)
+    objReader.Update()
+    
+    # Read reference mask image.
+    niftyReaderMask = vtk.vtkNIFTIImageReader() 
+    niftyReaderMask.SetFileName(referenceMaskDataVolume)
+    niftyReaderMask.Update()
+    
+    lesionPolyData=objReader.GetOutput()
+    
+    niftyImage = niftyReaderMask.GetOutput()
+    # print("BOUNDS", niftyImage.GetBounds())
+    # print("ORIGIN", niftyImage.GetOrigin())
+    # print("DIMENSIONS", niftyImage.GetDimensions())
+    # print("DIRECTION MATRIX", niftyImage.GetIndexToPhysicalMatrix())
+    
+    spacing = [0] * 3  # desired volume spacing
+    spacing[0] = 0.7
+    spacing[1] = 0.7
+    spacing[2] = 0.7
+    #bounds = [0]*6
+    #lesionPolyData.GetBounds(bounds)
+    bounds=niftyImage.GetBounds()
+    
+    lesionVolumeImage = vtk.vtkImageData()
+    lesionVolumeImage.SetSpacing(spacing)
+    streamDims = [0]*3
+    niftyImage.GetDimensions(streamDims)
+    
+    # for i in range(3):
+    #     streamDims[i] = int(math.ceil((bounds[i * 2 + 1] - bounds[i * 2]) / spacing[i]))
+    lesionVolumeImage.SetDimensions(streamDims)
+    lesionVolumeImage.SetExtent(0, streamDims[0] - 1, 0, streamDims[1] - 1, 0, streamDims[2] - 1)
+    streamOrigin = [0]*3
+    streamOrigin[0] = bounds[0] + spacing[0] / 2
+    streamOrigin[1] = bounds[2] + spacing[1] / 2
+    streamOrigin[2] = bounds[4] + spacing[2] / 2
+    #streamOrigin=niftyImage.GetOrigin()
+    lesionVolumeImage.SetOrigin(streamOrigin)
+    lesionVolumeImage.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+    
+    inVal = 255
+    outVal = 0
+    count = lesionVolumeImage.GetNumberOfPoints()
+    for i in range(count):
+        lesionVolumeImage.GetPointData().GetScalars().SetTuple1(i, inVal)
+    pol2stencil = vtk.vtkPolyDataToImageStencil()
+    pol2stencil.SetInputData(lesionPolyData)
+    pol2stencil.SetOutputOrigin(streamOrigin)
+    pol2stencil.SetOutputSpacing(spacing)
+    pol2stencil.SetOutputWholeExtent(lesionVolumeImage.GetExtent())
+    pol2stencil.Update()
+    imgStencil = vtk.vtkImageStencil()
+    imgStencil.SetInputData(lesionVolumeImage)
+    imgStencil.SetStencilConnection(pol2stencil.GetOutputPort())
+    imgStencil.ReverseStencilOff()
+    imgStencil.SetBackgroundValue(outVal)
+    imgStencil.Update()
+    
+    niftiWriter = vtk.vtkNIFTIImageWriter()
+    niftiWriter.SetInputConnection(imgStencil.GetOutputPort())
+    # copy most information directoy from the header
+    niftiWriter.SetNIFTIHeader(niftyReaderMask.GetNIFTIHeader())
+    # this information will override the reader's header
+    niftiWriter.SetQFac(niftyReaderMask.GetQFac())
+    niftiWriter.SetTimeDimension(niftyReaderMask.GetTimeDimension())
+    niftiWriter.SetQFormMatrix(niftyReaderMask.GetQFormMatrix())
+    niftiWriter.SetSFormMatrix(niftyReaderMask.GetSFormMatrix())
+    niftiWriter.SetFileName(outputFileName)
+    niftiWriter.Write()
+    print("Finished processing data instance", i)    
+print("Successfully completed")
 

@@ -14,6 +14,7 @@ import os
 import Utils
 import vtk
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+import networkx as nx
 
 # Main window class.
 class mainWindow(QtWidgets.QMainWindow):
@@ -44,7 +45,8 @@ class mainWindow(QtWidgets.QMainWindow):
         #self.showDialog()
         
         # Handlers
-        self.pushButton_LoadFolder.clicked.connect(self.on_click_browseFolder) # Attaching button click handler.
+        #self.pushButton_LoadFolder.clicked.connect(self.on_click_browseFolder) # Attaching button click handler.
+        self.pushButton_LoadFolder.clicked.connect(self.autoLoadData) # Attaching button click handler.
         self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
 
         #fileName = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\surfaces\\lesions\\l0.obj"
@@ -86,6 +88,7 @@ class mainWindow(QtWidgets.QMainWindow):
         numberOfActors = len(self.LesionActorList)
         self.horizontalSlider_TimePoint.setMaximum(numberOfActors-1)
         self.ren.AddActor(self.LesionActorList[0])
+        self.ren.AddActor(self.surfaceActors[0])
         self.ren.ResetCamera()
         self.iren.Render()
 
@@ -96,13 +99,13 @@ class mainWindow(QtWidgets.QMainWindow):
         self.label_currentDataIndex.setText(str(sliderValue))
         self.ren.RemoveAllViewProps()
         self.ren.AddActor(self.LesionActorList[sliderValue])
+        self.ren.AddActor(self.surfaceActors[0])
         self.iren.Render()
 
-    # Handler for browse folder button click.
-    @pyqtSlot()
-    def on_click_browseFolder(self):
-        folder = str(QFileDialog.getExistingDirectory(self, "Select Patient Directory"))
-        if folder:
+    # Load data automatically - To be removed in production.
+    def autoLoadData(self):
+        self.folder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
+        if self.folder:
             self.niftyReaderT1 = vtk.vtkNIFTIImageReader() 
             self.niftyReaderT1.SetFileName("D:\\OneDrive - University of Bergen\\Datasets\\MS_SegmentationChallengeDataset\\DTIDATA\\structural\\T1.nii")
             self.niftyReaderT1.Update()
@@ -112,10 +115,37 @@ class mainWindow(QtWidgets.QMainWindow):
             QFormMatrixT1.DeepCopy(qFormListT1, QFormMatrixT1)
             self.transform.SetMatrix(qFormListT1)
 
-            self.lineEdit_DatasetFolder.setText(folder)
+            self.lineEdit_DatasetFolder.setText(self.folder)
             self.LesionActorList = []
+            self.surfaceActors = []
             self.readThread = QThread()
-            self.worker = Utils.ReadThread(folder, self.LesionActorList, self.transform)
+            self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.transform, self.surfaceActors)
+            self.worker.moveToThread(self.readThread)
+            self.readThread.started.connect(self.worker.run)
+            self.worker.progress.connect(self.reportProgress)
+            self.worker.finished.connect(self.renderData)
+            self.readThread.start()
+
+
+    # Handler for browse folder button click.
+    @pyqtSlot()
+    def on_click_browseFolder(self):
+        self.folder = str(QFileDialog.getExistingDirectory(self, "Select Patient Directory"))
+        if self.folder:
+            self.niftyReaderT1 = vtk.vtkNIFTIImageReader() 
+            self.niftyReaderT1.SetFileName("D:\\OneDrive - University of Bergen\\Datasets\\MS_SegmentationChallengeDataset\\DTIDATA\\structural\\T1.nii")
+            self.niftyReaderT1.Update()
+            self.transform = vtk.vtkTransform()
+            QFormMatrixT1 = self.niftyReaderT1.GetQFormMatrix()
+            qFormListT1 = [0] * 16 #the matrix is 4x4
+            QFormMatrixT1.DeepCopy(qFormListT1, QFormMatrixT1)
+            self.transform.SetMatrix(qFormListT1)
+
+            self.lineEdit_DatasetFolder.setText(self.folder)
+            self.LesionActorList = []
+            self.ventricleActor = None
+            self.readThread = QThread()
+            self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.transform, self.ventricleActor)
             self.worker.moveToThread(self.readThread)
             self.readThread.started.connect(self.worker.run)
             self.worker.progress.connect(self.reportProgress)
