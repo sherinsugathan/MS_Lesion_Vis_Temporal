@@ -49,28 +49,6 @@ class mainWindow(QtWidgets.QMainWindow):
         self.pushButton_LoadFolder.clicked.connect(self.autoLoadData) # Attaching button click handler.
         self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
 
-        #fileName = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\surfaces\\lesions\\l0.obj"
-
-        # fileName = "D:\\OneDrive - University of Bergen\\Datasets\\MS_SegmentationChallengeDataset\\DTIDATA\\surfaces\\lesions.obj"
-        # reader = vtk.vtkOBJReader()
-        # reader.SetFileName(fileName) 
-        # reader.Update() 
-        # mapper = vtk.vtkOpenGLPolyDataMapper()
-        # mapper.SetInputConnection(reader.GetOutputPort())
-        # mapper.Update()
-        # actor = vtk.vtkActor()
-        # actor.SetMapper(mapper)
-
-        # self.niftyReaderT1 = vtk.vtkNIFTIImageReader() 
-        # self.niftyReaderT1.SetFileName("D:\\OneDrive - University of Bergen\\Datasets\\MS_SegmentationChallengeDataset\\DTIDATA\\structural\\T1.nii")
-        # self.niftyReaderT1.Update()
-        # transform = vtk.vtkTransform()
-        # QFormMatrixT1 = self.niftyReaderT1.GetQFormMatrix()
-        # qFormListT1 = [0] * 16 #the matrix is 4x4
-        # QFormMatrixT1.DeepCopy(qFormListT1, QFormMatrixT1)
-        # transform.SetMatrix(qFormListT1)
-        # actor.SetUserTransform(transform)
-
         self.vl = Qt.QVBoxLayout()
         self.vtkWidget = QVTKRenderWindowInteractor(self.frame)
         self.vl.addWidget(self.vtkWidget)
@@ -81,13 +59,20 @@ class mainWindow(QtWidgets.QMainWindow):
         self.iren.Initialize()
         self.ren.ResetCamera()
 
+        self.style = Utils.CustomMouseInteractor(self)
+        self.style.SetDefaultRenderer(self.ren)
+        self.style.main = self
+        self.iren.SetInteractorStyle(self.style)
+
     def reportProgress(self, n):
         self.progressBar.setValue(n)
 
     def renderData(self):
+        Utils.smoothSurface(self.surfaceActors[0])
         numberOfActors = len(self.LesionActorList)
         self.horizontalSlider_TimePoint.setMaximum(numberOfActors-1)
-        self.ren.AddActor(self.LesionActorList[0])
+        for lesion in self.LesionActorList[0]:
+            self.ren.AddActor(lesion)
         self.ren.AddActor(self.surfaceActors[0])
         self.ren.ResetCamera()
         self.iren.Render()
@@ -98,7 +83,8 @@ class mainWindow(QtWidgets.QMainWindow):
         sliderValue = self.horizontalSlider_TimePoint.value()
         self.label_currentDataIndex.setText(str(sliderValue))
         self.ren.RemoveAllViewProps()
-        self.ren.AddActor(self.LesionActorList[sliderValue])
+        for lesion in self.LesionActorList[sliderValue]:
+            self.ren.AddActor(lesion)
         self.ren.AddActor(self.surfaceActors[0])
         self.iren.Render()
 
@@ -106,46 +92,27 @@ class mainWindow(QtWidgets.QMainWindow):
     def autoLoadData(self):
         self.folder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
         if self.folder:
-            self.niftyReaderT1 = vtk.vtkNIFTIImageReader() 
-            self.niftyReaderT1.SetFileName("D:\\OneDrive - University of Bergen\\Datasets\\MS_SegmentationChallengeDataset\\DTIDATA\\structural\\T1.nii")
-            self.niftyReaderT1.Update()
-            self.transform = vtk.vtkTransform()
-            QFormMatrixT1 = self.niftyReaderT1.GetQFormMatrix()
-            qFormListT1 = [0] * 16 #the matrix is 4x4
-            QFormMatrixT1.DeepCopy(qFormListT1, QFormMatrixT1)
-            self.transform.SetMatrix(qFormListT1)
-
             self.lineEdit_DatasetFolder.setText(self.folder)
-            self.LesionActorList = []
+            self.LesionActorList = [[] for i in range(81)]
             self.surfaceActors = []
             self.readThread = QThread()
-            self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.transform, self.surfaceActors)
+            self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.surfaceActors)
             self.worker.moveToThread(self.readThread)
             self.readThread.started.connect(self.worker.run)
             self.worker.progress.connect(self.reportProgress)
             self.worker.finished.connect(self.renderData)
             self.readThread.start()
 
-
     # Handler for browse folder button click.
     @pyqtSlot()
     def on_click_browseFolder(self):
         self.folder = str(QFileDialog.getExistingDirectory(self, "Select Patient Directory"))
         if self.folder:
-            self.niftyReaderT1 = vtk.vtkNIFTIImageReader() 
-            self.niftyReaderT1.SetFileName("D:\\OneDrive - University of Bergen\\Datasets\\MS_SegmentationChallengeDataset\\DTIDATA\\structural\\T1.nii")
-            self.niftyReaderT1.Update()
-            self.transform = vtk.vtkTransform()
-            QFormMatrixT1 = self.niftyReaderT1.GetQFormMatrix()
-            qFormListT1 = [0] * 16 #the matrix is 4x4
-            QFormMatrixT1.DeepCopy(qFormListT1, QFormMatrixT1)
-            self.transform.SetMatrix(qFormListT1)
-
             self.lineEdit_DatasetFolder.setText(self.folder)
-            self.LesionActorList = []
-            self.ventricleActor = None
+            self.LesionActorList = [[] for i in range(81)]
+            self.surfaceActors = []
             self.readThread = QThread()
-            self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.transform, self.ventricleActor)
+            self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.surfaceActors)
             self.worker.moveToThread(self.readThread)
             self.readThread.started.connect(self.worker.run)
             self.worker.progress.connect(self.reportProgress)
