@@ -352,11 +352,40 @@ background: rgb(70,121,85);
          <number>0</number>
         </property>
         <property name="rightMargin">
-         <number>0</number>
+         <number>5</number>
         </property>
         <property name="bottomMargin">
          <number>0</number>
         </property>
+        <item row="2" column="0">
+         <widget class="QFrame" name="frame">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>650</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(67,67,67);
+border-style: solid;
+border-width: 1px;
+border-radius: 10px;</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="0">
          <widget class="QFrame" name="frame_2">
           <property name="enabled">
@@ -393,7 +422,7 @@ background: rgb(70,121,85);
            <property name="bottomMargin">
             <number>0</number>
            </property>
-           <item row="2" column="4">
+           <item row="2" column="3">
             <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
              <property name="spacing">
               <number>0</number>
@@ -419,13 +448,13 @@ background: rgb(70,121,85);
                 </size>
                </property>
                <property name="styleSheet">
-                <string notr="true">font: 12pt &quot;Google Sans&quot;;</string>
+                <string notr="true">font: 9pt &quot;Google Sans&quot;;</string>
                </property>
                <property name="text">
                 <string>no sequence loaded</string>
                </property>
                <property name="alignment">
-                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                <set>Qt::AlignBottom|Qt::AlignHCenter</set>
                </property>
               </widget>
              </item>
@@ -455,33 +484,127 @@ background: rgb(70,121,85);
              </item>
             </layout>
            </item>
-           <item row="2" column="3">
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+           <item row="2" column="1">
+            <layout class="QGridLayout" name="gridLayout_11">
+             <property name="rightMargin">
+              <number>0</number>
              </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
+             <item row="1" column="1">
+              <widget class="QListView" name="listView_Structural">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>80</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>140</width>
+                 <height>80</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">border-color: rgb(67,67,67);
+color: rgb(149, 189, 149);
+border-style: solid;
+border-width: 1px;
+border-radius: 4px;</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QListView" name="listView">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>140</width>
+                 <height>80</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">border-color: rgb(67,67,67);
+color: rgb(149, 189, 149);
+border-style: solid;
+border-width: 1px;
+border-radius: 4px;
+
+</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="styleSheet">
+                <string notr="true">font: 9pt &quot;Google Sans&quot;;</string>
+               </property>
+               <property name="text">
+                <string>Visible Surfaces</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="label_5">
+               <property name="styleSheet">
+                <string notr="true">font: 9pt &quot;Google Sans&quot;;</string>
+               </property>
+               <property name="text">
+                <string>Visible Volumes</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QPushButton" name="pushButton_UnselectAllSubjects">
+               <property name="minimumSize">
+                <size>
+                 <width>80</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton:hover#pushButton_UnselectAllSubjects
+{
+background-color: rgb(71,71,71);
+}
+QPushButton:pressed#pushButton_UnselectAllSubjects {background-color:rgb(100,100,100);color:rgb(10,10,10);}
+QPushButton#pushButton_UnselectAllSubjects
+{
+background-color: rgb(46,46,46);
+border-style: outset;
+border-width: 1px;
+border-radius: 4px;
+border-color: rgb(67,67,67);
+font: bold 11px;
+padding: 6px;
+color: rgb(231,231,231);
+font: 9pt &quot;Google Sans&quot;;
+border-style: solid;
+}</string>
+               </property>
+               <property name="text">
+                <string>Unselect All</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
-           <item row="2" column="5">
-            <spacer name="horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="2" column="6">
+           <item row="2" column="4">
             <layout class="QGridLayout" name="gridLayout_10">
              <property name="rightMargin">
               <number>0</number>
@@ -758,143 +881,11 @@ border-style: solid;
              </item>
             </layout>
            </item>
-           <item row="2" column="1">
-            <layout class="QGridLayout" name="gridLayout_11">
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <item row="1" column="1">
-              <widget class="QListView" name="listView_Structural">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>80</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>140</width>
-                 <height>80</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border-color: rgb(67,67,67);
-color: rgb(149, 189, 149);
-border-style: solid;
-border-width: 1px;
-border-radius: 4px;</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QListView" name="listView">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>140</width>
-                 <height>80</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border-color: rgb(67,67,67);
-color: rgb(149, 189, 149);
-border-style: solid;
-border-width: 1px;
-border-radius: 4px;
-
-</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_4">
-               <property name="styleSheet">
-                <string notr="true">font: 9pt &quot;Google Sans&quot;;</string>
-               </property>
-               <property name="text">
-                <string>Visible Surfaces</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLabel" name="label_5">
-               <property name="styleSheet">
-                <string notr="true">font: 9pt &quot;Google Sans&quot;;</string>
-               </property>
-               <property name="text">
-                <string>Visible Volumes</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QPushButton" name="pushButton_UnselectAllSubjects">
-               <property name="minimumSize">
-                <size>
-                 <width>80</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton:hover#pushButton_UnselectAllSubjects
-{
-background-color: rgb(71,71,71);
-}
-QPushButton:pressed#pushButton_UnselectAllSubjects {background-color:rgb(100,100,100);color:rgb(10,10,10);}
-QPushButton#pushButton_UnselectAllSubjects
-{
-background-color: rgb(46,46,46);
-border-style: outset;
-border-width: 1px;
-border-radius: 4px;
-border-color: rgb(67,67,67);
-font: bold 11px;
-padding: 6px;
-color: rgb(231,231,231);
-font: 9pt &quot;Google Sans&quot;;
-border-style: solid;
-}</string>
-               </property>
-               <property name="text">
-                <string>Unselect All</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
           </layout>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QFrame" name="frame">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>650</width>
-            <height>0</height>
-           </size>
-          </property>
+        <item row="3" column="0">
+         <widget class="QFrame" name="frameVis">
           <property name="styleSheet">
            <string notr="true">background-color: rgb(16,16,16);
 border-color: rgb(67,67,67);
@@ -906,7 +897,7 @@ border-radius: 10px;</string>
            <enum>QFrame::StyledPanel</enum>
           </property>
           <property name="frameShadow">
-           <enum>QFrame::Plain</enum>
+           <enum>QFrame::Raised</enum>
           </property>
          </widget>
         </item>
