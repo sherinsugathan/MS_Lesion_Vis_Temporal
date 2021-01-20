@@ -63,6 +63,7 @@ class mainWindow(QtWidgets.QMainWindow):
         self.style.SetDefaultRenderer(self.ren)
         self.style.main = self
         self.iren.SetInteractorStyle(self.style)
+        self.readThread = None
 
     def reportProgress(self, n):
         self.progressBar.setValue(n)
@@ -76,6 +77,8 @@ class mainWindow(QtWidgets.QMainWindow):
         self.ren.AddActor(self.surfaceActors[0])
         self.ren.ResetCamera()
         self.iren.Render()
+        openglRendererInUse = self.ren.GetRenderWindow().ReportCapabilities().splitlines()[1].split(":")[1].strip()
+        print(openglRendererInUse)
 
     # Handler for time point slider change
     @pyqtSlot()
@@ -90,11 +93,15 @@ class mainWindow(QtWidgets.QMainWindow):
 
     # Load data automatically - To be removed in production.
     def autoLoadData(self):
+        self.ren.RemoveAllViewProps()
+        self.iren.Render()
         self.folder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
         if self.folder:
             self.lineEdit_DatasetFolder.setText(self.folder)
             self.LesionActorList = [[] for i in range(81)]
             self.surfaceActors = []
+            if(self.readThread != None):
+                self.readThread.terminate()
             self.readThread = QThread()
             self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.surfaceActors)
             self.worker.moveToThread(self.readThread)
