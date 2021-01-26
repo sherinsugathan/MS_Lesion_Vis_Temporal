@@ -5,16 +5,26 @@
 ###################################
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QFileDialog, QCheckBox, QButtonGroup, QAbstractButton, QMessageBox, QDialog
-from PyQt5.QtCore import pyqtSlot, QThread
+from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal, QUrl, QObject
+from PyQt5.QtWebEngineWidgets import  QWebEngineView,QWebEnginePage
+from PyQt5.QtWebEngineWidgets import QWebEngineSettings
+from PyQt5.QtWebChannel import QWebChannel
 from PyQt5 import QtCore, QtGui
 from PyQt5 import Qt
 from PyQt5.QtCore import QTimer
+from OpenGL import GL
 import sys
 import os
 import Utils
 import vtk
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import networkx as nx
+
+class CallHandler(QObject):
+    @pyqtSlot(result=str)
+    def myHello(self):
+        print('call received')
+        return 'hello, Python'
 
 # Main window class.
 class mainWindow(QtWidgets.QMainWindow):
@@ -26,6 +36,10 @@ class mainWindow(QtWidgets.QMainWindow):
         uic.loadUi(ui, self)
         self.showMaximized()
 
+    def closeEvent(self, event):
+        #self.vtkWidget.Finalize() # This will also work --> self.vtkWidget.close()
+        pass
+
     def showDialog(self):
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
@@ -36,6 +50,37 @@ class mainWindow(QtWidgets.QMainWindow):
         dlg = QDialog(self)
         dlg.setWindowTitle("HELLO!")
         dlg.exec_()
+
+    def initializeD3VisView(self):
+        self.view = QWebEngineView()
+        print(type(self.view))
+        self.view.settings().setAttribute(QWebEngineSettings.WebGLEnabled, True)
+        self.view.settings().setAttribute(QWebEngineSettings.Accelerated2dCanvasEnabled, False)
+        self.view.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
+        #self.view.loadFinished.connect(self._loadFinish)
+        #self.channel = QWebChannel()
+        #self.handler = CallHandler()
+        #self.channel.registerObject('handler', self.handler)
+        #self.view.page().setWebChannel(self.channel)
+        
+        self.layout = Qt.QVBoxLayout()
+        self.layout.addWidget(self.view)
+        self.frameVis.setLayout(self.layout)
+        file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "interactionD3.html"))
+        htmlUrl = QUrl.fromLocalFile(file_path)
+        self.view.load(QUrl(htmlUrl))
+        #self.view.load(QUrl("http://www.google.com"))
+        self.view.show()
+
+
+    def _loadFinish(self, *args, **kwargs):
+        print("Loading finished")
+
+    def mousePress(self):
+        print("asdasdsad")
+
+    def vtkViewportEvent(self, obj,event):
+        print("bingo")
 
     # UI setup.
     def setupUI(self):  
@@ -51,19 +96,31 @@ class mainWindow(QtWidgets.QMainWindow):
 
         self.vl = Qt.QVBoxLayout()
         self.vtkWidget = QVTKRenderWindowInteractor(self.frame)
+        self.vtkWidget.Initialize()
+        #self.vtkWidget.Start()
+
+        #self.vtkWidget.AddObserver("ExitEvent", lambda o, e, a=app: a.quit())
+        self.vtkWidget.AddObserver("ExitEvent", self.vtkViewportEvent)
+
         self.vl.addWidget(self.vtkWidget)
         self.ren = vtk.vtkRenderer()
         self.frame.setLayout(self.vl)
         self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
         self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
-        self.iren.Initialize()
-        self.ren.ResetCamera()
+
+
+        self.initializeD3VisView()
 
         self.style = Utils.CustomMouseInteractor(self)
         self.style.SetDefaultRenderer(self.ren)
         self.style.main = self
         self.iren.SetInteractorStyle(self.style)
         self.readThread = None
+
+        self.iren.Initialize()
+        self.ren.ResetCamera()
+
+
 
     def reportProgress(self, n):
         self.progressBar.setValue(n)
@@ -126,8 +183,9 @@ class mainWindow(QtWidgets.QMainWindow):
             self.worker.finished.connect(self.renderData)
             self.readThread.start()
 
-app = QtWidgets.QApplication(sys.argv)
-window = mainWindow()
-window.setupUI()
-window.show()
-sys.exit(app.exec_())
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    window = mainWindow()
+    window.setupUI()
+    window.show()
+    sys.exit(app.exec_())

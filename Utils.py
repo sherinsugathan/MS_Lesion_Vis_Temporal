@@ -25,9 +25,14 @@ class ReadThread(QObject):
                 if polyData and polyData.GetNumberOfPoints():
                     mapper = vtk.vtkOpenGLPolyDataMapper()
                     mapper.SetInputData(polyData)
+                    mapper.SetScalarModeToUseCellData()
                     mapper.Update()
                     actor = vtk.vtkActor()
                     actor.SetMapper(mapper)
+                    actor.GetProperty().SetColor(0.9, 0.3, 0.4)
+                    smoothSurface(actor)
+                    actor.GetMapper().ScalarVisibilityOff()
+                    mapper.Update()
                     self.surfaceList[i].append(actor)
             self.progress.emit(int((i/80)*100))
         self.surfaceActor.append(self.loadSurfaces()) # Load ventricle mesh
@@ -42,6 +47,7 @@ class ReadThread(QObject):
         mapper.SetInputConnection(reader.GetOutputPort())
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
+        actor.GetProperty().SetColor(0.545,0.7411,0.545)
         return actor
         #self.ren.AddActor(actor)
         #self.ren.ResetCamera()
@@ -58,6 +64,7 @@ class CustomMouseInteractor(vtk.vtkInteractorStyleTrackballCamera):
         self.AddObserver("LeftButtonPressEvent",self.leftButtonPressEvent)
         self.AddObserver("LeftButtonReleaseEvent",self.leftButtonReleaseEvent)
         self.AddObserver("MouseMoveEvent", self.mouseMoveEvent)
+        self.AddObserver("RightButtonPressEvent", self.RightButtonPressEvent)
         self.lesionvis = lesionvis
         self.LastPickedActor = None
         self.NewPickedActor = None
@@ -114,11 +121,12 @@ class CustomMouseInteractor(vtk.vtkInteractorStyleTrackballCamera):
         self.OnMouseMove()
         return
 
+    def RightButtonPressEvent(self,obj,event):
+        print("Hi Sherin")
+
     def leftButtonPressEvent(self,obj,event):
         self.MouseMotion = 0
         self.OnLeftButtonDown()
-
-
 
 '''
 ##########################################################################

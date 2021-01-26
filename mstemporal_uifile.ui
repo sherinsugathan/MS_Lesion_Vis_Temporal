@@ -360,7 +360,7 @@ background: rgb(70,121,85);
         <item row="2" column="0">
          <widget class="QFrame" name="frame">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -368,7 +368,7 @@ background: rgb(70,121,85);
           <property name="minimumSize">
            <size>
             <width>650</width>
-            <height>0</height>
+            <height>400</height>
            </size>
           </property>
           <property name="styleSheet">
@@ -386,13 +386,42 @@ border-radius: 10px;</string>
           </property>
          </widget>
         </item>
+        <item row="3" column="0">
+         <widget class="QFrame" name="frameVis">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>650</width>
+            <height>400</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(67,67,67);
+border-style: solid;
+border-width: 1px;
+border-radius: 10px;</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="0">
          <widget class="QFrame" name="frame_2">
           <property name="enabled">
            <bool>true</bool>
           </property>
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -400,7 +429,7 @@ border-radius: 10px;</string>
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>50</height>
+            <height>0</height>
            </size>
           </property>
           <property name="layoutDirection">
@@ -518,6 +547,19 @@ border-radius: 4px;</string>
                </property>
               </widget>
              </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="styleSheet">
+                <string notr="true">font: 9pt &quot;Google Sans&quot;;</string>
+               </property>
+               <property name="text">
+                <string>Visible Surfaces</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
              <item row="1" column="0">
               <widget class="QListView" name="listView">
                <property name="sizePolicy">
@@ -543,19 +585,6 @@ border-radius: 4px;
                </property>
               </widget>
              </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_4">
-               <property name="styleSheet">
-                <string notr="true">font: 9pt &quot;Google Sans&quot;;</string>
-               </property>
-               <property name="text">
-                <string>Visible Surfaces</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="1">
               <widget class="QLabel" name="label_5">
                <property name="styleSheet">
@@ -566,39 +595,6 @@ border-radius: 4px;
                </property>
                <property name="alignment">
                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QPushButton" name="pushButton_UnselectAllSubjects">
-               <property name="minimumSize">
-                <size>
-                 <width>80</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton:hover#pushButton_UnselectAllSubjects
-{
-background-color: rgb(71,71,71);
-}
-QPushButton:pressed#pushButton_UnselectAllSubjects {background-color:rgb(100,100,100);color:rgb(10,10,10);}
-QPushButton#pushButton_UnselectAllSubjects
-{
-background-color: rgb(46,46,46);
-border-style: outset;
-border-width: 1px;
-border-radius: 4px;
-border-color: rgb(67,67,67);
-font: bold 11px;
-padding: 6px;
-color: rgb(231,231,231);
-font: 9pt &quot;Google Sans&quot;;
-border-style: solid;
-}</string>
-               </property>
-               <property name="text">
-                <string>Unselect All</string>
                </property>
               </widget>
              </item>
@@ -882,23 +878,6 @@ border-style: solid;
             </layout>
            </item>
           </layout>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QFrame" name="frameVis">
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(16,16,16);
-border-color: rgb(67,67,67);
-border-style: solid;
-border-width: 1px;
-border-radius: 10px;</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
          </widget>
         </item>
        </layout>
