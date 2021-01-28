@@ -203,7 +203,7 @@ font-weight: bold;</string>
          <property name="minimumSize">
           <size>
            <width>220</width>
-           <height>60</height>
+           <height>50</height>
           </size>
          </property>
          <property name="font">
@@ -221,6 +221,9 @@ color: rgb(231,231,231);</string>
          </property>
          <property name="text">
           <string>MS EXPERIMENTOR</string>
+         </property>
+         <property name="scaledContents">
+          <bool>false</bool>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -357,39 +360,10 @@ background: rgb(70,121,85);
         <property name="bottomMargin">
          <number>0</number>
         </property>
-        <item row="2" column="0">
-         <widget class="QFrame" name="frame">
+        <item row="4" column="0">
+         <widget class="QFrame" name="frameDefaultGraph">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>650</width>
-            <height>400</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(16,16,16);
-border-color: rgb(67,67,67);
-border-style: solid;
-border-width: 1px;
-border-radius: 10px;</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Plain</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QFrame" name="frameVis">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -489,20 +463,30 @@ border-radius: 10px;</string>
              </item>
              <item>
               <widget class="QSlider" name="horizontalSlider_TimePoint">
+               <property name="minimumSize">
+                <size>
+                 <width>500</width>
+                 <height>0</height>
+                </size>
+               </property>
                <property name="styleSheet">
                 <string notr="true">.QSlider::handle:horizontal {
-    background: #ffffff;
-    border: 9px solid #474747;
-    /*height: 5px;*/
-	width: 1px;
-    /*margin: -30px -30px;*/
-	/*border-radius: 30px;*/
+    background:  #477d3f;
+    border: 0px solid #474747;
+    height: 5px;
+	width:20px;
+line-height: 20px; 
+	margin-top: -5px; 
+	margin-bottom: -5px; 
+	border-radius: 10px; 
 }
 
 .QSlider::groove:horizontal {
     border: 1px solid #434343;
-    height: 5px;
+    height: 4px;
+
     background: rgb(46,46,46);
+border-radius: 4px;
     /*margin: 0 12px;*/
 }</string>
                </property>
@@ -518,89 +502,124 @@ border-radius: 10px;</string>
              <property name="rightMargin">
               <number>0</number>
              </property>
-             <item row="1" column="1">
-              <widget class="QListView" name="listView_Structural">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>80</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>140</width>
-                 <height>80</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border-color: rgb(67,67,67);
-color: rgb(149, 189, 149);
-border-style: solid;
-border-width: 1px;
-border-radius: 4px;</string>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="0">
-              <widget class="QLabel" name="label_4">
+              <widget class="QRadioButton" name="radioButton_T1">
                <property name="styleSheet">
-                <string notr="true">font: 9pt &quot;Google Sans&quot;;</string>
+                <string notr="true">QRadioButton {
+font: 9pt &quot;Google Sans&quot;;
+color: rgb(231,231,231);
+
+}
+
+QRadioButton::indicator {
+    width:                  10px;
+    height:                 10px;
+    border-radius:          7px;
+}
+
+QRadioButton::indicator:checked {
+    background-color:       rgb(149,189,149);
+    border:                 2px solid white;
+}
+
+QRadioButton::indicator:unchecked {
+    background-color:       black;
+    border:                 2px solid gray;
+}</string>
                </property>
                <property name="text">
-                <string>Visible Surfaces</string>
+                <string>T1</string>
                </property>
-               <property name="alignment">
-                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               <property name="checked">
+                <bool>true</bool>
                </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QListView" name="listView">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>140</width>
-                 <height>80</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border-color: rgb(67,67,67);
-color: rgb(149, 189, 149);
-border-style: solid;
-border-width: 1px;
-border-radius: 4px;
-
-</string>
-               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">radioGroup_Modality</string>
+               </attribute>
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLabel" name="label_5">
+              <widget class="QRadioButton" name="radioButton_T2">
                <property name="styleSheet">
-                <string notr="true">font: 9pt &quot;Google Sans&quot;;</string>
+                <string notr="true">QRadioButton {
+font: 9pt &quot;Google Sans&quot;;
+color: rgb(231,231,231);
+
+}
+
+QRadioButton::indicator {
+    width:                  10px;
+    height:                 10px;
+    border-radius:          7px;
+}
+
+QRadioButton::indicator:checked {
+    background-color:       rgb(149,189,149);
+    border:                 2px solid white;
+}
+
+QRadioButton::indicator:unchecked {
+    background-color:       black;
+    border:                 2px solid gray;
+}</string>
                </property>
                <property name="text">
-                <string>Visible Volumes</string>
+                <string>T2</string>
                </property>
-               <property name="alignment">
-                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               <attribute name="buttonGroup">
+                <string notr="true">radioGroup_Modality</string>
+               </attribute>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QRadioButton" name="radioButton_FLAIR">
+               <property name="styleSheet">
+                <string notr="true">QRadioButton {
+font: 9pt &quot;Google Sans&quot;;
+color: rgb(231,231,231);
+
+}
+
+QRadioButton::indicator {
+    width:                  10px;
+    height:                 10px;
+    border-radius:          7px;
+}
+
+QRadioButton::indicator:checked {
+    background-color:       rgb(149,189,149);
+    border:                 2px solid white;
+}
+
+QRadioButton::indicator:unchecked {
+    background-color:       black;
+    border:                 2px solid gray;
+}</string>
                </property>
+               <property name="text">
+                <string>T2-FLAIR</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">radioGroup_Modality</string>
+               </attribute>
               </widget>
              </item>
             </layout>
            </item>
-           <item row="2" column="4">
+           <item row="2" column="2">
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="2" column="5">
             <layout class="QGridLayout" name="gridLayout_10">
              <property name="rightMargin">
               <number>0</number>
@@ -611,274 +630,190 @@ border-radius: 4px;
              <property name="verticalSpacing">
               <number>0</number>
              </property>
-             <item row="0" column="1">
-              <widget class="QPushButton" name="pushButton_T2">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>40</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>16777215</height>
-                </size>
-               </property>
+             <item row="1" column="1">
+              <widget class="QRadioButton" name="radioButton_Pial">
                <property name="styleSheet">
-                <string notr="true">QPushButton:hover#pushButton_T2
-{
-background-color: rgb(71,71,71);
-}
-QPushButton:pressed#pushButton_T2 {background-color:rgb(150,150,150);}
-QPushButton:checked#pushButton_T2 {background-color:rgb(100,100,100);color: rgb(10,10,10);}
-QPushButton#pushButton_T2
-{
-background-color: rgb(46,46,46);
-color: rgb(231,231,231);
-border-style: outset;
-border-width: 1px;
-border-radius: 4px;
-border-color: rgb(67,67,67);
-font: bold 11px;
-padding: 6px;
+                <string notr="true">QRadioButton {
 font: 9pt &quot;Google Sans&quot;;
-border-style: solid;
+color: rgb(231,231,231);
+
+}
+
+QRadioButton::indicator {
+    width:                  10px;
+    height:                 10px;
+    border-radius:          7px;
+}
+
+QRadioButton::indicator:checked {
+    background-color:       rgb(149,189,149);
+    border:                 2px solid white;
+}
+
+QRadioButton::indicator:unchecked {
+    background-color:       black;
+    border:                 2px solid gray;
 }</string>
                </property>
                <property name="text">
-                <string>T2 DATA</string>
-               </property>
-               <property name="checkable">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QPushButton" name="pushButton_T1">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>40</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton:hover#pushButton_T1
-{
-background-color: rgb(71,71,71);
-}
-QPushButton:pressed#pushButton_T1 {background-color:rgb(150,150,150);}
-QPushButton:checked#pushButton_T1 {background-color:rgb(100,100,100);color: rgb(10,10,10);}
-QPushButton#pushButton_T1
-{
-background-color: rgb(46,46,46);
-color: rgb(231,231,231);
-border-style: outset;
-border-width: 1px;
-border-radius: 4px;
-border-color: rgb(67,67,67);
-font: bold 11px;
-padding: 6px;
-font: 9pt &quot;Google Sans&quot;;
-border-style: solid;
-}</string>
-               </property>
-               <property name="text">
-                <string>T1 DATA</string>
-               </property>
-               <property name="checkable">
-                <bool>true</bool>
+                <string>Pial</string>
                </property>
                <property name="checked">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QPushButton" name="pushButton_FLAIR">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>40</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton:hover#pushButton_FLAIR
-{
-background-color: rgb(71,71,71);
-}
-QPushButton:pressed#pushButton_FLAIR {background-color:rgb(150,150,150);}
-QPushButton:checked#pushButton_FLAIR {background-color:rgb(100,100,100);color: rgb(10,10,10);}
-QPushButton#pushButton_FLAIR
-{
-background-color: rgb(46,46,46);
-color: rgb(231,231,231);
-border-style: outset;
-border-width: 1px;
-border-radius: 4px;
-border-color: rgb(67,67,67);
-font: bold 11px;
-padding: 6px;
-font: 9pt &quot;Google Sans&quot;;
-border-style: solid;
-}</string>
-               </property>
-               <property name="text">
-                <string>FLAIR DATA</string>
-               </property>
-               <property name="checkable">
                 <bool>true</bool>
                </property>
+               <attribute name="buttonGroup">
+                <string notr="true">radioGroup_BrainSurface</string>
+               </attribute>
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QPushButton" name="pushButton_Continuous">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>40</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>16777215</height>
-                </size>
-               </property>
+              <widget class="QRadioButton" name="radioButton_White">
                <property name="styleSheet">
-                <string notr="true">QPushButton:hover#pushButton_Continuous
-{
-background-color: rgb(71,71,71);
-}
-QPushButton:pressed#pushButton_Continuous {background-color:rgb(150,150,150);}
-QPushButton:checked#pushButton_Continuous {background-color:rgb(100,100,100);color: rgb(10,10,10);}
-QPushButton#pushButton_Continuous
-{
-background-color: rgb(46,46,46);
-color: rgb(231,231,231);
-border-style: outset;
-border-width: 1px;
-border-radius: 4px;
-border-color: rgb(67,67,67);
-font: bold 11px;
-padding: 6px;
+                <string notr="true">QRadioButton {
 font: 9pt &quot;Google Sans&quot;;
-border-style: solid;
+color: rgb(231,231,231);
+
+}
+
+QRadioButton::indicator {
+    width:                  10px;
+    height:                 10px;
+    border-radius:          7px;
+}
+
+QRadioButton::indicator:checked {
+    background-color:       rgb(149,189,149);
+    border:                 2px solid white;
+}
+
+QRadioButton::indicator:unchecked {
+    background-color:       black;
+    border:                 2px solid gray;
 }</string>
                </property>
                <property name="text">
-                <string>CONTINUOUS</string>
-               </property>
-               <property name="checkable">
-                <bool>true</bool>
+                <string>White</string>
                </property>
                <property name="checked">
                 <bool>false</bool>
                </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QPushButton" name="pushButton_Discrete">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>40</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton:hover#pushButton_Discrete
-{
-background-color: rgb(71,71,71);
-}
-QPushButton:pressed#pushButton_Discrete {background-color:rgb(150,150,150);}
-QPushButton:checked#pushButton_Discrete {background-color:rgb(100,100,100);color: rgb(10,10,10);}
-QPushButton#pushButton_Discrete
-{
-background-color: rgb(46,46,46);
-color: rgb(231,231,231);
-border-style: outset;
-border-width: 1px;
-border-radius: 4px;
-border-color: rgb(67,67,67);
-font: bold 11px;
-padding: 6px;
-font: 9pt &quot;Google Sans&quot;;
-border-style: solid;
-}</string>
-               </property>
-               <property name="text">
-                <string>DISCRETE</string>
-               </property>
-               <property name="checkable">
-                <bool>true</bool>
-               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">radioGroup_BrainSurface</string>
+               </attribute>
               </widget>
              </item>
              <item row="1" column="2">
-              <widget class="QPushButton" name="pushButton_Distance">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>40</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>16777215</height>
-                </size>
-               </property>
+              <widget class="QRadioButton" name="radioButton_Inflated">
                <property name="styleSheet">
-                <string notr="true">QPushButton:hover#pushButton_Distance
-{
-background-color: rgb(71,71,71);
-}
-QPushButton:pressed#pushButton_Distance {background-color:rgb(150,150,150);}
-QPushButton:checked#pushButton_Distance {background-color:rgb(100,100,100);color: rgb(10,10,10);}
-QPushButton#pushButton_Distance
-{
-background-color: rgb(46,46,46);
-color: rgb(231,231,231);
-border-style: outset;
-border-width: 1px;
-border-radius: 4px;
-border-color: rgb(67,67,67);
-font: bold 11px;
-padding: 6px;
+                <string notr="true">QRadioButton {
 font: 9pt &quot;Google Sans&quot;;
-border-style: solid;
+color: rgb(231,231,231);
+
+}
+
+QRadioButton::indicator {
+    width:                  10px;
+    height:                 10px;
+    border-radius:          7px;
+}
+
+QRadioButton::indicator:checked {
+    background-color:       rgb(149,189,149);
+    border:                 2px solid white;
+}
+
+QRadioButton::indicator:unchecked {
+    background-color:       black;
+    border:                 2px solid gray;
 }</string>
                </property>
                <property name="text">
-                <string>DISTANCE</string>
+                <string>Inflated</string>
                </property>
-               <property name="checkable">
-                <bool>true</bool>
-               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">radioGroup_BrainSurface</string>
+               </attribute>
               </widget>
              </item>
             </layout>
            </item>
+           <item row="2" column="4">
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </widget>
+        </item>
+        <item row="3" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QFrame" name="frame">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>650</width>
+              <height>400</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(67,67,67);
+border-style: solid;
+border-width: 1px;
+border-radius: 10px;</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="frame_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>200</width>
+              <height>400</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(67,67,67);
+border-style: solid;
+border-width: 1px;
+border-radius: 10px;</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -1013,10 +948,13 @@ border-style: solid;
         </property>
         <property name="styleSheet">
          <string notr="true">.QSlider::handle:vertical {
-    background: #ffffff;
-    border: 9px solid #474747;
-    height: 5px;
+    background: #477d3f;
+    border: 0px solid #474747;
+    height: 20px;
+	width: 5px;
     /*margin: -30px -30px;*/
+	margin-left: -4px; 
+	margin-right: -4px; 
 	border-radius: 10px;
 }
 
@@ -1103,10 +1041,13 @@ border-radius: 10px;</string>
         </property>
         <property name="styleSheet">
          <string notr="true">.QSlider::handle:vertical {
-    background: #ffffff;
-    border: 9px solid #474747;
-    height: 5px;
+    background: #477d3f;
+    border: 0px solid #474747;
+    height: 20px;
+	width: 5px;
     /*margin: -30px -30px;*/
+	margin-left: -4px; 
+	margin-right: -4px; 
 	border-radius: 10px;
 }
 
@@ -1135,10 +1076,13 @@ border-radius: 10px;</string>
         </property>
         <property name="styleSheet">
          <string notr="true">.QSlider::handle:vertical {
-    background: #ffffff;
-    border: 9px solid #474747;
-    height: 5px;
+    background: #477d3f;
+    border: 0px solid #474747;
+    height: 20px;
+	width: 5px;
     /*margin: -30px -30px;*/
+	margin-left: -4px; 
+	margin-right: -4px; 
 	border-radius: 10px;
 }
 
@@ -1205,4 +1149,8 @@ border-radius: 10px;</string>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="radioGroup_Modality"/>
+  <buttongroup name="radioGroup_BrainSurface"/>
+ </buttongroups>
 </ui>

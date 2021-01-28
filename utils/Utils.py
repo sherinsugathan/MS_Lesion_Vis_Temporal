@@ -64,7 +64,6 @@ class CustomMouseInteractor(vtk.vtkInteractorStyleTrackballCamera):
         self.AddObserver("LeftButtonPressEvent",self.leftButtonPressEvent)
         self.AddObserver("LeftButtonReleaseEvent",self.leftButtonReleaseEvent)
         self.AddObserver("MouseMoveEvent", self.mouseMoveEvent)
-        self.AddObserver("RightButtonPressEvent", self.RightButtonPressEvent)
         self.lesionvis = lesionvis
         self.LastPickedActor = None
         self.NewPickedActor = None
@@ -120,9 +119,6 @@ class CustomMouseInteractor(vtk.vtkInteractorStyleTrackballCamera):
         self.MouseMotion = 1
         self.OnMouseMove()
         return
-
-    def RightButtonPressEvent(self,obj,event):
-        print("Hi Sherin")
 
     def leftButtonPressEvent(self,obj,event):
         self.MouseMotion = 0
