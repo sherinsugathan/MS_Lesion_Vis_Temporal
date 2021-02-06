@@ -3,20 +3,35 @@
 # Author: Sherin Sugathan
 # Last Modified Date: 6th Jan 2021
 ###################################
+# from PyQt5 import QtWidgets, uic
+# from PyQt5.QtWidgets import QFileDialog, QCheckBox, QButtonGroup, QAbstractButton, QMessageBox, QDialog
+# from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal, QUrl, QObject
+# from PyQt5.QtWebEngineWidgets import  QWebEngineView,QWebEnginePage
+# from PyQt5.QtWebEngineWidgets import QWebEngineSettings
+# from PyQt5.QtWebChannel import QWebChannel
+# from PyQt5 import QtCore, QtGui
+# from PyQt5 import Qt
+# from PyQt5.QtCore import QTimer
+import vtk
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QFileDialog, QCheckBox, QButtonGroup, QAbstractButton, QMessageBox, QDialog
-from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal, QUrl, QObject
-from PyQt5.QtWebEngineWidgets import  QWebEngineView,QWebEnginePage
-from PyQt5.QtWebEngineWidgets import QWebEngineSettings
-from PyQt5.QtWebChannel import QWebChannel
+from PyQt5.QtWidgets import QFileDialog, QCheckBox, QButtonGroup, QAbstractButton
+from PyQt5.QtCore import pyqtSlot, QThread
 from PyQt5 import QtCore, QtGui
 from PyQt5 import Qt
 from PyQt5.QtCore import QTimer
 from OpenGL import GL
+
+# Pyinstaller exe requirements
+#import pkg_resources.py2_warn
+import vtkmodules
+import vtkmodules.all
+import vtkmodules.qt.QVTKRenderWindowInteractor
+import vtkmodules.util
+import vtkmodules.util.numpy_support
+
 import sys
 import os
 from utils import Utils
-import vtk
 import numpy as np
 import numpy.ma as ma
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
@@ -30,14 +45,17 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import nibabel as nib
+import json
 
 # Main window class.
-class mainWindow(QtWidgets.QMainWindow):
+class mainWindow(Qt.QMainWindow):
     # Initialization
-    def __init__(self, *args):
-        super(mainWindow, self).__init__(*args)
+    def __init__(self):
+        super(mainWindow, self).__init__()
         ui = os.path.join(os.path.dirname(__file__), 'mstemporal_uifile.ui')
         uic.loadUi(ui, self)
+        self.initUI()
+        self.initVTK()
         self.showMaximized()
 
     def showDialog(self):
@@ -52,7 +70,8 @@ class mainWindow(QtWidgets.QMainWindow):
         dlg.exec_()
 
     # UI setup.
-    def setupUI(self):  
+    def initUI(self):  
+        vtk.vtkObject.GlobalWarningDisplayOff() # Supress warnings.
         #print("\033[1;101m STARTING APPLICATION... \033[0m")
         pmMain = Qt.QPixmap("icons\\AppLogo.png")
         self.logoLabel.setPixmap(pmMain.scaled(self.logoLabel.size().width(), self.logoLabel.size().height(), 1,1))
@@ -66,28 +85,41 @@ class mainWindow(QtWidgets.QMainWindow):
         self.mprB_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRB)
         self.mprC_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRC)
 
+
+
+    # Initialize vtk
+    def initVTK(self):
+        self.dataFolderInitialized = False
+        # Renderer for lesions.
         self.vl = Qt.QVBoxLayout()
         self.vtkWidget = QVTKRenderWindowInteractor(self.frame)
-        self.vtkWidget.Initialize()
-        #self.vtkWidget.Start()
-
-        #self.vtkWidget.AddObserver("ExitEvent", lambda o, e, a=app: a.quit())
-        #self.vtkWidget.AddObserver("ExitEvent", self.vtkViewportEvent)
-
         self.vl.addWidget(self.vtkWidget)
         self.ren = vtk.vtkRenderer()
-        self.frame.setLayout(self.vl)
+        self.ren.SetBackground(0.0627, 0.0627, 0.0627)
         self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
         self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
-
+        self.iren.SetRenderWindow(self.vtkWidget.GetRenderWindow())
+        self.ren.ResetCamera()
+        self.frame.setLayout(self.vl)
         self.style = Utils.CustomMouseInteractor(self)
         self.style.SetDefaultRenderer(self.ren)
         self.style.main = self
         self.iren.SetInteractorStyle(self.style)
         self.readThread = None
-
+        self.show()
         self.iren.Initialize()
-        self.ren.ResetCamera()
+
+        self.vlDual = Qt.QVBoxLayout()
+        self.vtkWidgetDual = QVTKRenderWindowInteractor(self.frameDual)
+        self.vlDual.addWidget(self.vtkWidgetDual)
+        self.renDual = vtk.vtkRenderer()
+        self.renDual.SetBackground(0.0627, 0.0627, 0.0627)
+        self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.renDual)
+        self.irenDual = self.vtkWidgetDual.GetRenderWindow().GetInteractor()
+        self.irenDual.SetRenderWindow(self.vtkWidgetDual.GetRenderWindow())
+        self.renDual.ResetCamera()
+        self.frameDual.setLayout(self.vlDual)
+        self.irenDual.Initialize()
 
         self.vl_MPRA = Qt.QVBoxLayout()
         self.vl_MPRB = Qt.QVBoxLayout()
@@ -116,8 +148,47 @@ class mainWindow(QtWidgets.QMainWindow):
         self.figureMPRB.canvas.mpl_connect('button_press_event', self.onClickMPRB)
         self.figureMPRC.canvas.mpl_connect('button_press_event', self.onClickMPRC)
 
+        self.keyType = vtk.vtkInformationStringKey.MakeKey("type", "vtkActor")
+        self.keyID = vtk.vtkInformationStringKey.MakeKey("ID", "vtkActor")
+        self.overlayDataMain = {"Lesion ID":"--", "Voxel Count":"--", "Centroid":"--", "Elongation":"--", "Lesion Perimeter":"--", "Lesion Spherical Radius":"--", "Lesion Spherical Perimeter":"--", "Lesion Flatness":"--", "Lesion Roundness":"--"}
+        self.structureInfo = None
+
+        self.textActorLesionStatistics = vtk.vtkTextActor()
+        self.textActorLesionStatistics.UseBorderAlignOff()
+        self.textActorLesionStatistics.SetPosition(1,0)
+        self.textActorLesionStatistics.GetTextProperty().SetFontFamily(4)
+        self.textActorLesionStatistics.GetTextProperty().SetFontFile("asset\\GoogleSans-Medium.ttf")
+        self.textActorLesionStatistics.GetTextProperty().SetFontSize(12)
+        #self.textActorLesionStatistics.GetTextProperty().ShadowOn()
+        self.textActorLesionStatistics.GetTextProperty().SetColor( 0.3411, 0.4824, 0.3608 )
+
+        self.buttonGroupGraphs = QButtonGroup()
+        self.buttonGroupGraphs.addButton(self.pushButton_DefaultGraph)
+        self.buttonGroupGraphs.addButton(self.pushButton_GraphView)
+        self.buttonGroupGraphs.setExclusive(True)
+        self.buttonGroupGraphs.buttonClicked.connect(self.on_buttonGroupGraphsChanged)
+
     def reportProgress(self, n):
         self.progressBar.setValue(n)
+
+    # Handler for mode change inside button group (graphs)
+    @pyqtSlot(QAbstractButton)
+    def on_buttonGroupGraphsChanged(self, btn):
+        if(self.dataFolderInitialized == True):
+            if(self.buttonGroupGraphs.checkedId() == -3): # Stream graph
+                self.stackedWidget_Graphs.setCurrentIndex(0)
+
+            if(self.buttonGroupGraphs.checkedId() == -2): # Graph vis
+                self.stackedWidget_Graphs.setCurrentIndex(1)
+
+    def updateLesionOverlayText(self, followUpIndex = None, lesionIndex = None):
+        overlayText = ""
+        if(followUpIndex == None or lesionIndex == None):
+            return
+        for key in self.overlayDataMain.keys():
+            overlayText = overlayText + "\n" + str(key) + ": " + str(self.overlayDataMain[key])
+        self.textActorLesionStatistics.SetInput(overlayText)
+        
 
     def renderData(self):
         Utils.smoothSurface(self.surfaceActors[0])
@@ -126,16 +197,35 @@ class mainWindow(QtWidgets.QMainWindow):
         for lesion in self.LesionActorList[0]:
             self.ren.AddActor(lesion)
         self.ren.AddActor(self.surfaceActors[0])
-        self.ren.SetBackground(0.0627, 0.0627, 0.0627)
         self.ren.ResetCamera()
         self.iren.Render()
         openglRendererInUse = self.ren.GetRenderWindow().ReportCapabilities().splitlines()[1].split(":")[1].strip()
-        print(openglRendererInUse)
+        self.textEdit_Information.append("Resource: " + str(openglRendererInUse))
+
+        self.renDual.AddActor(self.surfaceActors[1])
+        self.renDual.AddActor(self.surfaceActors[2])
+        self.renDual.ResetCamera()
+        self.irenDual.Render()
 
         self.displayOrientationCube() # Display orientation cube
         self.LoadStructuralSlices(self.folder, "T1", 0, True) # load slices
         self.initializeDefaultGraph() # Load graph data
+        self.initializeGraphVis() # Load graph visualization.
         self.activateControls() # Activate controls.
+        self.readLesionDataFromJson() # Read lesion data from JSON file.
+        self.ren.AddActor2D(self.textActorLesionStatistics) # Add lesion statistics overlay.
+        self.updateLesionOverlayText(0,1)
+        self.dataFolderInitialized = True
+
+    # Read lesion data from json file.
+    # How to access data 
+    # FORMAT - structureInfo[StringFollowUpIndex][0][StringLesionIndex][0]['Elongation']
+    # Example print(structureInfo[str(0)][0][str(1)][0]['Elongation']) # First timestep, First Lesion, Elongation property.
+    def readLesionDataFromJson(self):
+        # load precomputed lesion properties
+        with open(self.folder + "\\preProcess\\lesionStatistics.json") as fp: 
+            self.structureInfo = json.load(fp)
+        self.numberOfFollowups = len(self.structureInfo)
 
     # action called by thte push button 
     def plotMPRs(self, maskAlpha = 0.5, refreshData=True): 
@@ -274,6 +364,23 @@ class mainWindow(QtWidgets.QMainWindow):
         self.axes.SetInteractor(self.iren)
         self.axes.EnabledOn()
 
+        self.axesActorDual = vtk.vtkAnnotatedCubeActor()
+        self.axesActorDual.SetXPlusFaceText('R')
+        self.axesActorDual.SetXMinusFaceText('L')
+        self.axesActorDual.SetYMinusFaceText('H')
+        self.axesActorDual.SetYPlusFaceText('F')
+        self.axesActorDual.SetZMinusFaceText('P')
+        self.axesActorDual.SetZPlusFaceText('A')
+        self.axesActorDual.GetTextEdgesProperty().SetColor(1,1,1)
+        self.axesActorDual.GetTextEdgesProperty().SetLineWidth(1)
+        self.axesActorDual.GetCubeProperty().SetColor(0.9, 0.3, 0.4)
+        self.axesDual = vtk.vtkOrientationMarkerWidget()
+        self.axesDual.SetOrientationMarker(self.axesActorDual)
+        self.axesDual.SetViewport( 0.9, 0.9, 1.0, 1.0 )
+        self.axesDual.SetCurrentRenderer(self.renDual)
+        self.axesDual.SetInteractor(self.irenDual)
+        self.axesDual.EnabledOn()
+
     def initializeDefaultGraph(self):
         self.vl_default = Qt.QVBoxLayout()
         self.figureDefault = plt.figure(num = 3, frameon=False, clear=True)
@@ -281,6 +388,14 @@ class mainWindow(QtWidgets.QMainWindow):
         self.vl_default.addWidget(self.canvasDefault)
         self.frameDefaultGraph.setLayout(self.vl_default)
         self.plotDefaultGraph()
+
+    def initializeGraphVis(self):
+        self.vl_graph = Qt.QVBoxLayout()
+        self.figureGraph = plt.figure(num = 4, frameon=False, clear=True)
+        self.canvasGraph = FigureCanvas(self.figureGraph)
+        self.vl_graph.addWidget(self.canvasGraph)
+        self.frameGraphVis.setLayout(self.vl_graph)
+        self.plotGraphVis()
 
     def onScrollMPRA(self, event):
         currentSlide = self.midSliceX
@@ -388,10 +503,41 @@ class mainWindow(QtWidgets.QMainWindow):
         self.mprB_Slice_Slider.setEnabled(True)
         self.mprC_Slice_Slider.setEnabled(True)
 
+    # Plot graph visual
+    def plotGraphVis(self):
+        self.figureGraph.clear()
+        plt.figure(4)
+        plt.rcParams['font.family'] = 'Google Sans'
+        plt.tight_layout()
+        self.axGraph = self.figureGraph.add_subplot(111)
+        #plt.subplots_adjust(wspace=None, hspace=None)
+        plt.subplots_adjust(left=0.05, bottom=0.05, right=0.98, top=0.98)
+        G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+        edges = G.edges()
+        weights = [3 for u,v in edges]
+        #nx.draw_planar(G, with_labels=True, node_size=800, node_color="#e54c66", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
+        nx.draw_shell(G, with_labels=True, node_size=800, node_color="#e54c66", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
+        self.canvasGraph.draw()
+
+
+    def gaussian_mixture(self, x, n=5):
+        """Return a random mixture of *n* Gaussians, evaluated at positions *x*."""
+        def add_random_gaussian(a):
+            amplitude = 1 / (.1 + np.random.random())
+            dx = x[-1] - x[0]
+            x0 = (2 * np.random.random() - .5) * dx
+            z = 10 / (.1 + np.random.random()) / dx
+            a += amplitude * np.exp(-(z * (x - x0))**2)
+        a = np.zeros_like(x)
+        for j in range(n):
+            add_random_gaussian(a)
+        return a
+
     # plot default graph
     def plotDefaultGraph(self): 
         # clearing old figures
         self.figureDefault.clear()
+        self.figureDefault.tight_layout()
         plt.figure(3)
         # create an axis
         self.axDefault = self.figureDefault.add_subplot(111)
@@ -402,21 +548,36 @@ class mainWindow(QtWidgets.QMainWindow):
         t = np.arange(0.0, 2.0, 0.01)
         s = 1 + np.sin(2 * np.pi * t)
 
+        
+        x = np.linspace(0, 100, 101)
+        ys = [self.gaussian_mixture(x) for _ in range(3)]
+
         #fig, ax = plt.subplots()
-        self.axDefault.plot(t, s)
+        #self.axDefault.plot(t, s)
+        self.axDefault.stackplot(x, ys, baseline='wiggle')
+
         self.axDefault.set_facecolor((0.0627, 0.0627, 0.0627))
         self.axDefault.xaxis.label.set_color((0.6, 0.6, 0.6))
         self.axDefault.yaxis.label.set_color((0.6, 0.6, 0.6))
-        self.axDefault.spines['bottom'].set_color((0.6, 0.6, 0.6))
-        self.axDefault.spines['top'].set_color((0.6, 0.6, 0.6))
-        self.axDefault.spines['left'].set_color((0.6, 0.6, 0.6))
-        self.axDefault.spines['right'].set_color((0.6, 0.6, 0.6))
+        self.axDefault.spines['bottom'].set_color((0.3411, 0.4824, 0.3608))
+        self.axDefault.spines['bottom'].set_linewidth(2)
+        self.axDefault.spines['left'].set_color((0.3411, 0.4824, 0.3608))
+        self.axDefault.spines['left'].set_linewidth(2)
+        self.axDefault.spines['right'].set_visible(False)
+        self.axDefault.spines['top'].set_visible(False)
         self.axDefault.tick_params(axis='x', colors=(0.6, 0.6, 0.6))
         self.axDefault.tick_params(axis='y', colors=(0.6, 0.6, 0.6))
 
-        self.axDefault.set(xlabel='time (s)', ylabel='lesion volume (ml)',
-            title='About as simple as it gets, folks')
+        #self.axDefault.set(xlabel='time (s)', ylabel='lesion volume (ml)',
+            #title='About as simple as it gets, folks')
+
+        self.axDefault.set_xlabel("Followup instance", fontname="Arial", fontsize=12)
+        self.axDefault.set_ylabel("Lesion Volume (ml)", fontname="Arial", fontsize=12)
+        self.axDefault.set_title("Activity Graph", fontname="Arial", fontsize=20)
+        
         #self.axDefault.grid()
+
+        self.axDefault.title.set_color((0.6, 0.6, 0.6))
 
         #fig.savefig("test.png")
         #plt.show()
@@ -451,7 +612,9 @@ class mainWindow(QtWidgets.QMainWindow):
     # Load data automatically - To be removed in production.
     def autoLoadData(self):
         self.ren.RemoveAllViewProps()
+        self.renDual.RemoveAllViewProps()
         self.iren.Render()
+        self.irenDual.Render()
         self.folder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
         if self.folder:
             self.lineEdit_DatasetFolder.setText(self.folder)
@@ -460,7 +623,7 @@ class mainWindow(QtWidgets.QMainWindow):
             if(self.readThread != None):
                 self.readThread.terminate()
             self.readThread = QThread()
-            self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.surfaceActors)
+            self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.surfaceActors, self.keyType, self.keyID)
             self.worker.moveToThread(self.readThread)
             self.readThread.started.connect(self.worker.run)
             self.worker.progress.connect(self.reportProgress)
@@ -470,6 +633,10 @@ class mainWindow(QtWidgets.QMainWindow):
     # Handler for browse folder button click.
     @pyqtSlot()
     def on_click_browseFolder(self):
+        self.ren.RemoveAllViewProps()
+        self.renDual.RemoveAllViewProps()
+        self.iren.Render()
+        self.irenDual.Render()
         self.folder = str(QFileDialog.getExistingDirectory(self, "Select Patient Directory"))
         if self.folder:
             self.lineEdit_DatasetFolder.setText(self.folder)
@@ -483,9 +650,18 @@ class mainWindow(QtWidgets.QMainWindow):
             self.worker.finished.connect(self.renderData)
             self.readThread.start()
 
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    window = mainWindow()
-    window.setupUI()
-    window.show()
-    sys.exit(app.exec_())
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication(sys.argv)
+#     window = mainWindow()
+#     window.setupUI()
+#     window.show()
+#     sys.exit(app.exec_())
+
+
+
+###########################################
+# QApplication ############################
+###########################################
+app = QtWidgets.QApplication(sys.argv)
+window = mainWindow()
+sys.exit(app.exec_())
