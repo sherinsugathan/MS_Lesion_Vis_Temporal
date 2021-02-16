@@ -1,6 +1,8 @@
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
 from PyQt5 import QtCore, QtGui
 import vtk
+import os
+import glob
 
 class ReadThread(QObject): 
     progress = pyqtSignal(int)
@@ -15,7 +17,8 @@ class ReadThread(QObject):
         
     def run(self):
         self.actorList = []
-        for i in range(81):
+        file_count = len(glob.glob1(self.read_folder_name,"*.vtm")) # number of time points.
+        for i in range(file_count):
             lesionSurfaceDataFilePath = self.read_folder_name + "lesions" + str(i) + ".vtm"
             mbr = vtk.vtkXMLMultiBlockDataReader()
             mbr.SetFileName(lesionSurfaceDataFilePath)
@@ -36,7 +39,7 @@ class ReadThread(QObject):
 
                     actor = vtk.vtkActor()
                     actor.SetMapper(mapper)
-                    actor.GetProperty().SetColor(0.9, 0.3, 0.4)
+                    actor.GetProperty().SetColor(0.7804, 0.4824, 0.4824)
                     actor.GetProperty().SetInformation(info)
                     smoothSurface(actor)
                     actor.GetMapper().ScalarVisibilityOff()
@@ -49,7 +52,8 @@ class ReadThread(QObject):
         self.finished.emit()
 
     def loadSurfaces(self):
-        surfaceFileNames = ["ventricleMesh", "lh.white", "rh.white", "lh.pial", "rh.pial", "lh.inflated", "rh.inflated"]
+        #surfaceFileNames = ["ventricleMesh", "lh.white", "rh.white", "lh.pial", "rh.pial", "lh.inflated", "rh.inflated"]
+        surfaceFileNames = ["ventricleMesh", "lh.white", "rh.white", "lh.pial", "rh.pial"]
         for fileName in surfaceFileNames:
             loadPath = self.read_folder_name + "..\\" + fileName + ".obj"
             reader = vtk.vtkOBJReader()
@@ -58,14 +62,14 @@ class ReadThread(QObject):
             mapper = vtk.vtkOpenGLPolyDataMapper()
             mapper.SetInputConnection(reader.GetOutputPort())
 
-            info = vtk.vtkInformation()
-            info.Set(self.keyType, fileName)
-            info.Set(self.keyID, str(0)) # does not matter
+            #info = vtk.vtkInformation()
+            #info.Set(self.keyType, fileName)
+            #info.Set(self.keyID, str(0)) # does not matter
 
             actor = vtk.vtkActor()
             actor.SetMapper(mapper)
-            actor.GetProperty().SetColor(0.545,0.7411,0.545)
-            actor.GetProperty().SetInformation(info)
+            actor.GetProperty().SetColor(0.6863, 0.8275, 0.8902)
+            #actor.GetProperty().SetInformation(info)
             self.surfaceActor.append(actor)
         return
         #self.ren.AddActor(actor)
@@ -90,6 +94,7 @@ class CustomMouseInteractor(vtk.vtkInteractorStyleTrackballCamera):
         self.LastPickedProperty = vtk.vtkProperty()
         self.iren = iren
         self.MouseMotion = 0
+        self.overlayData = None
         self.informationKeyType = vtk.vtkInformationStringKey.MakeKey("type", "vtkActor")
         self.informationKeyID = vtk.vtkInformationStringKey.MakeKey("ID", "vtkActor")
 
@@ -123,18 +128,7 @@ class CustomMouseInteractor(vtk.vtkInteractorStyleTrackballCamera):
         
         #self.lesionvis.userPickedLesion = lesionID
         lesionID = int(lesionID)
-        followUpIndex = self.lesionvis.horizontalSlider_TimePoint.value()
-
-        # SAMPLE structureInfo[str(followUpIndex)][0][str(lesionID+1)][0]['Elongation']
-        self.lesionvis.overlayDataMain["Lesion ID"] = str(lesionID)
-        self.lesionvis.overlayDataMain["Centroid"] = str("{0:.2f}".format(self.lesionvis.structureInfo[str(followUpIndex)][0][str(lesionID+1)][0]['Centroid'][0])) +", " +  str("{0:.2f}".format(self.lesionvis.structureInfo[str(followUpIndex)][0][str(lesionID+1)][0]['Centroid'][0])) + ", " + str("{0:.2f}".format(self.lesionvis.structureInfo[str(followUpIndex)][0][str(lesionID+1)][0]['Centroid'][0]))
-        self.lesionvis.overlayDataMain["Voxel Count"] = self.lesionvis.structureInfo[str(followUpIndex)][0][str(lesionID+1)][0]['NumberOfPixels']
-        self.lesionvis.overlayDataMain["Elongation"] = "{0:.2f}".format(self.lesionvis.structureInfo[str(followUpIndex)][0][str(lesionID+1)][0]['Elongation'])
-        self.lesionvis.overlayDataMain["Lesion Perimeter"] = "{0:.2f}".format(self.lesionvis.structureInfo[str(followUpIndex)][0][str(lesionID+1)][0]['Perimeter'])
-        self.lesionvis.overlayDataMain["Lesion Spherical Radius"] = "{0:.2f}".format(self.lesionvis.structureInfo[str(followUpIndex)][0][str(lesionID+1)][0]['SphericalRadius'])
-        self.lesionvis.overlayDataMain["Lesion Spherical Perimeter"] = "{0:.2f}".format(self.lesionvis.structureInfo[str(followUpIndex)][0][str(lesionID+1)][0]['SphericalPerimeter'])
-        self.lesionvis.overlayDataMain["Lesion Flatness"] = "{0:.2f}".format(self.lesionvis.structureInfo[str(followUpIndex)][0][str(lesionID+1)][0]['Flatness'])
-        self.lesionvis.overlayDataMain["Lesion Roundness"] = "{0:.2f}".format(self.lesionvis.structureInfo[str(followUpIndex)][0][str(lesionID+1)][0]['Roundness'])
+        self.overlayData = self.lesionvis.getLesionData(lesionID)
 
     def leftButtonReleaseEvent(self,obj,event):
         if(self.MouseMotion == 0):
@@ -169,18 +163,32 @@ class CustomMouseInteractor(vtk.vtkInteractorStyleTrackballCamera):
                 itemType = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyType)
                 lesionID = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyID)
 
+
                 if(lesionID != None): # lesion picked.
+                    self.lesionvis.userPickedLesionID = int(lesionID) + 1
+                    self.lesionvis.clearLesionHighlights()
                     self.mapLesionToText(lesionID, self.NewPickedActor)
+                    self.lesionvis.updateLesionOverlayText()
+                else:
+                    print("non item")
 
                 #self.iren.Render()
                 # save the last picked actor
                 self.LastPickedActor = self.NewPickedActor
             else: # no actor picked. Clicked on background.
-                #self.resetToDefaultViewLesions()
-                pass
+                self.resetToDefaultViewLesions()
+                self.lesionvis.userPickedLesionID = None
 
         self.OnLeftButtonUp()
         return
+
+    def resetToDefaultViewLesions(self):
+        if(self.LastPickedActor!=None):
+            #self.LastPickedActor.GetProperty().DeepCopy(self.LastPickedProperty)
+            self.lesionvis.clearLesionHighlights()
+            self.LastPickedActor = None
+            self.lesionvis.textActorLesionStatistics.SetInput("")
+        #self.lesionvis.ren.RemoveActor(self.textActorLesionStatistics) # Text overlay
 
     def mouseMoveEvent(self,obj,event):
         self.MouseMotion = 1

@@ -46,6 +46,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import nibabel as nib
 import json
+import random
+from scipy.ndimage.filters import gaussian_filter1d
 
 # Main window class.
 class mainWindow(Qt.QMainWindow):
@@ -84,6 +86,15 @@ class mainWindow(Qt.QMainWindow):
         self.mprA_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRA)
         self.mprB_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRB)
         self.mprC_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRC)
+
+        self.comboBox_LesionAttributes.addItem("Voxel Count")
+        self.comboBox_LesionAttributes.addItem("Physical Size")
+        self.comboBox_LesionAttributes.addItem("Elongation")
+        self.comboBox_LesionAttributes.addItem("Perimeter")
+        self.comboBox_LesionAttributes.addItem("Spherical Radius")
+        self.comboBox_LesionAttributes.addItem("Spherical Perimeter")
+        self.comboBox_LesionAttributes.addItem("Flatness")
+        self.comboBox_LesionAttributes.addItem("Roundness")
 
 
 
@@ -150,8 +161,10 @@ class mainWindow(Qt.QMainWindow):
 
         self.keyType = vtk.vtkInformationStringKey.MakeKey("type", "vtkActor")
         self.keyID = vtk.vtkInformationStringKey.MakeKey("ID", "vtkActor")
-        self.overlayDataMain = {"Lesion ID":"--", "Voxel Count":"--", "Centroid":"--", "Elongation":"--", "Lesion Perimeter":"--", "Lesion Spherical Radius":"--", "Lesion Spherical Perimeter":"--", "Lesion Flatness":"--", "Lesion Roundness":"--"}
+        self.overlayDataMain = {"Lesion ID":"--", "Voxel Count":"--", "Physical Size":"--", "Centroid":"--", "Elongation":"--", "Lesion Perimeter":"--", "Lesion Spherical Radius":"--", "Lesion Spherical Perimeter":"--", "Lesion Flatness":"--", "Lesion Roundness":"--"}
         self.structureInfo = None
+        self.userPickedLesionID = None
+        self.dataCount = 0
 
         self.textActorLesionStatistics = vtk.vtkTextActor()
         self.textActorLesionStatistics.UseBorderAlignOff()
@@ -181,47 +194,44 @@ class mainWindow(Qt.QMainWindow):
             if(self.buttonGroupGraphs.checkedId() == -2): # Graph vis
                 self.stackedWidget_Graphs.setCurrentIndex(1)
 
-    def updateLesionOverlayText(self, followUpIndex = None, lesionIndex = None):
+    def updateLesionOverlayText(self):
         overlayText = ""
-        if(followUpIndex == None or lesionIndex == None):
-            return
         for key in self.overlayDataMain.keys():
             overlayText = overlayText + "\n" + str(key) + ": " + str(self.overlayDataMain[key])
         self.textActorLesionStatistics.SetInput(overlayText)
         
-
     def renderData(self):
         Utils.smoothSurface(self.surfaceActors[0])
-        numberOfActors = len(self.LesionActorList)
-        self.horizontalSlider_TimePoint.setMaximum(numberOfActors-1)
+        self.dataCount = len(self.LesionActorList)
+        self.horizontalSlider_TimePoint.setMaximum(self.dataCount-1)
         for lesion in self.LesionActorList[0]:
             self.ren.AddActor(lesion)
-        self.ren.AddActor(self.surfaceActors[0])
+        self.ren.AddActor(self.surfaceActors[0]) # ventricle
         self.ren.ResetCamera()
         self.iren.Render()
         openglRendererInUse = self.ren.GetRenderWindow().ReportCapabilities().splitlines()[1].split(":")[1].strip()
         self.textEdit_Information.append("Resource: " + str(openglRendererInUse))
 
-        self.renDual.AddActor(self.surfaceActors[1])
-        self.renDual.AddActor(self.surfaceActors[2])
+        self.renDual.AddActor(self.surfaceActors[3])
+        self.renDual.AddActor(self.surfaceActors[4])
         self.renDual.ResetCamera()
         self.irenDual.Render()
 
+        self.readInitializeLesionJSONData() # Read lesion data from JSON file.
         self.displayOrientationCube() # Display orientation cube
         self.LoadStructuralSlices(self.folder, "T1", 0, True) # load slices
         self.initializeDefaultGraph() # Load graph data
         self.initializeGraphVis() # Load graph visualization.
         self.activateControls() # Activate controls.
-        self.readLesionDataFromJson() # Read lesion data from JSON file.
         self.ren.AddActor2D(self.textActorLesionStatistics) # Add lesion statistics overlay.
-        self.updateLesionOverlayText(0,1)
         self.dataFolderInitialized = True
+        self.currentTimeStep = self.horizontalSlider_TimePoint.value()
 
     # Read lesion data from json file.
     # How to access data 
     # FORMAT - structureInfo[StringFollowUpIndex][0][StringLesionIndex][0]['Elongation']
     # Example print(structureInfo[str(0)][0][str(1)][0]['Elongation']) # First timestep, First Lesion, Elongation property.
-    def readLesionDataFromJson(self):
+    def readInitializeLesionJSONData(self):
         # load precomputed lesion properties
         with open(self.folder + "\\preProcess\\lesionStatistics.json") as fp: 
             self.structureInfo = json.load(fp)
@@ -356,7 +366,7 @@ class mainWindow(Qt.QMainWindow):
         self.axesActor.SetZPlusFaceText('A')
         self.axesActor.GetTextEdgesProperty().SetColor(1,1,1)
         self.axesActor.GetTextEdgesProperty().SetLineWidth(1)
-        self.axesActor.GetCubeProperty().SetColor(0.9, 0.3, 0.4)
+        self.axesActor.GetCubeProperty().SetColor(0.7804, 0.4824, 0.4824)
         self.axes = vtk.vtkOrientationMarkerWidget()
         self.axes.SetOrientationMarker(self.axesActor)
         self.axes.SetViewport( 0.9, 0.9, 1.0, 1.0 )
@@ -373,7 +383,7 @@ class mainWindow(Qt.QMainWindow):
         self.axesActorDual.SetZPlusFaceText('A')
         self.axesActorDual.GetTextEdgesProperty().SetColor(1,1,1)
         self.axesActorDual.GetTextEdgesProperty().SetLineWidth(1)
-        self.axesActorDual.GetCubeProperty().SetColor(0.9, 0.3, 0.4)
+        self.axesActorDual.GetCubeProperty().SetColor(0.7804, 0.4824, 0.4824)
         self.axesDual = vtk.vtkOrientationMarkerWidget()
         self.axesDual.SetOrientationMarker(self.axesActorDual)
         self.axesDual.SetViewport( 0.9, 0.9, 1.0, 1.0 )
@@ -516,23 +526,48 @@ class mainWindow(Qt.QMainWindow):
         edges = G.edges()
         weights = [3 for u,v in edges]
         #nx.draw_planar(G, with_labels=True, node_size=800, node_color="#e54c66", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
-        nx.draw_shell(G, with_labels=True, node_size=800, node_color="#e54c66", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
+        nx.draw_shell(G, with_labels=True, node_size=800, node_color="#c87b7b", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
         self.canvasGraph.draw()
 
+    def computeNodeOrderForGraph(self, G):
+        nodeIDList = list(G.nodes)
+        nodesAndDegreesUndirected =  list(G.degree(nodeIDList))
+        nodesAndDegreesDirectedOut =  list(G.out_degree(nodeIDList))
+        nodesAndDegreesDirectedIn =  list(G.in_degree(nodeIDList))
+        disconnectedNodes = [elem[0] for elem in nodesAndDegreesUndirected if elem[1]==0]
+        splitNodes = [elem[0] for elem in nodesAndDegreesDirectedOut if elem[1]>1]
+        mergeNodes = [elem[0] for elem in nodesAndDegreesDirectedIn if elem[1]>1]
+        nodeOrderForGraph = disconnectedNodes
+        for elem in mergeNodes:
+            nodeOrderForGraph.append(elem)
+            for i in [item for item in nx.ancestors(G, elem)]:
+                nodeOrderForGraph.append(i)
+        for elem in splitNodes:
+            nodeOrderForGraph.append(elem)
+            for i in [item[0] for item in G[elem]]:
+                nodeOrderForGraph.append(i)
+        return nodeOrderForGraph
 
-    def gaussian_mixture(self, x, n=5):
-        """Return a random mixture of *n* Gaussians, evaluated at positions *x*."""
-        def add_random_gaussian(a):
-            amplitude = 1 / (.1 + np.random.random())
-            dx = x[-1] - x[0]
-            x0 = (2 * np.random.random() - .5) * dx
-            z = 10 / (.1 + np.random.random()) / dx
-            a += amplitude * np.exp(-(z * (x - x0))**2)
-        a = np.zeros_like(x)
-        for j in range(n):
-            add_random_gaussian(a)
-        return a
+    def onClickDefaultStreamGraphCanvas(self, event):
+        # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+        #     ('double' if event.dblclick else 'single', event.button,
+        #     event.x, event.y, event.xdata, event.ydata))
+        if(event.xdata != None):
+            x_loc = int(round(event.xdata))
+            self.updateDefaultGraph(x_loc)
+        else:
+            print("click outside graph")
+            self.updateDefaultGraph()
 
+    def onPickDefaultStreamGraphCanvas(self, event):
+        # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+        #     ('double' if event.dblclick else 'single', event.button,
+        #     event.x, event.y, event.xdata, event.ydata))
+        thisline = event.artist
+        labelValue = thisline.get_label()
+        #ind = event.ind
+        print('onpick1 line:', labelValue)
+           
     # plot default graph
     def plotDefaultGraph(self): 
         # clearing old figures
@@ -541,21 +576,37 @@ class mainWindow(Qt.QMainWindow):
         plt.figure(3)
         # create an axis
         self.axDefault = self.figureDefault.add_subplot(111)
-        #plt.axis('off')
         plt.subplots_adjust(wspace=None, hspace=None)
+        #plt.axvline(x=40, linewidth=4, color='y')
 
         # Data for plotting
-        t = np.arange(0.0, 2.0, 0.01)
-        s = 1 + np.sin(2 * np.pi * t)
+        self.G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+        nodeOrderForGraph = self.computeNodeOrderForGraph(self.G)
 
-        
-        x = np.linspace(0, 100, 101)
-        ys = [self.gaussian_mixture(x) for _ in range(3)]
+        ys = []
+        dataArray = []
+        graphLegendLabelList = []
+        for id in nodeOrderForGraph:
+            graphLegendLabelList.append(str(id))
+            timeList = self.G.nodes[id]["time"]
+            labelList = self.G.nodes[id]["lesionLabel"]
+            data = []
+            for i in range(len(timeList)):
+                time = timeList[i]
+                label = labelList[i]
+                dataItem = self.getLesionData(label, time, "NumberOfPixels")
+                data.append(dataItem)
+            buckets = [0] * 81
+            buckets[timeList[0]:timeList[-1]+1] = data
+            buckets = gaussian_filter1d(buckets, sigma = 2)
+            arr = np.asarray(buckets, dtype=np.float64)
+            dataArray.append(arr)
 
-        #fig, ax = plt.subplots()
-        #self.axDefault.plot(t, s)
-        self.axDefault.stackplot(x, ys, baseline='wiggle')
-
+        x = np.linspace(0, 81, 81)
+        #random.shuffle(dataArray)
+        ys = dataArray
+        self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = graphLegendLabelList)
+    
         self.axDefault.set_facecolor((0.0627, 0.0627, 0.0627))
         self.axDefault.xaxis.label.set_color((0.6, 0.6, 0.6))
         self.axDefault.yaxis.label.set_color((0.6, 0.6, 0.6))
@@ -567,47 +618,102 @@ class mainWindow(Qt.QMainWindow):
         self.axDefault.spines['top'].set_visible(False)
         self.axDefault.tick_params(axis='x', colors=(0.6, 0.6, 0.6))
         self.axDefault.tick_params(axis='y', colors=(0.6, 0.6, 0.6))
-
-        #self.axDefault.set(xlabel='time (s)', ylabel='lesion volume (ml)',
-            #title='About as simple as it gets, folks')
-
-        self.axDefault.set_xlabel("Followup instance", fontname="Arial", fontsize=12)
-        self.axDefault.set_ylabel("Lesion Volume (ml)", fontname="Arial", fontsize=12)
-        self.axDefault.set_title("Activity Graph", fontname="Arial", fontsize=20)
-        
-        #self.axDefault.grid()
-
+        self.axDefault.set_xlabel("followup instance", fontname="Arial", fontsize=12)
+        self.axDefault.set_ylabel("lesion volume (ml)", fontname="Arial", fontsize=12)
+        self.axDefault.set_title("activity graph", fontname="Arial", fontsize=15)
         self.axDefault.title.set_color((0.6, 0.6, 0.6))
-
+        plt.xlim(xmin=0)
+        plt.xlim(xmax=self.dataCount-1)
+        #self.axDefault.grid()
         #fig.savefig("test.png")
         #plt.show()
         self.canvasDefault.draw()
+        self.canvasDefault.mpl_connect('pick_event', self.onPickDefaultStreamGraphCanvas)
+        self.canvasDefault.mpl_connect('button_press_event', self.onClickDefaultStreamGraphCanvas)
+        self.defaultGraphBackup = self.canvasDefault.copy_from_bbox(self.axDefault.bbox)
 
+        self.vLine = None
 
-        # if(refreshData == True):
-        #     self.slice_MPRA = np.rot90(self.slice_MPRA)
-        #     self.sliceMask_MPRA = np.rot90(self.sliceMask_MPRA)
-        # if(self.pushButton_FLAIR.isChecked() == True):
-        #     aspectCoronalData = self.spacingData[2]/self.spacingData[1]
-        #     aspectCoronalMask = self.spacingMask[2]/self.spacingMask[1]
-        # else:
-        #     aspectCoronalData = self.spacingData[2]/self.spacingData[0]
-        #     aspectCoronalMask = self.spacingMask[2]/self.spacingMask[0]
-        # self.MPRA = plt.imshow(self.slice_MPRA, cmap='Greys_r', aspect=aspectCoronalData)
-        # self.MPRAMask = plt.imshow(self.sliceMask_MPRA, cmap=self.MPROverlayColorMap, alpha=maskAlpha, aspect=aspectCoronalMask,  interpolation='none')
-        # self.sliceNumberHandleMPRA = self.axMPRA.text(5, 5, str(self.midSliceX), verticalalignment='top', horizontalalignment='left', color='green', fontsize=12)
-        
+    # plot default graph
+    def updateDefaultGraph(self, vlineXloc=None):
+        plt.figure(3)
+        #self.canvasDefault.restore_region(self.defaultGraphBackup)
+        if(vlineXloc != None):
+            if(self.vLine == None):
+                self.vLine = plt.axvline(x=vlineXloc, linewidth=2, color='y')
+            else:
+                self.vLine.set_xdata([vlineXloc])
+        else:
+            self.vLine.remove()
+            self.vLine = None
+        self.canvasDefault.draw()
+
+    def getLesionData(self, label, time=None, key = None):
+        if(time==None):
+            time = self.horizontalSlider_TimePoint.value()
+        if(key != None): # Return specific attribute data.
+            return self.structureInfo[str(time)][0][str(label)][0][key]
+        else: # Return everything in dictionary.
+            self.overlayDataMain["Lesion ID"] = str(label)
+            self.overlayDataMain["Voxel Count"] = self.structureInfo[str(time)][0][str(label+1)][0]["NumberOfPixels"]
+            self.overlayDataMain["Physical Size"] = "{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]["PhysicalSize"])
+            self.overlayDataMain["Centroid"] = str("{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['Centroid'][0])) +", " +  str("{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['Centroid'][0])) + ", " + str("{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['Centroid'][0]))
+            self.overlayDataMain["Elongation"] = "{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['Elongation'])
+            self.overlayDataMain["Lesion Perimeter"] = "{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['Perimeter'])
+            self.overlayDataMain["Lesion Spherical Radius"] = "{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['SphericalRadius'])
+            self.overlayDataMain["Lesion Spherical Perimeter"] = "{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['SphericalPerimeter'])
+            self.overlayDataMain["Lesion Flatness"] = "{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['Flatness'])
+            self.overlayDataMain["Lesion Roundness"] = "{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['Roundness'])
+            return self.overlayDataMain
 
     # Handler for time point slider change
     @pyqtSlot()
     def on_sliderChangedTimePoint(self):
         sliderValue = self.horizontalSlider_TimePoint.value()
+        if(self.userPickedLesionID!=None):
+            highlightLesionID = self.getLinkedLesionIDFromTimeStep(self.userPickedLesionID, self.currentTimeStep, sliderValue)
+            if(highlightLesionID!=None):
+                self.userPickedLesionID = highlightLesionID
+                self.overlayData = self.getLesionData(highlightLesionID-1)
+                self.updateLesionOverlayText()
+            else:
+                self.textActorLesionStatistics.SetInput("")
+                self.userPickedLesionID = None
+                self.style.LastPickedActor = None
+                self.clearLesionHighlights()
+
+        self.currentTimeStep = sliderValue
         self.label_currentDataIndex.setText(str(sliderValue))
         self.ren.RemoveAllViewProps()
         for lesion in self.LesionActorList[sliderValue]:
+            lesion.GetProperty().SetColor(0.7804, 0.4824, 0.4824) # default lesion color
+            lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
+            if(self.userPickedLesionID!=None):
+                if(lesionID == highlightLesionID-1):
+                    lesion.GetProperty().SetColor(0.4627, 0.4627, 0.9568) # A blueish color.
             self.ren.AddActor(lesion)
-        self.ren.AddActor(self.surfaceActors[0])
+        self.ren.AddActor(self.surfaceActors[0]) # ventricle
+        self.ren.AddActor(self.textActorLesionStatistics) # Text overlay
         self.iren.Render()
+
+    def clearLesionHighlights(self, timeStep = None):
+        if(timeStep == None):
+            timeStep = self.horizontalSlider_TimePoint.value()
+        for lesion in self.LesionActorList[timeStep]:
+            lesion.GetProperty().SetColor(0.7804, 0.4824, 0.4824) # default lesion color
+
+    # Get lesion ID of any timestep provided the current ID and timestep.
+    def getLinkedLesionIDFromTimeStep(self, currentLesionID, currentTimeStep, queryTimeStep):
+        nodeIDList = list(self.G.nodes)
+        for id in nodeIDList:
+            timeList = self.G.nodes[id]["time"]
+            labelList = self.G.nodes[id]["lesionLabel"]
+            temporalData = list(zip(timeList, labelList))
+            if((currentTimeStep, currentLesionID) in list(temporalData)):
+                result = [elem[1] for elem in temporalData if elem[0]==queryTimeStep]
+                if(len(result)!=0):
+                    return result[0]
+        return None
 
     # Load data automatically - To be removed in production.
     def autoLoadData(self):
