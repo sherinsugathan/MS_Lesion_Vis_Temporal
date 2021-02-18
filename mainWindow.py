@@ -78,16 +78,6 @@ class mainWindow(Qt.QMainWindow):
         pmMain = Qt.QPixmap("icons\\AppLogo.png")
         self.logoLabel.setPixmap(pmMain.scaled(self.logoLabel.size().width(), self.logoLabel.size().height(), 1,1))
         #self.showDialog()
-        
-        # Handlers
-        #self.pushButton_LoadFolder.clicked.connect(self.on_click_browseFolder) # Attaching button click handler.
-        self.pushButton_LoadFolder.clicked.connect(self.autoLoadData) # Attaching button click handler.
-        self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
-        self.mprA_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRA)
-        self.mprB_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRB)
-        self.mprC_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRC)
-
-        self.comboBox_LesionAttributes.addItem("Voxel Count")
         self.comboBox_LesionAttributes.addItem("Physical Size")
         self.comboBox_LesionAttributes.addItem("Elongation")
         self.comboBox_LesionAttributes.addItem("Perimeter")
@@ -95,8 +85,14 @@ class mainWindow(Qt.QMainWindow):
         self.comboBox_LesionAttributes.addItem("Spherical Perimeter")
         self.comboBox_LesionAttributes.addItem("Flatness")
         self.comboBox_LesionAttributes.addItem("Roundness")
-
-
+        # Handlers
+        #self.pushButton_LoadFolder.clicked.connect(self.on_click_browseFolder) # Attaching button click handler.
+        self.pushButton_LoadFolder.clicked.connect(self.autoLoadData) # Attaching button click handler.
+        self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
+        self.mprA_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRA)
+        self.mprB_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRB)
+        self.mprC_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRC)
+        self.comboBox_LesionAttributes.currentTextChanged.connect(self.on_combobox_changed_LesionAttributes) # Attaching handler for lesion filter combobox selection change.
 
     # Initialize vtk
     def initVTK(self):
@@ -183,6 +179,24 @@ class mainWindow(Qt.QMainWindow):
 
     def reportProgress(self, n):
         self.progressBar.setValue(n)
+
+    # Handler for lesion attribute selection changed.
+    @pyqtSlot()
+    def on_combobox_changed_LesionAttributes(self): 
+        if (str(self.comboBox_LesionAttributes.currentText())=="Physical Size"):
+            self.plotDefaultGraph("PhysicalSize")
+        if (str(self.comboBox_LesionAttributes.currentText())=="Elongation"):
+            self.plotDefaultGraph("Elongation")
+        if (str(self.comboBox_LesionAttributes.currentText())=="Perimeter"):
+            self.plotDefaultGraph("Perimeter")
+        if (str(self.comboBox_LesionAttributes.currentText())=="Spherical Radius"):
+            self.plotDefaultGraph("SphericalRadius")
+        if (str(self.comboBox_LesionAttributes.currentText())=="Spherical Perimeter"):
+            self.plotDefaultGraph("SphericalPerimeter")
+        if (str(self.comboBox_LesionAttributes.currentText())=="Flatness"):
+            self.plotDefaultGraph("Flatness")
+        if (str(self.comboBox_LesionAttributes.currentText())=="Roundness"):
+            self.plotDefaultGraph("Roundness") 
 
     # Handler for mode change inside button group (graphs)
     @pyqtSlot(QAbstractButton)
@@ -397,7 +411,7 @@ class mainWindow(Qt.QMainWindow):
         self.canvasDefault = FigureCanvas(self.figureDefault)
         self.vl_default.addWidget(self.canvasDefault)
         self.frameDefaultGraph.setLayout(self.vl_default)
-        self.plotDefaultGraph()
+        self.plotDefaultGraph("PhysicalSize")
 
     def initializeGraphVis(self):
         self.vl_graph = Qt.QVBoxLayout()
@@ -525,8 +539,8 @@ class mainWindow(Qt.QMainWindow):
         G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
         edges = G.edges()
         weights = [3 for u,v in edges]
-        #nx.draw_planar(G, with_labels=True, node_size=800, node_color="#e54c66", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
-        nx.draw_shell(G, with_labels=True, node_size=800, node_color="#c87b7b", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
+        nx.draw_planar(G, with_labels=True, node_size=800, node_color="#e54c66", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
+        #nx.draw_shell(G, with_labels=True, node_size=800, node_color="#c87b7b", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
         self.canvasGraph.draw()
 
     def computeNodeOrderForGraph(self, G):
@@ -569,7 +583,7 @@ class mainWindow(Qt.QMainWindow):
         print('onpick1 line:', labelValue)
            
     # plot default graph
-    def plotDefaultGraph(self): 
+    def plotDefaultGraph(self, lesionAttributeString): 
         # clearing old figures
         self.figureDefault.clear()
         self.figureDefault.tight_layout()
@@ -594,7 +608,7 @@ class mainWindow(Qt.QMainWindow):
             for i in range(len(timeList)):
                 time = timeList[i]
                 label = labelList[i]
-                dataItem = self.getLesionData(label, time, "NumberOfPixels")
+                dataItem = self.getLesionData(label, time, lesionAttributeString)
                 data.append(dataItem)
             buckets = [0] * 81
             buckets[timeList[0]:timeList[-1]+1] = data
@@ -602,7 +616,7 @@ class mainWindow(Qt.QMainWindow):
             arr = np.asarray(buckets, dtype=np.float64)
             dataArray.append(arr)
 
-        x = np.linspace(0, 81, 81)
+        x = np.linspace(0, self.dataCount, self.dataCount)
         #random.shuffle(dataArray)
         ys = dataArray
         self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = graphLegendLabelList)
@@ -619,7 +633,7 @@ class mainWindow(Qt.QMainWindow):
         self.axDefault.tick_params(axis='x', colors=(0.6, 0.6, 0.6))
         self.axDefault.tick_params(axis='y', colors=(0.6, 0.6, 0.6))
         self.axDefault.set_xlabel("followup instance", fontname="Arial", fontsize=12)
-        self.axDefault.set_ylabel("lesion volume (ml)", fontname="Arial", fontsize=12)
+        self.axDefault.set_ylabel(lesionAttributeString, fontname="Arial", fontsize=12)
         self.axDefault.set_title("activity graph", fontname="Arial", fontsize=15)
         self.axDefault.title.set_color((0.6, 0.6, 0.6))
         plt.xlim(xmin=0)
@@ -644,8 +658,9 @@ class mainWindow(Qt.QMainWindow):
             else:
                 self.vLine.set_xdata([vlineXloc])
         else:
-            self.vLine.remove()
-            self.vLine = None
+            if(self.vLine != None):
+                self.vLine.remove()
+                self.vLine = None
         self.canvasDefault.draw()
 
     def getLesionData(self, label, time=None, key = None):
