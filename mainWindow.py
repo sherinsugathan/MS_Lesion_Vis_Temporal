@@ -48,6 +48,7 @@ import nibabel as nib
 import json
 import random
 from scipy.ndimage.filters import gaussian_filter1d
+import seaborn as sns
 
 # Main window class.
 class mainWindow(Qt.QMainWindow):
@@ -543,8 +544,14 @@ class mainWindow(Qt.QMainWindow):
         #nx.draw_shell(G, with_labels=True, node_size=800, node_color="#c87b7b", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
         self.canvasGraph.draw()
 
-    def computeNodeOrderForGraph(self, G):
+    def computeNodeOrderForGraph(self, G): #TODO NEED TO UPDATE CODE to support multilevel activity (eg split and merge in one sequence)
+        # color palette
+        #numberOfConnectedComponents = len(list(nx.strongly_connected_components(G))) # gets the number of disconnected components in the graph
+        #print(numberOfConnectedComponents)
+         
+        #  
         nodeIDList = list(G.nodes)
+        streamPlotDataColors = sns.color_palette("Set2", len(nodeIDList)) # visually pleasing colors from color brewer.
         nodesAndDegreesUndirected =  list(G.degree(nodeIDList))
         nodesAndDegreesDirectedOut =  list(G.out_degree(nodeIDList))
         nodesAndDegreesDirectedIn =  list(G.in_degree(nodeIDList))
@@ -552,15 +559,22 @@ class mainWindow(Qt.QMainWindow):
         splitNodes = [elem[0] for elem in nodesAndDegreesDirectedOut if elem[1]>1]
         mergeNodes = [elem[0] for elem in nodesAndDegreesDirectedIn if elem[1]>1]
         nodeOrderForGraph = disconnectedNodes
+        colorPaletteIndex = len(disconnectedNodes)
         for elem in mergeNodes:
             nodeOrderForGraph.append(elem)
+            colorPaletteIndex = colorPaletteIndex + 1
             for i in [item for item in nx.ancestors(G, elem)]:
                 nodeOrderForGraph.append(i)
+                streamPlotDataColors[colorPaletteIndex] = streamPlotDataColors[colorPaletteIndex-1]
+                colorPaletteIndex = colorPaletteIndex + 1
         for elem in splitNodes:
             nodeOrderForGraph.append(elem)
+            colorPaletteIndex = colorPaletteIndex + 1
             for i in [item[0] for item in G[elem]]:
                 nodeOrderForGraph.append(i)
-        return nodeOrderForGraph
+                streamPlotDataColors[colorPaletteIndex] = streamPlotDataColors[colorPaletteIndex-1]
+                colorPaletteIndex = colorPaletteIndex + 1
+        return nodeOrderForGraph, streamPlotDataColors
 
     def onClickDefaultStreamGraphCanvas(self, event):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
@@ -579,8 +593,10 @@ class mainWindow(Qt.QMainWindow):
         #     event.x, event.y, event.xdata, event.ydata))
         thisline = event.artist
         labelValue = thisline.get_label()
+        #artist = event.artist
         #ind = event.ind
-        print('onpick1 line:', labelValue)
+        #print('onpick1 line:', labelValue)
+        self.updateDefaultGraph(None, labelValue)
            
     # plot default graph
     def plotDefaultGraph(self, lesionAttributeString): 
@@ -595,13 +611,15 @@ class mainWindow(Qt.QMainWindow):
 
         # Data for plotting
         self.G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
-        nodeOrderForGraph = self.computeNodeOrderForGraph(self.G)
+        self.UG = self.G.to_undirected()
+        self.sub_graphs = list(nx.connected_components(self.UG))
+        nodeOrderForGraph, self.plotColors = self.computeNodeOrderForGraph(self.G)
 
         ys = []
         dataArray = []
-        graphLegendLabelList = []
+        self.graphLegendLabelList = []
         for id in nodeOrderForGraph:
-            graphLegendLabelList.append(str(id))
+            self.graphLegendLabelList.append(str(id))
             timeList = self.G.nodes[id]["time"]
             labelList = self.G.nodes[id]["lesionLabel"]
             data = []
@@ -619,8 +637,7 @@ class mainWindow(Qt.QMainWindow):
         x = np.linspace(0, self.dataCount, self.dataCount)
         #random.shuffle(dataArray)
         ys = dataArray
-        self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = graphLegendLabelList)
-    
+        self.polyCollection = self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList, linewidth=0.5, edgecolor='white', colors = self.plotColors)
         self.axDefault.set_facecolor((0.0627, 0.0627, 0.0627))
         self.axDefault.xaxis.label.set_color((0.6, 0.6, 0.6))
         self.axDefault.yaxis.label.set_color((0.6, 0.6, 0.6))
@@ -649,19 +666,42 @@ class mainWindow(Qt.QMainWindow):
         self.vLine = None
 
     # plot default graph
-    def updateDefaultGraph(self, vlineXloc=None):
+    def updateDefaultGraph(self, vlineXloc=None, updateColorIndex=None):
         plt.figure(3)
         #self.canvasDefault.restore_region(self.defaultGraphBackup)
         if(vlineXloc != None):
             if(self.vLine == None):
-                self.vLine = plt.axvline(x=vlineXloc, linewidth=2, color='y')
+                self.vLine = plt.axvline(x=vlineXloc, linewidth=1, color='r', linestyle='--')
             else:
                 self.vLine.set_xdata([vlineXloc])
         else:
             if(self.vLine != None):
                 self.vLine.remove()
                 self.vLine = None
+
+        if(updateColorIndex!=None):
+            tempColors = list(self.plotColors)
+            newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(updateColorIndex)], 0.6)
+
+            for i in range(len(self.polyCollection)):
+                self.polyCollection[i].set_facecolor(tempColors[i])
+
+            updateIndex = self.graphLegendLabelList.index(updateColorIndex)
+            for item in self.sub_graphs:
+                if(updateColorIndex in item):
+                    for nodeIndex in item:
+                        self.polyCollection[self.graphLegendLabelList.index(nodeIndex)].set_facecolor(newColor)
         self.canvasDefault.draw()
+
+    def adjust_lightness(self, color, amount=0.5):
+        import matplotlib.colors as mc
+        import colorsys
+        try:
+            c = mc.cnames[color]
+        except:
+            c = color
+        c = colorsys.rgb_to_hls(*mc.to_rgb(c))
+        return colorsys.hls_to_rgb(c[0], max(0, min(1, amount * c[1])), c[2])
 
     def getLesionData(self, label, time=None, key = None):
         if(time==None):
