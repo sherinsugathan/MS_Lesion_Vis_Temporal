@@ -915,7 +915,7 @@ QRadioButton::indicator:unchecked {
               <number>0</number>
              </property>
              <item row="1" column="1">
-              <widget class="QRadioButton" name="radioButton_Pial">
+              <widget class="QRadioButton" name="radioButton_Inflated">
                <property name="styleSheet">
                 <string notr="true">QRadioButton {
 font: 9pt &quot;Google Sans&quot;;
@@ -942,10 +942,10 @@ QRadioButton::indicator:unchecked {
 }</string>
                </property>
                <property name="text">
-                <string>Pial</string>
+                <string>Inflated</string>
                </property>
                <property name="checked">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
                <attribute name="buttonGroup">
                 <string notr="true">radioGroup_BrainSurface</string>
@@ -983,7 +983,7 @@ QRadioButton::indicator:unchecked {
                 <string>White</string>
                </property>
                <property name="checked">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <attribute name="buttonGroup">
                 <string notr="true">radioGroup_BrainSurface</string>
@@ -1037,7 +1037,7 @@ QRadioButton::indicator:unchecked {
 }
 
 .QComboBox{
-border-color: rgb(20, 52, 30);
+border-color: rgb(57,57,57);
 color: rgb(149, 189, 149);
 border-style: solid;
 border-width: 2px;
@@ -1094,7 +1094,7 @@ border-radius: 4px;
 }
 
 .QComboBox{
-border-color: rgb(20, 52, 30);
+border-color: rgb(57,57,57);
 color: rgb(149, 189, 149);
 border-style: solid;
 border-width: 2px;
@@ -1458,7 +1458,7 @@ border-radius: 10px;</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="radioGroup_Modality"/>
   <buttongroup name="radioGroup_BrainSurface"/>
+  <buttongroup name="radioGroup_Modality"/>
  </buttongroups>
 </ui>

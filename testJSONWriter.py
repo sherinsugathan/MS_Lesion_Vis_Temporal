@@ -8,7 +8,7 @@ with open(file) as fp: # read source json file.
 numberOfLesionElements = len(structureInfo)
 
 r = structureInfo[str(44)]
-print(r[1][str(3)])
+print(r[0][str(3)])
 
 #for i in 81:
 

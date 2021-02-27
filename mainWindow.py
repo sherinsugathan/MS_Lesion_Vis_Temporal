@@ -109,7 +109,7 @@ class mainWindow(Qt.QMainWindow):
         self.iren.SetRenderWindow(self.vtkWidget.GetRenderWindow())
         self.ren.ResetCamera()
         self.frame.setLayout(self.vl)
-        self.style = Utils.CustomMouseInteractor(self)
+        self.style = Utils.CustomMouseInteractorLesions(self)
         self.style.SetDefaultRenderer(self.ren)
         self.style.main = self
         self.iren.SetInteractorStyle(self.style)
@@ -127,6 +127,10 @@ class mainWindow(Qt.QMainWindow):
         self.irenDual.SetRenderWindow(self.vtkWidgetDual.GetRenderWindow())
         self.renDual.ResetCamera()
         self.frameDual.setLayout(self.vlDual)
+        self.styleSurface = Utils.CustomMouseInteractorSurface(self)
+        self.styleSurface.SetDefaultRenderer(self.renDual)
+        self.styleSurface.main = self
+        self.irenDual.SetInteractorStyle(self.styleSurface)
         self.irenDual.Initialize()
 
         self.vl_MPRA = Qt.QVBoxLayout()
@@ -162,6 +166,10 @@ class mainWindow(Qt.QMainWindow):
         self.structureInfo = None
         self.userPickedLesionID = None
         self.dataCount = 0
+        self.vtk_colorsLh = vtk.vtkUnsignedCharArray()
+        self.vtk_colorsRh = vtk.vtkUnsignedCharArray()
+        self.vtk_colorsLh.SetNumberOfComponents(3)
+        self.vtk_colorsRh.SetNumberOfComponents(3)
 
         self.textActorLesionStatistics = vtk.vtkTextActor()
         self.textActorLesionStatistics.UseBorderAlignOff()
@@ -177,6 +185,12 @@ class mainWindow(Qt.QMainWindow):
         self.buttonGroupGraphs.addButton(self.pushButton_GraphView)
         self.buttonGroupGraphs.setExclusive(True)
         self.buttonGroupGraphs.buttonClicked.connect(self.on_buttonGroupGraphsChanged)
+
+        self.buttonGroupSurfaces = QButtonGroup()
+        self.buttonGroupSurfaces.addButton(self.radioButton_White)
+        self.buttonGroupSurfaces.addButton(self.radioButton_Inflated)
+        self.buttonGroupSurfaces.setExclusive(True)
+        self.buttonGroupSurfaces.buttonClicked.connect(self.on_buttonGroupSurfaceChanged)
 
     def reportProgress(self, n):
         self.progressBar.setValue(n)
@@ -198,6 +212,22 @@ class mainWindow(Qt.QMainWindow):
             self.plotDefaultGraph("Flatness")
         if (str(self.comboBox_LesionAttributes.currentText())=="Roundness"):
             self.plotDefaultGraph("Roundness") 
+
+    # Handler for mode change inside button group (surfaces)
+    @pyqtSlot(QAbstractButton)
+    def on_buttonGroupSurfaceChanged(self, btn):
+        if(self.dataFolderInitialized == True):
+            if(self.buttonGroupSurfaces.checkedButton().text() == "White"):
+                self.renDual.RemoveActor(self.surfaceActors[3])
+                self.renDual.RemoveActor(self.surfaceActors[4])
+                self.renDual.AddActor(self.surfaceActors[1])
+                self.renDual.AddActor(self.surfaceActors[2])
+            else:
+                self.renDual.RemoveActor(self.surfaceActors[1])
+                self.renDual.RemoveActor(self.surfaceActors[2])
+                self.renDual.AddActor(self.surfaceActors[3])
+                self.renDual.AddActor(self.surfaceActors[4])
+            self.irenDual.Render()
 
     # Handler for mode change inside button group (graphs)
     @pyqtSlot(QAbstractButton)
@@ -227,8 +257,8 @@ class mainWindow(Qt.QMainWindow):
         openglRendererInUse = self.ren.GetRenderWindow().ReportCapabilities().splitlines()[1].split(":")[1].strip()
         self.textEdit_Information.append("Resource: " + str(openglRendererInUse))
 
-        self.renDual.AddActor(self.surfaceActors[3])
-        self.renDual.AddActor(self.surfaceActors[4])
+        self.renDual.AddActor(self.surfaceActors[1])
+        self.renDual.AddActor(self.surfaceActors[2])
         self.renDual.ResetCamera()
         self.irenDual.Render()
 
@@ -241,6 +271,12 @@ class mainWindow(Qt.QMainWindow):
         self.ren.AddActor2D(self.textActorLesionStatistics) # Add lesion statistics overlay.
         self.dataFolderInitialized = True
         self.currentTimeStep = self.horizontalSlider_TimePoint.value()
+        self.numberOfPointsLh = self.surfaceActors[3].GetMapper().GetInput().GetNumberOfPoints()
+        self.numberOfPointsRh = self.surfaceActors[4].GetMapper().GetInput().GetNumberOfPoints()
+        self.vtk_colorsLh.SetNumberOfTuples(self.numberOfPointsLh)
+        self.vtk_colorsRh.SetNumberOfTuples(self.numberOfPointsRh)
+        self.vertexIndexArrayLh = np.arange(self.numberOfPointsLh)
+        self.vertexIndexArrayRh = np.arange(self.numberOfPointsRh)
 
     # Read lesion data from json file.
     # How to access data 
@@ -582,10 +618,11 @@ class mainWindow(Qt.QMainWindow):
         #     event.x, event.y, event.xdata, event.ydata))
         if(event.xdata != None):
             x_loc = int(round(event.xdata))
-            self.updateDefaultGraph(x_loc)
+            print("click inside graph")
+            self.updateDefaultGraph(x_loc, None)
         else:
             print("click outside graph")
-            self.updateDefaultGraph()
+            self.updateDefaultGraph(None, None)
 
     def onPickDefaultStreamGraphCanvas(self, event):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
@@ -665,7 +702,7 @@ class mainWindow(Qt.QMainWindow):
 
         self.vLine = None
 
-    # plot default graph
+    # update default graph
     def updateDefaultGraph(self, vlineXloc=None, updateColorIndex=None):
         plt.figure(3)
         #self.canvasDefault.restore_region(self.defaultGraphBackup)
@@ -691,6 +728,12 @@ class mainWindow(Qt.QMainWindow):
                 if(updateColorIndex in item):
                     for nodeIndex in item:
                         self.polyCollection[self.graphLegendLabelList.index(nodeIndex)].set_facecolor(newColor)
+
+        if(vlineXloc==None and updateColorIndex==None): # Reset graph to default colors.
+            tempColors = list(self.plotColors)
+            for i in range(len(self.polyCollection)):
+                self.polyCollection[i].set_facecolor(tempColors[i])
+
         self.canvasDefault.draw()
 
     def adjust_lightness(self, color, amount=0.5):
@@ -731,6 +774,26 @@ class mainWindow(Qt.QMainWindow):
                 self.userPickedLesionID = highlightLesionID
                 self.overlayData = self.getLesionData(highlightLesionID-1)
                 self.updateLesionOverlayText()
+                # Project on brain surface.
+                affectedLh = np.asarray(self.structureInfo[str(sliderValue)][0][str(highlightLesionID)][0]['AffectedPointIdsLh'])
+                affectedRh = np.asarray(self.structureInfo[str(sliderValue)][0][str(highlightLesionID)][0]['AffectedPointIdsRh'])
+
+                print("highlight lesion id", highlightLesionID)
+                lesionMappingLh = np.isin(self.vertexIndexArrayLh, affectedLh)
+                lesionMappingRh = np.isin(self.vertexIndexArrayRh, affectedRh)
+                cLh = np.full(self.numberOfPointsLh*3,255, dtype='B')
+                cRh = np.full(self.numberOfPointsRh*3,255, dtype='B')
+                cLh =cLh.astype('B').reshape((self.numberOfPointsLh,3))
+                cRh =cRh.astype('B').reshape((self.numberOfPointsRh,3))
+                cLh[lesionMappingLh==True] = [255,0,0]
+                cRh[lesionMappingRh==True] = [255,0,0]
+                self.vtk_colorsLh.SetArray(cLh, cLh.size, True)
+                self.vtk_colorsRh.SetArray(cRh, cRh.size, True)
+                self.surfaceActors[3].GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
+                self.surfaceActors[3].GetMapper().GetInput().GetPointData().SetScalars(self.vtk_colorsLh)
+                self.surfaceActors[4].GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
+                self.surfaceActors[4].GetMapper().GetInput().GetPointData().SetScalars(self.vtk_colorsRh)
+                self.irenDual.Render()
             else:
                 self.textActorLesionStatistics.SetInput("")
                 self.userPickedLesionID = None
