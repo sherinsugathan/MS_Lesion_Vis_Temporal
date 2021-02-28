@@ -172,6 +172,7 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
                     self.lesionvis.userPickedLesionID = int(lesionID) + 1
                     self.lesionvis.clearLesionHighlights()
                     self.mapLesionToText(lesionID, self.NewPickedActor)
+                    self.lesionvis.on_sliderChangedTimePoint()
                     self.lesionvis.updateLesionOverlayText()
                 else:
                     self.resetToDefaultViewLesions()

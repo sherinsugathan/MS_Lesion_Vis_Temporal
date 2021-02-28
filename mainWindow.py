@@ -222,11 +222,15 @@ class mainWindow(Qt.QMainWindow):
                 self.renDual.RemoveActor(self.surfaceActors[4])
                 self.renDual.AddActor(self.surfaceActors[1])
                 self.renDual.AddActor(self.surfaceActors[2])
+                self.surfaceActors[1].GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
+                self.surfaceActors[2].GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
             else:
                 self.renDual.RemoveActor(self.surfaceActors[1])
                 self.renDual.RemoveActor(self.surfaceActors[2])
                 self.renDual.AddActor(self.surfaceActors[3])
                 self.renDual.AddActor(self.surfaceActors[4])
+                self.surfaceActors[3].GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
+                self.surfaceActors[4].GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
             self.irenDual.Render()
 
     # Handler for mode change inside button group (graphs)
@@ -769,31 +773,12 @@ class mainWindow(Qt.QMainWindow):
     def on_sliderChangedTimePoint(self):
         sliderValue = self.horizontalSlider_TimePoint.value()
         if(self.userPickedLesionID!=None):
-            highlightLesionID = self.getLinkedLesionIDFromTimeStep(self.userPickedLesionID, self.currentTimeStep, sliderValue)
+            highlightLesionID = self.getLinkedLesionIDFromTimeStep(self.userPickedLesionID, sliderValue)
             if(highlightLesionID!=None):
                 self.userPickedLesionID = highlightLesionID
                 self.overlayData = self.getLesionData(highlightLesionID-1)
                 self.updateLesionOverlayText()
-                # Project on brain surface.
-                affectedLh = np.asarray(self.structureInfo[str(sliderValue)][0][str(highlightLesionID)][0]['AffectedPointIdsLh'])
-                affectedRh = np.asarray(self.structureInfo[str(sliderValue)][0][str(highlightLesionID)][0]['AffectedPointIdsRh'])
-
-                print("highlight lesion id", highlightLesionID)
-                lesionMappingLh = np.isin(self.vertexIndexArrayLh, affectedLh)
-                lesionMappingRh = np.isin(self.vertexIndexArrayRh, affectedRh)
-                cLh = np.full(self.numberOfPointsLh*3,255, dtype='B')
-                cRh = np.full(self.numberOfPointsRh*3,255, dtype='B')
-                cLh =cLh.astype('B').reshape((self.numberOfPointsLh,3))
-                cRh =cRh.astype('B').reshape((self.numberOfPointsRh,3))
-                cLh[lesionMappingLh==True] = [255,0,0]
-                cRh[lesionMappingRh==True] = [255,0,0]
-                self.vtk_colorsLh.SetArray(cLh, cLh.size, True)
-                self.vtk_colorsRh.SetArray(cRh, cRh.size, True)
-                self.surfaceActors[3].GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
-                self.surfaceActors[3].GetMapper().GetInput().GetPointData().SetScalars(self.vtk_colorsLh)
-                self.surfaceActors[4].GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
-                self.surfaceActors[4].GetMapper().GetInput().GetPointData().SetScalars(self.vtk_colorsRh)
-                self.irenDual.Render()
+                self.computeApplyProjection(highlightLesionID, self.surfaceActors[1], self.surfaceActors[2], sliderValue)
             else:
                 self.textActorLesionStatistics.SetInput("")
                 self.userPickedLesionID = None
@@ -814,6 +799,29 @@ class mainWindow(Qt.QMainWindow):
         self.ren.AddActor(self.textActorLesionStatistics) # Text overlay
         self.iren.Render()
 
+    # Compute projection for a selected lesion and apply it on active surface.
+    def computeApplyProjection(self, highlightLesionID, surfaceLh, surfaceRh, sliderValue = None):
+        if(sliderValue == None):
+            sliderValue = self.horizontalSlider_TimePoint.value()
+        # Project on brain surface.
+        affectedLh = np.asarray(self.structureInfo[str(sliderValue)][0][str(highlightLesionID)][0]['AffectedPointIdsLh'])
+        affectedRh = np.asarray(self.structureInfo[str(sliderValue)][0][str(highlightLesionID)][0]['AffectedPointIdsRh'])
+        lesionMappingLh = np.isin(self.vertexIndexArrayLh, affectedLh)
+        lesionMappingRh = np.isin(self.vertexIndexArrayRh, affectedRh)
+        cLh = np.full(self.numberOfPointsLh*3,255, dtype='B')
+        cRh = np.full(self.numberOfPointsRh*3,255, dtype='B')
+        cLh =cLh.astype('B').reshape((self.numberOfPointsLh,3))
+        cRh =cRh.astype('B').reshape((self.numberOfPointsRh,3))
+        cLh[lesionMappingLh==True] = [255,0,0]
+        cRh[lesionMappingRh==True] = [255,0,0]
+        self.vtk_colorsLh.SetArray(cLh, cLh.size, True)
+        self.vtk_colorsRh.SetArray(cRh, cRh.size, True)
+        surfaceLh.GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
+        surfaceLh.GetMapper().GetInput().GetPointData().SetScalars(self.vtk_colorsLh)
+        surfaceRh.GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
+        surfaceRh.GetMapper().GetInput().GetPointData().SetScalars(self.vtk_colorsRh)
+        self.irenDual.Render()
+
     def clearLesionHighlights(self, timeStep = None):
         if(timeStep == None):
             timeStep = self.horizontalSlider_TimePoint.value()
@@ -821,13 +829,15 @@ class mainWindow(Qt.QMainWindow):
             lesion.GetProperty().SetColor(0.7804, 0.4824, 0.4824) # default lesion color
 
     # Get lesion ID of any timestep provided the current ID and timestep.
-    def getLinkedLesionIDFromTimeStep(self, currentLesionID, currentTimeStep, queryTimeStep):
+    def getLinkedLesionIDFromTimeStep(self, currentLesionID, queryTimeStep=None):
+        if(queryTimeStep == None):
+            queryTimeStep = self.horizontalSlider_TimePoint.value()
         nodeIDList = list(self.G.nodes)
         for id in nodeIDList:
             timeList = self.G.nodes[id]["time"]
             labelList = self.G.nodes[id]["lesionLabel"]
             temporalData = list(zip(timeList, labelList))
-            if((currentTimeStep, currentLesionID) in list(temporalData)):
+            if((self.currentTimeStep, currentLesionID) in list(temporalData)):
                 result = [elem[1] for elem in temporalData if elem[0]==queryTimeStep]
                 if(len(result)!=0):
                     return result[0]
