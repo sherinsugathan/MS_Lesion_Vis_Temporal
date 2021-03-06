@@ -119,8 +119,8 @@ def computeStreamlines(subjectFolder, lesionPointDataSet = None, gradientFile = 
     Returns: Nothing
 ##########################################################################
 '''
-def computeStreamlinesDTI(subjectFolder, lesionID):
-    streamlineDataFilePath = subjectFolder + "\\surfaces\\streamlinesMultiBlockDatasetDTI.xml"
+def computeStreamlinesDTI(timeStep, subjectFolder, lesionID):
+    streamlineDataFilePath = subjectFolder + "\\surfaces\\streamlinesMultiBlockDatasetDTI" + str(timeStep) + ".xml"
     reader = vtk.vtkXMLMultiBlockDataReader()
     reader.SetFileName(streamlineDataFilePath)
     reader.Update()
@@ -237,7 +237,7 @@ def computeAndWriteMapping(timeStep, jsonPath, dataType, gradientFile = None):
         if(dataType == "STRUCTURAL"):
             streamLinePolyData = computeStreamlines(rootPath, lesionActors[jsonElementIndex-1].GetMapper().GetInput(), gradientFile)
         if(dataType == "DTI"):
-            streamLinePolyData = computeStreamlinesDTI(rootPath, jsonElementIndex-1)
+            streamLinePolyData = computeStreamlinesDTI(timeStep, rootPath, jsonElementIndex-1)
         if(dataType == "DANIELSSONDISTANCE"):
             streamLinePolyData = computeStreamlines(rootPath, lesionActors[jsonElementIndex-1].GetMapper().GetInput(), gradientFile)
         

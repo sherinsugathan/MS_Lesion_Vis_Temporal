@@ -86,6 +86,11 @@ class mainWindow(Qt.QMainWindow):
         self.comboBox_LesionAttributes.addItem("Spherical Perimeter")
         self.comboBox_LesionAttributes.addItem("Flatness")
         self.comboBox_LesionAttributes.addItem("Roundness")
+
+        self.comboBox_ProjectionMethods.addItem("DTI")
+        self.comboBox_ProjectionMethods.addItem("Heat Equation")
+        self.comboBox_ProjectionMethods.addItem("Danielsson")
+
         # Handlers
         #self.pushButton_LoadFolder.clicked.connect(self.on_click_browseFolder) # Attaching button click handler.
         self.pushButton_LoadFolder.clicked.connect(self.autoLoadData) # Attaching button click handler.
@@ -94,6 +99,7 @@ class mainWindow(Qt.QMainWindow):
         self.mprB_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRB)
         self.mprC_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRC)
         self.comboBox_LesionAttributes.currentTextChanged.connect(self.on_combobox_changed_LesionAttributes) # Attaching handler for lesion filter combobox selection change.
+        self.comboBox_ProjectionMethods.currentTextChanged.connect(self.on_combobox_changed_ProjectionMethods) # Attaching handler for projection methods combobox selection change.
 
     # Initialize vtk
     def initVTK(self):
@@ -212,6 +218,11 @@ class mainWindow(Qt.QMainWindow):
             self.plotDefaultGraph("Flatness")
         if (str(self.comboBox_LesionAttributes.currentText())=="Roundness"):
             self.plotDefaultGraph("Roundness") 
+
+    # Handler for projection method selection changed.
+    @pyqtSlot()
+    def on_combobox_changed_ProjectionMethods(self): 
+        pass
 
     # Handler for mode change inside button group (surfaces)
     @pyqtSlot(QAbstractButton)
@@ -671,7 +682,7 @@ class mainWindow(Qt.QMainWindow):
                 data.append(dataItem)
             buckets = [0] * 81
             buckets[timeList[0]:timeList[-1]+1] = data
-            buckets = gaussian_filter1d(buckets, sigma = 2)
+            #buckets = gaussian_filter1d(buckets, sigma = 2)
             arr = np.asarray(buckets, dtype=np.float64)
             dataArray.append(arr)
 

@@ -601,6 +601,9 @@ border-radius: 10px;</string>
             <property name="bottomMargin">
              <number>0</number>
             </property>
+            <property name="verticalSpacing">
+             <number>0</number>
+            </property>
             <item row="0" column="0">
              <widget class="QFrame" name="frameDefaultGraph">
               <property name="sizePolicy">
@@ -1054,6 +1057,12 @@ border-radius: 4px;
         <item row="4" column="0">
          <layout class="QGridLayout" name="gridLayout_14">
           <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <property name="horizontalSpacing">
+           <number>6</number>
+          </property>
+          <property name="verticalSpacing">
            <number>0</number>
           </property>
           <item row="0" column="0">

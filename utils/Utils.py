@@ -72,7 +72,7 @@ class ReadThread(QObject):
             if(fileName == "ventricleMesh"):
                 actor.GetProperty().SetColor(0.6863, 0.8275, 0.8902)
             else:
-                actor.GetProperty().SetColor(0.7373, 0.6863, 0.6275)
+                actor.GetProperty().SetColor(1.0, 1.0, 1.0)
             actor.GetProperty().SetInformation(info)
             self.surfaceActor.append(actor)
         return
