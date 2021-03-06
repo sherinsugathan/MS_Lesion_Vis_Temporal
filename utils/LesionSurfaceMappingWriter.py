@@ -241,181 +241,185 @@ def computeAndWriteMapping(timeStep, jsonPath, dataType, gradientFile = None):
         if(dataType == "DANIELSSONDISTANCE"):
             streamLinePolyData = computeStreamlines(rootPath, lesionActors[jsonElementIndex-1].GetMapper().GetInput(), gradientFile)
         
+        if(streamLinePolyData != None): # If there is a polydata available for selected lesion.
+            streamerMapper = vtk.vtkPolyDataMapper()
+            streamerMapper.SetInputData(streamLinePolyData)
+            streamerActor = vtk.vtkActor()
+            streamerActor.SetMapper(streamerMapper)
+            #Load streamlines data
+            #readerStreamlines = vtk.vtkXMLPolyDataReader()
+            #readerStreamlines.SetFileName(streamlinesFile)
+            #readerStreamlines.Update()
 
-        streamerMapper = vtk.vtkPolyDataMapper()
-        streamerMapper.SetInputData(streamLinePolyData)
-        streamerActor = vtk.vtkActor()
-        streamerActor.SetMapper(streamerMapper)
-        #Load streamlines data
-        #readerStreamlines = vtk.vtkXMLPolyDataReader()
-        #readerStreamlines.SetFileName(streamlinesFile)
-        #readerStreamlines.Update()
-
-        #streamLinePolyData = readerStreamlines.GetOutput()
-        spacing = [0] * 3  # desired volume spacing
-        spacing[0] = 0.5
-        spacing[1] = 0.5
-        spacing[2] = 0.5
-        bounds = [0]*6
-        streamLinePolyData.GetBounds(bounds)
-        #print(bounds)
-
-
-        streamLineVolumeImage = vtk.vtkImageData()
-        streamLineVolumeImage.SetSpacing(spacing)
-        streamDims = [0]*3
-        for i in range(3):
-            streamDims[i] = int(math.ceil((bounds[i * 2 + 1] - bounds[i * 2]) / spacing[i]))
-        streamLineVolumeImage.SetDimensions(streamDims)
-        streamLineVolumeImage.SetExtent(0, streamDims[0] - 1, 0, streamDims[1] - 1, 0, streamDims[2] - 1)
-        streamOrigin = [0]*3
-        streamOrigin[0] = bounds[0] + spacing[0] / 2
-        streamOrigin[1] = bounds[2] + spacing[1] / 2
-        streamOrigin[2] = bounds[4] + spacing[2] / 2
-        streamLineVolumeImage.SetOrigin(streamOrigin)
-        streamLineVolumeImage.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
-
-        inVal = 255
-        outVal = 0
-        count = streamLineVolumeImage.GetNumberOfPoints()
-        for i in range(count):
-            streamLineVolumeImage.GetPointData().GetScalars().SetTuple1(i, inVal)
-
-        pol2stencil = vtk.vtkPolyDataToImageStencil()
-        pol2stencil.SetInputData(streamLinePolyData)
-        pol2stencil.SetOutputOrigin(streamOrigin)
-        pol2stencil.SetOutputSpacing(spacing)
-        pol2stencil.SetOutputWholeExtent(streamLineVolumeImage.GetExtent())
-        pol2stencil.Update()
-
-        imgStencil = vtk.vtkImageStencil()
-        imgStencil.SetInputData(streamLineVolumeImage)
-        imgStencil.SetStencilConnection(pol2stencil.GetOutputPort())
-        imgStencil.ReverseStencilOff()
-        imgStencil.SetBackgroundValue(outVal)
-        imgStencil.Update()
-
-        # writer = vtk.vtkMetaImageWriter()
-        # writer.SetFileName("D:\\SphereVolume.mhd")
-        # writer.SetInputData(imgStencil.GetOutput())
-        # writer.Write()  
-
-        # mapperStreamlines = vtk.vtkPolyDataMapper()
-        # mapperStreamlines.SetInputConnection(readerStreamlines.GetOutputPort())
-        # actorStreamlines = vtk.vtkActor()
-        # actorStreamlines.SetMapper(mapperStreamlines)
+            #streamLinePolyData = readerStreamlines.GetOutput()
+            spacing = [0] * 3  # desired volume spacing
+            spacing[0] = 0.5
+            spacing[1] = 0.5
+            spacing[2] = 0.5
+            bounds = [0]*6
+            streamLinePolyData.GetBounds(bounds)
+            #print(bounds)
 
 
-        #myImageReader = vtk.vtkMetaImageReader()
-        #myImageReader.SetFileName("D:\\SphereVolume.mhd")
-        #myImageReader.Update()
+            streamLineVolumeImage = vtk.vtkImageData()
+            streamLineVolumeImage.SetSpacing(spacing)
+            streamDims = [0]*3
+            for i in range(3):
+                streamDims[i] = int(math.ceil((bounds[i * 2 + 1] - bounds[i * 2]) / spacing[i]))
+            streamLineVolumeImage.SetDimensions(streamDims)
+            streamLineVolumeImage.SetExtent(0, streamDims[0] - 1, 0, streamDims[1] - 1, 0, streamDims[2] - 1)
+            streamOrigin = [0]*3
+            streamOrigin[0] = bounds[0] + spacing[0] / 2
+            streamOrigin[1] = bounds[2] + spacing[1] / 2
+            streamOrigin[2] = bounds[4] + spacing[2] / 2
+            streamLineVolumeImage.SetOrigin(streamOrigin)
+            streamLineVolumeImage.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
 
-        volumeMapper = vtk.vtkGPUVolumeRayCastMapper()
-        volumeMapper.SetInputConnection(imgStencil.GetOutputPort())
-        volume = vtk.vtkVolume()
-        volume.SetMapper(volumeMapper)
-        opacityTransferFunction = vtk.vtkPiecewiseFunction()
-        opacityTransferFunction.AddPoint(0,0.0)
-        opacityTransferFunction.AddPoint(255,1)
-        volprop = vtk.vtkVolumeProperty()
-        volprop.SetScalarOpacity(opacityTransferFunction)
-        volume.SetProperty(volprop)
-        print("VOLUME GENERATED")
+            inVal = 255
+            outVal = 0
+            count = streamLineVolumeImage.GetNumberOfPoints()
+            for i in range(count):
+                streamLineVolumeImage.GetPointData().GetScalars().SetTuple1(i, inVal)
 
-        #Load surface data Lh
-        surfaceReaderLh = vtk.vtkOBJReader()
-        surfaceReaderLh.SetFileName(surfaceFileLh)
-        surfaceReaderLh.Update()
-        mapperLh = vtk.vtkOpenGLPolyDataMapper()
-        mapperLh.SetInputConnection(surfaceReaderLh.GetOutputPort())
-        actorLh = vtk.vtkActor()
-        actorLh.SetMapper(mapperLh)
+            pol2stencil = vtk.vtkPolyDataToImageStencil()
+            pol2stencil.SetInputData(streamLinePolyData)
+            pol2stencil.SetOutputOrigin(streamOrigin)
+            pol2stencil.SetOutputSpacing(spacing)
+            pol2stencil.SetOutputWholeExtent(streamLineVolumeImage.GetExtent())
+            pol2stencil.Update()
 
-        #Load surface data Rh
-        surfaceReaderRh = vtk.vtkOBJReader()
-        surfaceReaderRh.SetFileName(surfaceFileRh)
-        surfaceReaderRh.Update()
-        mapperRh = vtk.vtkOpenGLPolyDataMapper()
-        mapperRh.SetInputConnection(surfaceReaderRh.GetOutputPort())
-        actorRh = vtk.vtkActor()
-        actorRh.SetMapper(mapperRh)
+            imgStencil = vtk.vtkImageStencil()
+            imgStencil.SetInputData(streamLineVolumeImage)
+            imgStencil.SetStencilConnection(pol2stencil.GetOutputPort())
+            imgStencil.ReverseStencilOff()
+            imgStencil.SetBackgroundValue(outVal)
+            imgStencil.Update()
 
-        # Apply necessary transforms
-        actorLh.SetUserTransform(transform)
-        actorRh.SetUserTransform(transform)
+            # writer = vtk.vtkMetaImageWriter()
+            # writer.SetFileName("D:\\SphereVolume.mhd")
+            # writer.SetInputData(imgStencil.GetOutput())
+            # writer.Write()  
 
-        # Apply transformations to data Rh. This is needed in addition to previous step which applied only to display data/
-        transformFilterRh = vtk.vtkTransformPolyDataFilter()
-        transformFilterRh.SetInputData(surfaceReaderRh.GetOutput()) 
-        transformFilterRh.SetTransform(transform)
-        transformFilterRh.Update()
-        # Apply transformations to data Lh. This is needed in addition to previous step which applied only to display data/
-        transformFilterLh = vtk.vtkTransformPolyDataFilter()
-        transformFilterLh.SetInputData(surfaceReaderLh.GetOutput()) 
-        transformFilterLh.SetTransform(transform)
-        transformFilterLh.Update()
+            # mapperStreamlines = vtk.vtkPolyDataMapper()
+            # mapperStreamlines.SetInputConnection(readerStreamlines.GetOutputPort())
+            # actorStreamlines = vtk.vtkActor()
+            # actorStreamlines.SetMapper(mapperStreamlines)
 
-        mapperRh.Update()
-        mapperLh.Update()
-        # Probe Filtering
-        probeFilterRh = vtk.vtkProbeFilter()
-        probeFilterRh.SetSourceConnection(imgStencil.GetOutputPort())
-        probeFilterRh.SetInputData(transformFilterRh.GetOutput())
-        probeFilterRh.Update()
-        probeFilterLh = vtk.vtkProbeFilter()
-        probeFilterLh.SetSourceConnection(imgStencil.GetOutputPort())
-        probeFilterLh.SetInputData(transformFilterLh.GetOutput())
-        probeFilterLh.Update()
 
-        # probedSurfaceMapperRh = vtk.vtkPolyDataMapper()
-        # probedSurfaceMapperRh.SetInputConnection(probeFilterRh.GetOutputPort())
-        # probedSurfaceMapperRh.SetScalarRange(probeFilterRh.GetOutput().GetScalarRange())
-        # probedSurfaceMapperRh.ScalarVisibilityOn()
-        # lesionStreamActorRh = vtk.vtkActor()
-        # lesionStreamActorRh.SetMapper(probedSurfaceMapperRh)
-        # probedSurfaceMapperLh = vtk.vtkPolyDataMapper()
-        # probedSurfaceMapperLh.SetInputConnection(probeFilterLh.GetOutputPort())
-        # probedSurfaceMapperLh.SetScalarRange(probeFilterLh.GetOutput().GetScalarRange())
-        # probedSurfaceMapperLh.ScalarVisibilityOn()
-        # lesionStreamActorLh = vtk.vtkActor()
-        # lesionStreamActorLh.SetMapper(probedSurfaceMapperLh)
+            #myImageReader = vtk.vtkMetaImageReader()
+            #myImageReader.SetFileName("D:\\SphereVolume.mhd")
+            #myImageReader.Update()
 
-        # Get color/point data array.
-        #print(probeFilterLh.GetOutput().GetPointData())
-        pointDataArrayRh = probeFilterRh.GetOutput().GetPointData().GetArray("ImageScalars")
-        pointDataArrayLh = probeFilterLh.GetOutput().GetPointData().GetArray("ImageScalars")
+            volumeMapper = vtk.vtkGPUVolumeRayCastMapper()
+            volumeMapper.SetInputConnection(imgStencil.GetOutputPort())
+            volume = vtk.vtkVolume()
+            volume.SetMapper(volumeMapper)
+            opacityTransferFunction = vtk.vtkPiecewiseFunction()
+            opacityTransferFunction.AddPoint(0,0.0)
+            opacityTransferFunction.AddPoint(255,1)
+            volprop = vtk.vtkVolumeProperty()
+            volprop.SetScalarOpacity(opacityTransferFunction)
+            volume.SetProperty(volprop)
+            print("VOLUME GENERATED")
 
-        # Set Colors for vertices
-        vtk_colorsRh = vtk.vtkUnsignedCharArray()
-        vtk_colorsRh.SetNumberOfComponents(3)
-        vtk_colorsLh = vtk.vtkUnsignedCharArray()
-        vtk_colorsLh.SetNumberOfComponents(3)
-        clrGreen = [0,255,0] # Red color representing pathology.
-        clrRed = [255,0,0] # Green color representing normal areas
-        numberOfPointsRh = mapperRh.GetInput().GetNumberOfPoints()
-        numberOfPointsLh = mapperLh.GetInput().GetNumberOfPoints()
+            #Load surface data Lh
+            surfaceReaderLh = vtk.vtkOBJReader()
+            surfaceReaderLh.SetFileName(surfaceFileLh)
+            surfaceReaderLh.Update()
+            mapperLh = vtk.vtkOpenGLPolyDataMapper()
+            mapperLh.SetInputConnection(surfaceReaderLh.GetOutputPort())
+            actorLh = vtk.vtkActor()
+            actorLh.SetMapper(mapperLh)
 
-        mappingIndicesRh = []
-        mappingIndicesLh = []
-        #Assign colors based on thresholding probed values.
-        for index in range(numberOfPointsLh):
-            if(pointDataArrayLh.GetValue(index)>0):
-                vtk_colorsLh.InsertNextTuple3(clrRed[0], clrRed[1], clrRed[2])
-                mappingIndicesLh.append(index)
-            else:
-                vtk_colorsLh.InsertNextTuple3(clrGreen[0], clrGreen[1], clrGreen[2])
-        for index in range(numberOfPointsRh):
-            if(pointDataArrayRh.GetValue(index)>0):
-                vtk_colorsRh.InsertNextTuple3(clrRed[0], clrRed[1], clrRed[2])
-                mappingIndicesRh.append(index)
-            else:
-                vtk_colorsRh.InsertNextTuple3(clrGreen[0], clrGreen[1], clrGreen[2])
-        print("PROBING COMPLETED")
-        #print("Impact on Lh=", len(mappingIndicesLh))
-        #print("Impact on Rh=", len(mappingIndicesRh))
-        print("Results timeStep", timeStep, ",", str(jsonElementIndex), "/", str(numberOfLesionActors), "IMPACT_LH :", str(len(mappingIndicesLh)))
-        print("Results timeStep", timeStep, ",", str(jsonElementIndex), "/", str(numberOfLesionActors), "IMPACT_RH :", str(len(mappingIndicesRh)))
+            #Load surface data Rh
+            surfaceReaderRh = vtk.vtkOBJReader()
+            surfaceReaderRh.SetFileName(surfaceFileRh)
+            surfaceReaderRh.Update()
+            mapperRh = vtk.vtkOpenGLPolyDataMapper()
+            mapperRh.SetInputConnection(surfaceReaderRh.GetOutputPort())
+            actorRh = vtk.vtkActor()
+            actorRh.SetMapper(mapperRh)
 
+            # Apply necessary transforms
+            actorLh.SetUserTransform(transform)
+            actorRh.SetUserTransform(transform)
+
+            # Apply transformations to data Rh. This is needed in addition to previous step which applied only to display data/
+            transformFilterRh = vtk.vtkTransformPolyDataFilter()
+            transformFilterRh.SetInputData(surfaceReaderRh.GetOutput()) 
+            transformFilterRh.SetTransform(transform)
+            transformFilterRh.Update()
+            # Apply transformations to data Lh. This is needed in addition to previous step which applied only to display data/
+            transformFilterLh = vtk.vtkTransformPolyDataFilter()
+            transformFilterLh.SetInputData(surfaceReaderLh.GetOutput()) 
+            transformFilterLh.SetTransform(transform)
+            transformFilterLh.Update()
+
+            mapperRh.Update()
+            mapperLh.Update()
+            # Probe Filtering
+            probeFilterRh = vtk.vtkProbeFilter()
+            probeFilterRh.SetSourceConnection(imgStencil.GetOutputPort())
+            probeFilterRh.SetInputData(transformFilterRh.GetOutput())
+            probeFilterRh.Update()
+            probeFilterLh = vtk.vtkProbeFilter()
+            probeFilterLh.SetSourceConnection(imgStencil.GetOutputPort())
+            probeFilterLh.SetInputData(transformFilterLh.GetOutput())
+            probeFilterLh.Update()
+
+            # probedSurfaceMapperRh = vtk.vtkPolyDataMapper()
+            # probedSurfaceMapperRh.SetInputConnection(probeFilterRh.GetOutputPort())
+            # probedSurfaceMapperRh.SetScalarRange(probeFilterRh.GetOutput().GetScalarRange())
+            # probedSurfaceMapperRh.ScalarVisibilityOn()
+            # lesionStreamActorRh = vtk.vtkActor()
+            # lesionStreamActorRh.SetMapper(probedSurfaceMapperRh)
+            # probedSurfaceMapperLh = vtk.vtkPolyDataMapper()
+            # probedSurfaceMapperLh.SetInputConnection(probeFilterLh.GetOutputPort())
+            # probedSurfaceMapperLh.SetScalarRange(probeFilterLh.GetOutput().GetScalarRange())
+            # probedSurfaceMapperLh.ScalarVisibilityOn()
+            # lesionStreamActorLh = vtk.vtkActor()
+            # lesionStreamActorLh.SetMapper(probedSurfaceMapperLh)
+
+            # Get color/point data array.
+            #print(probeFilterLh.GetOutput().GetPointData())
+            pointDataArrayRh = probeFilterRh.GetOutput().GetPointData().GetArray("ImageScalars")
+            pointDataArrayLh = probeFilterLh.GetOutput().GetPointData().GetArray("ImageScalars")
+
+            # Set Colors for vertices
+            vtk_colorsRh = vtk.vtkUnsignedCharArray()
+            vtk_colorsRh.SetNumberOfComponents(3)
+            vtk_colorsLh = vtk.vtkUnsignedCharArray()
+            vtk_colorsLh.SetNumberOfComponents(3)
+            clrGreen = [0,255,0] # Red color representing pathology.
+            clrRed = [255,0,0] # Green color representing normal areas
+            numberOfPointsRh = mapperRh.GetInput().GetNumberOfPoints()
+            numberOfPointsLh = mapperLh.GetInput().GetNumberOfPoints()
+
+            mappingIndicesRh = []
+            mappingIndicesLh = []
+            #Assign colors based on thresholding probed values.
+            for index in range(numberOfPointsLh):
+                if(pointDataArrayLh.GetValue(index)>0):
+                    vtk_colorsLh.InsertNextTuple3(clrRed[0], clrRed[1], clrRed[2])
+                    mappingIndicesLh.append(index)
+                else:
+                    vtk_colorsLh.InsertNextTuple3(clrGreen[0], clrGreen[1], clrGreen[2])
+            for index in range(numberOfPointsRh):
+                if(pointDataArrayRh.GetValue(index)>0):
+                    vtk_colorsRh.InsertNextTuple3(clrRed[0], clrRed[1], clrRed[2])
+                    mappingIndicesRh.append(index)
+                else:
+                    vtk_colorsRh.InsertNextTuple3(clrGreen[0], clrGreen[1], clrGreen[2])
+            print("PROBING COMPLETED")
+            #print("Impact on Lh=", len(mappingIndicesLh))
+            #print("Impact on Rh=", len(mappingIndicesRh))
+            print("Results timeStep", timeStep, ",", str(jsonElementIndex), "/", str(numberOfLesionActors), "IMPACT_LH :", str(len(mappingIndicesLh)))
+            print("Results timeStep", timeStep, ",", str(jsonElementIndex), "/", str(numberOfLesionActors), "IMPACT_RH :", str(len(mappingIndicesRh)))
+        else: # Empty polyline Data. this can happen for tiny lesions.
+            mappingIndicesRh = []
+            mappingIndicesLh = []
+            print("Results timeStep", timeStep, ",", str(jsonElementIndex), "/", str(numberOfLesionActors), "IMPACT_LH :", str(len(mappingIndicesLh)))
+            print("Results timeStep", timeStep, ",", str(jsonElementIndex), "/", str(numberOfLesionActors), "IMPACT_RH :", str(len(mappingIndicesRh)))
         # Set Color Data as scalars on the point data.
         # probedSurfaceMapperRh.GetInput().GetPointData().SetScalars(vtk_colorsRh)
         # probedSurfaceMapperLh.GetInput().GetPointData().SetScalars(vtk_colorsLh)

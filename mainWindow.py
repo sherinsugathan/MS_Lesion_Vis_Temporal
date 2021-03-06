@@ -631,6 +631,8 @@ class mainWindow(Qt.QMainWindow):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
         #     ('double' if event.dblclick else 'single', event.button,
         #     event.x, event.y, event.xdata, event.ydata))
+        if event.dblclick:
+            print("double click")
         if(event.xdata != None):
             x_loc = int(round(event.xdata))
             print("click inside graph")
