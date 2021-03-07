@@ -222,7 +222,7 @@ class mainWindow(Qt.QMainWindow):
     # Handler for projection method selection changed.
     @pyqtSlot()
     def on_combobox_changed_ProjectionMethods(self): 
-        pass
+        self.on_sliderChangedTimePoint()
 
     # Handler for mode change inside button group (surfaces)
     @pyqtSlot(QAbstractButton)
@@ -816,9 +816,17 @@ class mainWindow(Qt.QMainWindow):
     def computeApplyProjection(self, highlightLesionID, surfaceLh, surfaceRh, sliderValue = None):
         if(sliderValue == None):
             sliderValue = self.horizontalSlider_TimePoint.value()
+        dataKey = ""
+        if (str(self.comboBox_ProjectionMethods.currentText())=="DTI"):
+            dataKey = "DTI"
+        if (str(self.comboBox_ProjectionMethods.currentText())=="Heat Equation"):
+            dataKey = ""
+        if (str(self.comboBox_ProjectionMethods.currentText())=="Danielsson"):
+            dataKey = "Danielsson"
+
         # Project on brain surface.
-        affectedLh = np.asarray(self.structureInfo[str(sliderValue)][0][str(highlightLesionID)][0]['AffectedPointIdsLh'])
-        affectedRh = np.asarray(self.structureInfo[str(sliderValue)][0][str(highlightLesionID)][0]['AffectedPointIdsRh'])
+        affectedLh = np.asarray(self.structureInfo[str(sliderValue)][0][str(highlightLesionID)][0]["AffectedPointIdsLh"+dataKey])
+        affectedRh = np.asarray(self.structureInfo[str(sliderValue)][0][str(highlightLesionID)][0]["AffectedPointIdsRh"+dataKey])
         lesionMappingLh = np.isin(self.vertexIndexArrayLh, affectedLh)
         lesionMappingRh = np.isin(self.vertexIndexArrayRh, affectedRh)
         cLh = np.full(self.numberOfPointsLh*3,255, dtype='B')
