@@ -635,7 +635,7 @@ class mainWindow(Qt.QMainWindow):
             print("double click")
         if(event.xdata != None):
             x_loc = int(round(event.xdata))
-            print("click inside graph")
+            #print("click inside graph")
             self.updateDefaultGraph(x_loc, None)
         else:
             print("click outside graph")
@@ -688,7 +688,8 @@ class mainWindow(Qt.QMainWindow):
             arr = np.asarray(buckets, dtype=np.float64)
             dataArray.append(arr)
 
-        x = np.linspace(0, self.dataCount, self.dataCount)
+        #x = np.linspace(0, self.dataCount, self.dataCount)
+        x = list(range(self.dataCount))
         #random.shuffle(dataArray)
         ys = dataArray
         self.polyCollection = self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList, linewidth=0.5, edgecolor='white', colors = self.plotColors)
@@ -709,6 +710,9 @@ class mainWindow(Qt.QMainWindow):
         self.axDefault.title.set_color((0.6, 0.6, 0.6))
         plt.xlim(xmin=0)
         plt.xlim(xmax=self.dataCount-1)
+        #self.axDefault.xaxis.set_ticks(np.arange(0, self.dataCount-1, 1))
+        plt.minorticks_on()
+        self.axDefault.xaxis.grid(True, which='both', color='#999999', linestyle='-', alpha=0.2) # add vertical grid lines.
         #self.axDefault.grid()
         #fig.savefig("test.png")
         #plt.show()
@@ -785,6 +789,7 @@ class mainWindow(Qt.QMainWindow):
     @pyqtSlot()
     def on_sliderChangedTimePoint(self):
         sliderValue = self.horizontalSlider_TimePoint.value()
+        self.updateDefaultGraph(sliderValue, None) # update graph
         if(self.userPickedLesionID!=None):
             highlightLesionID = self.getLinkedLesionIDFromTimeStep(self.userPickedLesionID, sliderValue)
             if(highlightLesionID!=None):
