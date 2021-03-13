@@ -1,6 +1,6 @@
 # read structural data and write synthetic intensity profiles.
+# TODO : Currently one structural data is copied into all output instances. Please use separate structural data for every output-
 from datetime import time
-from typing import final
 import SimpleITK as sitk
 import vtk
 import numpy as np
@@ -11,10 +11,10 @@ import csv
 from itertools import cycle
 import networkx as nx
 
-rootPath = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
+rootPath = "C:\\Sherin\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
 fileNameT1 = rootPath + "\\structural\\T1.nii"
 #fileNameMaskLabels = rootPath + "\\lesionMask\\ConnectedComponents.nii"
-G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+G = nx.read_gml("C:\\Sherin\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
 UG = G.to_undirected()
 sub_graphs = list(nx.connected_components(UG))
 
@@ -42,15 +42,15 @@ def getLabelForNodeIDTimeStep(G, nodeId, queryTimeStep):
     return labelList[timeList.index(queryTimeStep)]
 
 def getIntensityValue(label, timeStep):
-    print("label", label, "timeStep", timeStep)
+    #print("label", label, "timeStep", timeStep)
     nodeID = getNodeIDfromLabelAndTimeStep(label, timeStep)
-    print("node id", nodeID)
+    #print("node id", nodeID)
     #search node_id in sub_graphs and get the index
     dataIndex = [sub_graphs.index(elem) for elem in sub_graphs if str(nodeID) in list(elem)]
-    print("dataIndex", dataIndex)
+    #print("dataIndex", dataIndex)
     # get the array from proper index and return timeStep item.
     intensityArray = subgraph_IntensityList[dataIndex[0]]
-    print("length", len(intensityArray))
+    #print("length", len(intensityArray))
     return intensityArray[timeStep]
 
 def updateStructuralData(imageT1, timeStep):
@@ -105,10 +105,6 @@ for elem in sub_graphs:
         finalList = finalList + [finalList[-1]]*countDiff
     subgraph_IntensityList.append(finalList)
 
-
-print("length here is", subgraph_IntensityList[2])
-quit()
-
 #print(finalList)
 #print(len(finalList))
 #quit()
@@ -130,11 +126,11 @@ quit()
 
 #updateStructuralData(imageT1, 150)
 
-for timeStep in range(27, dataCount):
+for timeStep in range(dataCount):
     imageT1 = sitk.ReadImage(fileNameT1)
     dimensions = imageT1.GetSize()
     updateStructuralData(imageT1, timeStep)
     print("Processed Volume", timeStep)
-    sitk.WriteImage(imageT1, "D:\\T1_"+str(timeStep)+".nii")
+    sitk.WriteImage(imageT1, "C:\\temp\\T1_"+str(timeStep)+".nii")
 
-print("File write complete")
+print("File writes complete")
