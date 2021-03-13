@@ -43,14 +43,15 @@ def getLabelForNodeIDTimeStep(G, nodeId, queryTimeStep):
     return labelList[timeList.index(queryTimeStep)]
 
 def getIntensityValue(label, timeStep):
-    #print("label", label, "timeStep", timeStep)
+    print("label", label, "timeStep", timeStep)
     nodeID = getNodeIDfromLabelAndTimeStep(label, timeStep)
-    #print("node id", nodeID)
+    print("node id", nodeID)
     #search node_id in sub_graphs and get the index
     dataIndex = [sub_graphs.index(elem) for elem in sub_graphs if str(nodeID) in list(elem)]
-    #print("dataIndex", dataIndex)
+    print("dataIndex", dataIndex)
     # get the array from proper index and return timeStep item.
     intensityArray = subgraph_IntensityList[dataIndex[0]]
+    print("length", len(intensityArray))
     return intensityArray[timeStep]
 
 def updateStructuralData(imageT1, timeStep):
@@ -79,9 +80,9 @@ intensityProfile = {"hyper":150, "hyper2":100, "iso":0, "hypo":-400, "hypo2": -2
 
 prof1= ["hypo", "iso", "hyper", "hyper2"]
 prof2= ["hypo", "iso", "hyper"]
-prof3= ["iso", "iso"]
+prof3= ["iso", "hypo"]
 prof4= ["hypo", "hypo2"]
-prof5= ["hyper", "hyper2"]
+prof5= ["hyper", "iso"]
 profilePool = []
 profilePool.append(prof1)
 profilePool.append(prof2)
@@ -90,24 +91,24 @@ profilePool.append(prof4)
 profilePool.append(prof5)
 pool = cycle(profilePool)
 
-
-intVector = [0]*dataCount
-splitPercentage = 100/(len(prof1)-1)
-sectionSize = math.floor(splitPercentage*len(intVector)/100)
-
 subgraph_IntensityList = []
 for elem in sub_graphs:
     finalList = []
     profile = next(pool)
-    print(profile)
+    intVector = [0]*dataCount
+    splitPercentage = 100/(len(profile)-1)
+    sectionSize = math.floor(splitPercentage*len(intVector)/100)
+    #print(profile)
     for i in range(len(profile)-1):
         finalList = finalList + list(np.linspace(intensityProfile[profile[i]], intensityProfile[profile[i+1]], sectionSize, endpoint=True))
+    countDiff = dataCount - len(finalList)
+    if(countDiff>0):
+        finalList = finalList + [finalList[-1]]*countDiff
     subgraph_IntensityList.append(finalList)
 
-countDiff = dataCount - len(finalList)
 
-if(countDiff>0):
-    finalList = finalList + [finalList[-1]]*countDiff
+print("length here is", subgraph_IntensityList[2])
+quit()
 
 #print(finalList)
 #print(len(finalList))
@@ -130,7 +131,7 @@ if(countDiff>0):
 
 #updateStructuralData(imageT1, 150)
 
-for timeStep in range(1):
+for timeStep in range(27, dataCount):
     imageT1 = sitk.ReadImage(fileNameT1)
     dimensions = imageT1.GetSize()
     updateStructuralData(imageT1, timeStep)
