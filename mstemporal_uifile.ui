@@ -653,9 +653,48 @@ border-radius: 10px;</string>
              <widget class="QFrame" name="frameGraphVis">
               <property name="styleSheet">
                <string notr="true">background-color: rgb(16,16,16);
-border-color: rgb(67,67,67);
+border-color: rgb(57,57,57);
 border-style: solid;
-border-width: 1px;
+border-width: 2px;
+border-radius: 10px;</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_3">
+           <layout class="QGridLayout" name="gridLayout_15">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QFrame" name="frameIntensityPlot">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>457</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(57,57,57);
+border-style: solid;
+border-width: 2px;
 border-radius: 10px;</string>
               </property>
               <property name="frameShape">

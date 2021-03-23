@@ -74,9 +74,11 @@ def ResliceMaskToMRIVoxelSpace():
                 resampler.SetOutputSpacing(imageT1.GetSpacing())
                 resampler.SetOutputOrigin(imageT1.GetOrigin())
                 resampler.SetOutputDirection(imageT1.GetDirection())
-                resampler.SetInterpolator(sitk.sitkLinear)
+                resampler.SetInterpolator(sitk.sitkNearestNeighbor)
                 resampled_img = resampler.Execute(imageMask)
                 sitk.WriteImage(resampled_img, voxelSpaceCorrectedFile)
                 print("PROCESSED", subject, modality, "INSTANCE", i)
 
     print("3. ResliceMaskToMRIVoxelSpace() Successfully completed")
+
+ResliceMaskToMRIVoxelSpace()

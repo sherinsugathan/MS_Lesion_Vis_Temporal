@@ -49,6 +49,7 @@ import json
 import random
 from scipy.ndimage.filters import gaussian_filter1d
 import seaborn as sns
+import SimpleITK as sitk
 
 # Main window class.
 class mainWindow(Qt.QMainWindow):
@@ -268,6 +269,7 @@ class mainWindow(Qt.QMainWindow):
             self.ren.AddActor(lesion)
         self.ren.AddActor(self.surfaceActors[0]) # ventricle
         self.ren.ResetCamera()
+        self.ren.GetActiveCamera().Zoom(1.3)
         self.iren.Render()
         openglRendererInUse = self.ren.GetRenderWindow().ReportCapabilities().splitlines()[1].split(":")[1].strip()
         self.textEdit_Information.append("Resource: " + str(openglRendererInUse))
@@ -275,6 +277,7 @@ class mainWindow(Qt.QMainWindow):
         self.renDual.AddActor(self.surfaceActors[1])
         self.renDual.AddActor(self.surfaceActors[2])
         self.renDual.ResetCamera()
+        self.renDual.GetActiveCamera().Zoom(1.3)
         self.irenDual.Render()
 
         self.readInitializeLesionJSONData() # Read lesion data from JSON file.
@@ -282,6 +285,8 @@ class mainWindow(Qt.QMainWindow):
         self.LoadStructuralSlices(self.folder, "T1", 0, True) # load slices
         self.initializeDefaultGraph() # Load graph data
         self.initializeGraphVis() # Load graph visualization.
+        self.readInitializestructuralData()
+        self.initializeIntensityGraph() # Load intensity visualization.
         self.activateControls() # Activate controls.
         self.ren.AddActor2D(self.textActorLesionStatistics) # Add lesion statistics overlay.
         self.dataFolderInitialized = True
@@ -292,6 +297,18 @@ class mainWindow(Qt.QMainWindow):
         self.vtk_colorsRh.SetNumberOfTuples(self.numberOfPointsRh)
         self.vertexIndexArrayLh = np.arange(self.numberOfPointsLh)
         self.vertexIndexArrayRh = np.arange(self.numberOfPointsRh)
+
+    # Read structural data information.
+    def readInitializestructuralData(self):
+        #structuralDataPath = self.folder + "structural\\T1_0.nii"
+        structuralDataPath = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\structural\\T1_0.nii"
+        img = sitk.ReadImage(structuralDataPath)
+        stats = sitk.StatisticsImageFilter()
+        stats.Execute(img)
+        #print("Minimum:", stats.GetMinimum())
+        #print("Maximum:", stats.GetMaximum())
+        self.intMin = stats.GetMinimum()
+        self.intMax = stats.GetMaximum()
 
     # Read lesion data from json file.
     # How to access data 
@@ -473,6 +490,21 @@ class mainWindow(Qt.QMainWindow):
         self.frameGraphVis.setLayout(self.vl_graph)
         self.plotGraphVis()
 
+    def initializeIntensityGraph(self):
+        self.vl_intensity = Qt.QVBoxLayout()
+        self.figureIntensity = plt.figure(figsize = [15,10], num = 5, frameon=False, clear=True, dpi=100)
+        self.canvasIntensity = FigureCanvas(self.figureIntensity)
+        self.canvasIntensity.setParent(self.frameIntensityPlot)
+        self.vl_intensity.addWidget(self.canvasIntensity)
+        self.vl_intensity.setStretchFactor(self.canvasIntensity, 1)
+        self.vl_intensity.setSpacing(0)
+        self.vl_intensity.setContentsMargins(0, 0, 0, 0)
+        self.frameIntensityPlot.setLayout(self.vl_intensity)
+        self.frameIntensityPlot.setStyleSheet('background-color: rgb(220,220,220);border-color: rgb(57,57,57);border-style: solid;border-width: 2px; border-radius: 10px;')
+        self.canvasIntensity.mpl_connect('button_press_event', self.onClickIntensityGraphCanvas)
+        self.selectedNodeID = 2
+        self.plotIntensityGraph(3)
+
     def onScrollMPRA(self, event):
         currentSlide = self.midSliceX
         if(event.button == 'up'):
@@ -595,13 +627,29 @@ class mainWindow(Qt.QMainWindow):
         #nx.draw_shell(G, with_labels=True, node_size=800, node_color="#c87b7b", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
         self.canvasGraph.draw()
 
+    # # Plot intensity graph
+    # def plotIntensityGraph(self):
+    #     self.figureIntensity.clear()
+    #     plt.figure(5)
+    #     plt.tight_layout()
+    #     self.axIntensityGraph = self.figureIntensity.add_subplot(111)
+    #     #plt.subplots_adjust(wspace=None, hspace=None)
+    #     plt.subplots_adjust(left=0.05, bottom=0.05, right=0.98, top=0.98)
+    #     #G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+    #     #edges = G.edges()
+    #     #weights = [3 for u,v in edges]
+    #     #nx.draw_planar(G, with_labels=True, node_size=800, node_color="#e54c66", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
+    #     #nx.draw_shell(G, with_labels=True, node_size=800, node_color="#c87b7b", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
+    #     #self.canvasGraph.draw()
+
     def computeNodeOrderForGraph(self, G): #TODO NEED TO UPDATE CODE to support multilevel activity (eg split and merge in one sequence)
         # color palette
         #numberOfConnectedComponents = len(list(nx.strongly_connected_components(G))) # gets the number of disconnected components in the graph
         #print(numberOfConnectedComponents)
          
-        #  
+ 
         nodeIDList = list(G.nodes)
+        streamPlotDataColors = sns.color_palette("Set2", len(nodeIDList)) # visually pleasing colors from color brewer.
         streamPlotDataColors = sns.color_palette("Set2", len(nodeIDList)) # visually pleasing colors from color brewer.
         nodesAndDegreesUndirected =  list(G.degree(nodeIDList))
         nodesAndDegreesDirectedOut =  list(G.out_degree(nodeIDList))
@@ -627,31 +675,65 @@ class mainWindow(Qt.QMainWindow):
                 colorPaletteIndex = colorPaletteIndex + 1
         return nodeOrderForGraph, streamPlotDataColors
 
-    def onClickDefaultStreamGraphCanvas(self, event):
+    def onClickIntensityGraphCanvas(self, event):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
         #     ('double' if event.dblclick else 'single', event.button,
         #     event.x, event.y, event.xdata, event.ydata))
         if event.dblclick:
-            print("double click")
+            self.selectedNodeID = None
+            self.stackedWidget_Graphs.setCurrentIndex(0)
+        if(event.xdata != None):
+            pass
+            #x_loc = int(round(event.xdata))
+            #print("click inside graph")
+            #self.updateDefaultGraph(x_loc, None)
+        else:
+            pass
+            #print("click outside graph")
+            #self.updateDefaultGraph(None, None)
+
+    def onClickDefaultStreamGraphCanvas(self, event):
+        # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+        #     ('double' if event.dblclick else 'single', event.button,
+        #     event.x, event.y, event.xdata, event.ydata))
+
         if(event.xdata != None):
             x_loc = int(round(event.xdata))
-            #print("click inside graph")
+            print("click inside graph at", x_loc)
+            #self.selectedNodeID = 
             self.updateDefaultGraph(x_loc, None)
+            if event.dblclick:
+                #print("double click in stream graph")
+                #print("Graph Y span is ", self.computeIntensityGraphYSpan())
+                if(self.selectedNodeID != None):
+                    self.plotIntensityGraph(self.computeIntensityGraphYSpan())
+                    self.canvasIntensity.draw()
+                    self.stackedWidget_Graphs.setCurrentIndex(2)
         else:
             print("click outside graph")
             self.updateDefaultGraph(None, None)
 
+
+
     def onPickDefaultStreamGraphCanvas(self, event):
-        # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-        #     ('double' if event.dblclick else 'single', event.button,
-        #     event.x, event.y, event.xdata, event.ydata))
         thisline = event.artist
-        labelValue = thisline.get_label()
+        nodeID = thisline.get_label()
+        self.selectedNodeID = nodeID
+        
         #artist = event.artist
         #ind = event.ind
         #print('onpick1 line:', labelValue)
-        self.updateDefaultGraph(None, labelValue)
+        self.updateDefaultGraph(None, nodeID)
            
+    def computeIntensityGraphYSpan(self):
+        sub_graphs = list(nx.connected_components(self.UG))
+        for item in sub_graphs:
+            if str(self.selectedNodeID) in item:
+                H = self.G.subgraph(item)
+                leaf_nodes_split = [x for x in H.nodes() if H.out_degree(x)==0 and H.in_degree(x)==1]
+                leaf_nodes_merge = [x for x in H.nodes() if H.out_degree(x)==1 and H.in_degree(x)==0]
+                return max(len(leaf_nodes_merge), len(leaf_nodes_split))+1
+
     # plot default graph
     def plotDefaultGraph(self, lesionAttributeString): 
         # clearing old figures
@@ -708,6 +790,7 @@ class mainWindow(Qt.QMainWindow):
         self.axDefault.set_ylabel(lesionAttributeString, fontname="Arial", fontsize=12)
         self.axDefault.set_title("activity graph", fontname="Arial", fontsize=15)
         self.axDefault.title.set_color((0.6, 0.6, 0.6))
+        plt.subplots_adjust(left=0.05, right=0.98, top=0.96, bottom=0.1)
         plt.xlim(xmin=0)
         plt.xlim(xmax=self.dataCount-1)
         #self.axDefault.xaxis.set_ticks(np.arange(0, self.dataCount-1, 1))
@@ -756,6 +839,80 @@ class mainWindow(Qt.QMainWindow):
                 self.polyCollection[i].set_facecolor(tempColors[i])
 
         self.canvasDefault.draw()
+
+    def hinton(self, matrix, max_weight=None, ax=None):
+        """Draw Hinton diagram for visualizing a weight matrix."""
+        ax = ax if ax is not None else plt.gca()
+        #if not max_weight:
+        #    max_weight = 2 ** np.ceil(np.log(np.abs(matrix).max()) / np.log(2))
+
+        max_weight = 0.5
+
+        ax.patch.set_facecolor('gray') # Background color
+        ax.set_aspect('equal', 'box')
+        #ax.xaxis.set_major_locator(plt.NullLocator())
+        #ax.yaxis.set_major_locator(plt.NullLocator())
+
+        for (x, y), w in np.ndenumerate(matrix):
+            #color = 'white' if w > 0 else 'black'
+            color = (w, w, w)
+            edgeColor = 'black'
+            size = np.sqrt(np.abs(w) / max_weight)
+            rect = plt.Rectangle([x - size / 2, y - size / 2], size, size, facecolor=color, edgecolor=edgeColor)
+            ax.add_patch(rect)
+
+        ax.autoscale_view()
+        ax.invert_yaxis()
+
+    # plot intensity graph
+    def plotIntensityGraph(self, maxWidthY): 
+        # Clearing old figures.
+        print("hello Sherin")
+        self.figureIntensity.clear()
+        #self.figureIntensity.tight_layout()
+        plt.figure(5)
+        self.axIntensity = self.figureIntensity.add_subplot(111)#, autoscale_on=False)
+        self.axIntensity.axis("off")
+        np.random.seed(19680801)
+        self.hinton(self.getIntensityDataMatrix(self.selectedNodeID, maxWidthY), self.axIntensity)
+        plt.subplots_adjust(left=-0, right=1, top=0.9, bottom=0.1)
+        plt.xlim(xmin=-1)
+        plt.xlim(xmax=self.dataCount+1)
+
+    def readDiffListFromJSON(self, timeList, labelList):  
+        intensityList = []
+        for i in range(len(timeList)):
+            intensityList.append((int(self.structureInfo[str(timeList[i])][0][str(labelList[i])][0]['Mean'])-self.intMin)/(self.intMax-self.intMin))
+        return intensityList
+
+    # Compute and return intensity matrix for the graph
+    def getIntensityDataMatrix(self, nodeID, maxWidthY):
+        #return np.random.rand(80, maxWidthY) -0.5
+        intensityMatrix = []
+        G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+        connectedComponents = nx.strongly_connected_components(G)
+        UG = G.to_undirected()
+        dataCount = 81
+        sub_graphs = list(nx.connected_components(UG))
+        selectedCluster = None
+        for item in sub_graphs:
+            if(str(nodeID) in item):
+                selectedCluster = item
+
+        nodeIDList = selectedCluster
+        for id in nodeIDList:
+            intensityDiffArray = np.zeros(dataCount)
+            timeList = G.nodes[id]["time"]
+            labelList = G.nodes[id]["lesionLabel"]
+            diffList = self.readDiffListFromJSON(timeList, labelList)
+            #print(labelList)
+            intensityDiffArray[timeList] = [elem for elem in diffList ]
+            intensityMatrix.append(intensityDiffArray)
+            #print(intensityDiffArray)
+
+        old = np.random.rand(81, maxWidthY)
+        new = np.array(intensityMatrix).transpose()
+        return new #-0.5
 
     def adjust_lightness(self, color, amount=0.5):
         import matplotlib.colors as mc

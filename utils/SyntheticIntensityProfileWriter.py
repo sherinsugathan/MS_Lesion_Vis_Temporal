@@ -11,10 +11,10 @@ import csv
 from itertools import cycle
 import networkx as nx
 
-rootPath = "C:\\Sherin\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
+rootPath = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
 fileNameT1 = rootPath + "\\structural\\T1.nii"
 #fileNameMaskLabels = rootPath + "\\lesionMask\\ConnectedComponents.nii"
-G = nx.read_gml("C:\\Sherin\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
 UG = G.to_undirected()
 sub_graphs = list(nx.connected_components(UG))
 
@@ -128,6 +128,9 @@ for elem in sub_graphs:
 
 for timeStep in range(dataCount):
     imageT1 = sitk.ReadImage(fileNameT1)
+    print("Sherin", imageT1.GetMetaData('cal_min'))
+    print("Sherin", imageT1.GetMetaData('cal_max'))
+    quit()
     dimensions = imageT1.GetSize()
     updateStructuralData(imageT1, timeStep)
     print("Processed Volume", timeStep)
