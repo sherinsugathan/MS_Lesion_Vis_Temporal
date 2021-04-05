@@ -11,8 +11,9 @@ import csv
 from itertools import cycle
 import networkx as nx
 
+
 rootPath = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
-fileNameT1 = rootPath + "\\structural\\T1.nii"
+fileNameT1 = rootPath + "\\structural\\T1_nu.nii"
 #fileNameMaskLabels = rootPath + "\\lesionMask\\ConnectedComponents.nii"
 G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
 UG = G.to_undirected()
@@ -68,10 +69,12 @@ def updateStructuralData(imageT1, timeStep):
                     newVoxel = imageT1.GetPixel(i,j,k) + intensityValue
                     if(newVoxel<0):
                         newVoxel = 0
+                    if(newVoxel>255):
+                        newVoxel = 255
                     imageT1[i,j,k] = newVoxel
 
 
-intensityProfile = {"hyper":150, "hyper2":100, "iso":0, "hypo":-400, "hypo2": -200}
+intensityProfile = {"hyper":20, "hyper2":50, "iso":0, "hypo":-40, "hypo2": -80}
 #0: HYPER
 #1: ISO 
 #2: HYPO 
@@ -128,9 +131,6 @@ for elem in sub_graphs:
 
 for timeStep in range(dataCount):
     imageT1 = sitk.ReadImage(fileNameT1)
-    print("Sherin", imageT1.GetMetaData('cal_min'))
-    print("Sherin", imageT1.GetMetaData('cal_max'))
-    quit()
     dimensions = imageT1.GetSize()
     updateStructuralData(imageT1, timeStep)
     print("Processed Volume", timeStep)

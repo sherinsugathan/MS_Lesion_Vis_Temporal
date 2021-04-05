@@ -301,7 +301,7 @@ class mainWindow(Qt.QMainWindow):
     # Read structural data information.
     def readInitializestructuralData(self):
         #structuralDataPath = self.folder + "structural\\T1_0.nii"
-        structuralDataPath = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\structural\\T1_0.nii"
+        structuralDataPath = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\structural\\T1.nii"
         img = sitk.ReadImage(structuralDataPath)
         stats = sitk.StatisticsImageFilter()
         stats.Execute(img)
@@ -647,7 +647,6 @@ class mainWindow(Qt.QMainWindow):
         #numberOfConnectedComponents = len(list(nx.strongly_connected_components(G))) # gets the number of disconnected components in the graph
         #print(numberOfConnectedComponents)
          
- 
         nodeIDList = list(G.nodes)
         streamPlotDataColors = sns.color_palette("Set2", len(nodeIDList)) # visually pleasing colors from color brewer.
         streamPlotDataColors = sns.color_palette("Set2", len(nodeIDList)) # visually pleasing colors from color brewer.
@@ -883,6 +882,7 @@ class mainWindow(Qt.QMainWindow):
         intensityList = []
         for i in range(len(timeList)):
             intensityList.append((int(self.structureInfo[str(timeList[i])][0][str(labelList[i])][0]['Mean'])-self.intMin)/(self.intMax-self.intMin))
+            print("min is", self.intMin, "max is", self.intMax)
         return intensityList
 
     # Compute and return intensity matrix for the graph
@@ -905,7 +905,7 @@ class mainWindow(Qt.QMainWindow):
             timeList = G.nodes[id]["time"]
             labelList = G.nodes[id]["lesionLabel"]
             diffList = self.readDiffListFromJSON(timeList, labelList)
-            #print(labelList)
+            print("max is", max(diffList))
             intensityDiffArray[timeList] = [elem for elem in diffList ]
             intensityMatrix.append(intensityDiffArray)
             #print(intensityDiffArray)
