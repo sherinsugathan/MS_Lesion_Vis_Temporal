@@ -52,7 +52,7 @@ color:white;</string>
       <property name="styleSheet">
        <string notr="true">color: rgb(231,231,231);
 background-color: rgb(33,33,33);
-font: 9pt &quot;Google Sans&quot;;
+font-family: &quot;Google Sans&quot;;
 border-color: rgb(22, 157, 221);
 border-style: solid;</string>
       </property>
@@ -102,7 +102,7 @@ background: rgb(70,121,85);
         <widget class="QLabel" name="label_3">
          <property name="styleSheet">
           <string notr="true">color: rgb(149,189,149);
-font: 10pt &quot;Google Sans&quot;;
+font-family: &quot;Google Sans&quot;;
 font-weight: bold;</string>
          </property>
          <property name="text">
@@ -138,7 +138,7 @@ border-radius: 4px;
         <widget class="QLabel" name="label_16">
          <property name="styleSheet">
           <string notr="true">color: rgb(149,189,149);
-font: 10pt &quot;Google Sans&quot;;
+font-family: &quot;Google Sans&quot;;
 font-weight: bold;</string>
          </property>
          <property name="text">
@@ -185,7 +185,7 @@ color: rgb(231,231,231);</string>
         <widget class="QLabel" name="label_2">
          <property name="styleSheet">
           <string notr="true">color: rgb(149,189,149);
-font: 10pt &quot;Google Sans&quot;;
+font-family: &quot;Google Sans&quot;;
 font-weight: bold;</string>
          </property>
          <property name="text">
@@ -217,10 +217,9 @@ border-style: outset;
 border-width: 2px;
 border-radius: 4px;
 border-color: rgb(57,57,57);
-font: bold 11px;
+font-family: &quot;Google Sans&quot;;
 padding: 6px;
 color: rgb(231,231,231);
-font: 9pt &quot;Google Sans&quot;;
 border-style: solid;
 }</string>
          </property>
@@ -244,10 +243,9 @@ border-style: outset;
 border-width: 2px;
 border-radius: 4px;
 border-color: rgb(57,57,57);
-font: bold 11px;
 padding: 6px;
 color: rgb(231,231,231);
-font: 9pt &quot;Google Sans&quot;;
+font-family: &quot;Google Sans&quot;;
 border-style: solid;
 }</string>
          </property>
@@ -284,10 +282,9 @@ border-style: outset;
 border-width: 2px;
 border-radius: 4px;
 border-color: rgb(57,57,57);
-font: bold 11px;
 padding: 6px;
 color: rgb(231,231,231);
-font: 9pt &quot;Google Sans&quot;;
+font-family: &quot;Google Sans&quot;;
 border-style: solid;
 }</string>
          </property>
@@ -460,7 +457,8 @@ border-style: solid;
          <property name="styleSheet">
           <string notr="true">border-width: 2px;
 border-radius: 4px;
-border-color: rgb(57,57,57);</string>
+border-color: rgb(57,57,57);
+font-family: &quot;Google Sans&quot;;</string>
          </property>
         </widget>
        </item>
@@ -468,7 +466,7 @@ border-color: rgb(57,57,57);</string>
         <widget class="QLabel" name="label">
          <property name="styleSheet">
           <string notr="true">color: rgb(149,189,149);
-font: 10pt &quot;Google Sans&quot;;
+font-family: &quot;Google Sans&quot;;
 font-weight: bold;</string>
          </property>
          <property name="text">
@@ -771,7 +769,7 @@ border-radius: 10px;</string>
                 </size>
                </property>
                <property name="styleSheet">
-                <string notr="true">font: 9pt &quot;Google Sans&quot;;</string>
+                <string notr="true">font-family: &quot;Google Sans&quot;;</string>
                </property>
                <property name="text">
                 <string>no sequence loaded</string>
@@ -897,6 +895,9 @@ QRadioButton::indicator:unchecked {
              </item>
              <item row="0" column="2">
               <widget class="QRadioButton" name="radioButton_FLAIR">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="styleSheet">
                 <string notr="true">QRadioButton {
 font: 9pt &quot;Google Sans&quot;;
@@ -960,7 +961,7 @@ QRadioButton::indicator:unchecked {
               <widget class="QRadioButton" name="radioButton_Inflated">
                <property name="styleSheet">
                 <string notr="true">QRadioButton {
-font: 9pt &quot;Google Sans&quot;;
+font-family: &quot;Google Sans&quot;;
 color: rgb(231,231,231);
 
 }
@@ -998,7 +999,7 @@ QRadioButton::indicator:unchecked {
               <widget class="QRadioButton" name="radioButton_White">
                <property name="styleSheet">
                 <string notr="true">QRadioButton {
-font: 9pt &quot;Google Sans&quot;;
+font-family: &quot;Google Sans&quot;;
 color: rgb(231,231,231);
 
 }
@@ -1104,6 +1105,17 @@ border-radius: 4px;
           <property name="verticalSpacing">
            <number>0</number>
           </property>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_AllLesions">
+            <property name="styleSheet">
+             <string notr="true">font-family: &quot;Google Sans&quot;;
+color: rgb(231,231,231);</string>
+            </property>
+            <property name="text">
+             <string>All Lesions</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QComboBox" name="comboBox_LesionAttributes">
             <property name="minimumSize">
@@ -1123,7 +1135,7 @@ border-radius: 4px;
     subcontrol-origin: padding;
     subcontrol-position: top right;
     width: 15px;
-	font: 9pt &quot;Google Sans&quot;;
+	font-family: &quot;Google Sans&quot;;
     border-left-width: 0px;
     border-left-color: darkgray;
     border-left-style: solid; /* just a single line */
@@ -1146,7 +1158,7 @@ border-color: rgb(57,57,57);
 color: rgb(149, 189, 149);
 border-style: solid;
 border-width: 2px;
-font: 9pt &quot;Google Sans&quot;;
+font-family: &quot;Google Sans&quot;;
 border-radius: 4px;
 }
 </string>
@@ -1156,7 +1168,7 @@ border-radius: 4px;
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="0" column="3">
            <spacer name="horizontalSpacer_4">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -1168,6 +1180,17 @@ border-radius: 4px;
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="0" column="2">
+           <widget class="QCheckBox" name="checkBox_LesionBorder">
+            <property name="styleSheet">
+             <string notr="true">font-family: &quot;Google Sans&quot;;
+color: rgb(231,231,231);</string>
+            </property>
+            <property name="text">
+             <string>Lesion Border</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>

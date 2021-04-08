@@ -101,6 +101,8 @@ class mainWindow(Qt.QMainWindow):
         self.mprC_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRC)
         self.comboBox_LesionAttributes.currentTextChanged.connect(self.on_combobox_changed_LesionAttributes) # Attaching handler for lesion filter combobox selection change.
         self.comboBox_ProjectionMethods.currentTextChanged.connect(self.on_combobox_changed_ProjectionMethods) # Attaching handler for projection methods combobox selection change.
+        self.checkBox_AllLesions.stateChanged.connect(self.displayAllLesions_changed) # Display all lesions in intensity graph
+        self.checkBox_LesionBorder.stateChanged.connect(self.displayLesionBorder_changed) # Display lesion border in intensity graph
 
     # Initialize vtk
     def initVTK(self):
@@ -199,6 +201,15 @@ class mainWindow(Qt.QMainWindow):
         self.buttonGroupSurfaces.setExclusive(True)
         self.buttonGroupSurfaces.buttonClicked.connect(self.on_buttonGroupSurfaceChanged)
 
+        self.buttonGroupModalities = QButtonGroup()
+        self.buttonGroupModalities.addButton(self.radioButton_T1)
+        self.buttonGroupModalities.addButton(self.radioButton_T2)
+        self.buttonGroupModalities.addButton(self.radioButton_FLAIR)
+        self.buttonGroupModalities.setExclusive(True)
+        self.buttonGroupModalities.buttonClicked.connect(self.on_buttonGroupModalityChanged)
+
+        
+
     def reportProgress(self, n):
         self.progressBar.setValue(n)
 
@@ -255,6 +266,12 @@ class mainWindow(Qt.QMainWindow):
             if(self.buttonGroupGraphs.checkedId() == -2): # Graph vis
                 self.stackedWidget_Graphs.setCurrentIndex(1)
 
+    # Handler for mode change inside button group (modality)
+    @pyqtSlot(QAbstractButton)
+    def on_buttonGroupModalityChanged(self, btn):
+        self.plotIntensityGraph()
+        self.canvasIntensity.draw()
+
     def updateLesionOverlayText(self):
         overlayText = ""
         for key in self.overlayDataMain.keys():
@@ -300,6 +317,9 @@ class mainWindow(Qt.QMainWindow):
 
     # Read structural data information.
     def readInitializestructuralData(self):
+        self.intMin = 0
+        self.intMax = 255
+        return
         #structuralDataPath = self.folder + "structural\\T1_0.nii"
         structuralDataPath = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\structural\\T1.nii"
         img = sitk.ReadImage(structuralDataPath)
@@ -503,7 +523,6 @@ class mainWindow(Qt.QMainWindow):
         self.frameIntensityPlot.setStyleSheet('background-color: rgb(220,220,220);border-color: rgb(57,57,57);border-style: solid;border-width: 2px; border-radius: 10px;')
         self.canvasIntensity.mpl_connect('button_press_event', self.onClickIntensityGraphCanvas)
         self.selectedNodeID = 2
-        self.plotIntensityGraph(3)
 
     def onScrollMPRA(self, event):
         currentSlide = self.midSliceX
@@ -705,7 +724,7 @@ class mainWindow(Qt.QMainWindow):
                 #print("double click in stream graph")
                 #print("Graph Y span is ", self.computeIntensityGraphYSpan())
                 if(self.selectedNodeID != None):
-                    self.plotIntensityGraph(self.computeIntensityGraphYSpan())
+                    self.plotIntensityGraph()
                     self.canvasIntensity.draw()
                     self.stackedWidget_Graphs.setCurrentIndex(2)
         else:
@@ -724,14 +743,14 @@ class mainWindow(Qt.QMainWindow):
         #print('onpick1 line:', labelValue)
         self.updateDefaultGraph(None, nodeID)
            
-    def computeIntensityGraphYSpan(self):
-        sub_graphs = list(nx.connected_components(self.UG))
-        for item in sub_graphs:
-            if str(self.selectedNodeID) in item:
-                H = self.G.subgraph(item)
-                leaf_nodes_split = [x for x in H.nodes() if H.out_degree(x)==0 and H.in_degree(x)==1]
-                leaf_nodes_merge = [x for x in H.nodes() if H.out_degree(x)==1 and H.in_degree(x)==0]
-                return max(len(leaf_nodes_merge), len(leaf_nodes_split))+1
+    # def computeIntensityGraphYSpan(self):
+    #     sub_graphs = list(nx.connected_components(self.UG))
+    #     for item in sub_graphs:
+    #         if str(self.selectedNodeID) in item:
+    #             H = self.G.subgraph(item)
+    #             leaf_nodes_split = [x for x in H.nodes() if H.out_degree(x)==0 and H.in_degree(x)==1]
+    #             leaf_nodes_merge = [x for x in H.nodes() if H.out_degree(x)==1 and H.in_degree(x)==0]
+    #             return max(len(leaf_nodes_merge), len(leaf_nodes_split))+1
 
     # plot default graph
     def plotDefaultGraph(self, lesionAttributeString): 
@@ -846,8 +865,13 @@ class mainWindow(Qt.QMainWindow):
         #    max_weight = 2 ** np.ceil(np.log(np.abs(matrix).max()) / np.log(2))
 
         max_weight = 0.5
+        displayEdges = self.checkBox_LesionBorder.isChecked()
 
-        ax.patch.set_facecolor('gray') # Background color
+        if(self.buttonGroupModalities.checkedButton().text() == "T1"): # T1 white matter intensity (NAWM)
+            self.frameIntensityPlot.setStyleSheet('background-color: rgb(220,220,220);border-color: rgb(57,57,57);border-style: solid;border-width: 2px; border-radius: 10px;')
+        if(self.buttonGroupModalities.checkedButton().text() == "T2"): # T2 white matter intensity (NAWM)
+            self.frameIntensityPlot.setStyleSheet('background-color: rgb(58,58,58);border-color: rgb(57,57,57);border-style: solid;border-width: 2px; border-radius: 10px;')
+
         ax.set_aspect('equal', 'box')
         #ax.xaxis.set_major_locator(plt.NullLocator())
         #ax.yaxis.set_major_locator(plt.NullLocator())
@@ -855,8 +879,15 @@ class mainWindow(Qt.QMainWindow):
         for (x, y), w in np.ndenumerate(matrix):
             #color = 'white' if w > 0 else 'black'
             color = (w, w, w)
-            edgeColor = 'black'
-            size = np.sqrt(np.abs(w) / max_weight)
+            if displayEdges:
+                edgeColor = (0.6,0.6,0.6)
+            else:
+                edgeColor = color
+            if(w==0):
+                size = 0
+            else:
+                size = np.sqrt(np.abs(0.5) / max_weight)
+            #size = np.sqrt(np.abs(w) / max_weight)
             rect = plt.Rectangle([x - size / 2, y - size / 2], size, size, facecolor=color, edgecolor=edgeColor)
             ax.add_patch(rect)
 
@@ -864,53 +895,58 @@ class mainWindow(Qt.QMainWindow):
         ax.invert_yaxis()
 
     # plot intensity graph
-    def plotIntensityGraph(self, maxWidthY): 
+    def plotIntensityGraph(self): 
         # Clearing old figures.
-        print("hello Sherin")
         self.figureIntensity.clear()
         #self.figureIntensity.tight_layout()
         plt.figure(5)
         self.axIntensity = self.figureIntensity.add_subplot(111)#, autoscale_on=False)
         self.axIntensity.axis("off")
         np.random.seed(19680801)
-        self.hinton(self.getIntensityDataMatrix(self.selectedNodeID, maxWidthY), self.axIntensity)
+        self.hinton(self.getIntensityDataMatrix(self.selectedNodeID), self.axIntensity)
         plt.subplots_adjust(left=-0, right=1, top=0.9, bottom=0.1)
         plt.xlim(xmin=-1)
         plt.xlim(xmax=self.dataCount+1)
 
     def readDiffListFromJSON(self, timeList, labelList):  
         intensityList = []
+        propertyString = "Mean"
+        if(self.buttonGroupModalities.checkedButton().text() == "T2"):
+            propertyString = "MeanT2"
+
         for i in range(len(timeList)):
-            intensityList.append((int(self.structureInfo[str(timeList[i])][0][str(labelList[i])][0]['Mean'])-self.intMin)/(self.intMax-self.intMin))
-            print("min is", self.intMin, "max is", self.intMax)
+            #intensityList.append((int(self.structureInfo[str(timeList[i])][0][str(labelList[i])][0]['Mean'])-self.intMin)/(self.intMax-self.intMin))
+            intensityList.append(int(self.structureInfo[str(timeList[i])][0][str(labelList[i])][0][propertyString])/255)
+            #print("min is", self.intMin, "max is", self.intMax)
         return intensityList
 
     # Compute and return intensity matrix for the graph
-    def getIntensityDataMatrix(self, nodeID, maxWidthY):
-        #return np.random.rand(80, maxWidthY) -0.5
+    def getIntensityDataMatrix(self, nodeID):
+        displayAllLesions = self.checkBox_AllLesions.isChecked()
         intensityMatrix = []
         G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
         connectedComponents = nx.strongly_connected_components(G)
         UG = G.to_undirected()
         dataCount = 81
         sub_graphs = list(nx.connected_components(UG))
-        selectedCluster = None
+        selectedClusters = []
         for item in sub_graphs:
-            if(str(nodeID) in item):
-                selectedCluster = item
+            if(str(nodeID) in item or displayAllLesions == True):
+                selectedClusters.append(item)
 
-        nodeIDList = selectedCluster
-        for id in nodeIDList:
-            intensityDiffArray = np.zeros(dataCount)
-            timeList = G.nodes[id]["time"]
-            labelList = G.nodes[id]["lesionLabel"]
-            diffList = self.readDiffListFromJSON(timeList, labelList)
-            print("max is", max(diffList))
-            intensityDiffArray[timeList] = [elem for elem in diffList ]
-            intensityMatrix.append(intensityDiffArray)
-            #print(intensityDiffArray)
+        for cluster in selectedClusters:
+            nodeIDList = cluster
+            for id in nodeIDList:
+                intensityDiffArray = np.zeros(dataCount)
+                timeList = G.nodes[id]["time"]
+                labelList = G.nodes[id]["lesionLabel"]
+                diffList = self.readDiffListFromJSON(timeList, labelList)
+                #print("max is", max(diffList))
+                intensityDiffArray[timeList] = [elem for elem in diffList ]
+                intensityMatrix.append(intensityDiffArray)
+                #print(intensityDiffArray)
 
-        old = np.random.rand(81, maxWidthY)
+        old = np.random.rand(81, len(intensityMatrix))
         new = np.array(intensityMatrix).transpose()
         return new #-0.5
 
@@ -941,6 +977,18 @@ class mainWindow(Qt.QMainWindow):
             self.overlayDataMain["Lesion Flatness"] = "{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['Flatness'])
             self.overlayDataMain["Lesion Roundness"] = "{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['Roundness'])
             return self.overlayDataMain
+
+    # Handler for time point slider change
+    @pyqtSlot()
+    def displayAllLesions_changed(self):
+        self.plotIntensityGraph()
+        self.canvasIntensity.draw()
+
+    # Handler for time point slider change
+    @pyqtSlot()
+    def displayLesionBorder_changed(self):
+        self.plotIntensityGraph()
+        self.canvasIntensity.draw()
 
     # Handler for time point slider change
     @pyqtSlot()

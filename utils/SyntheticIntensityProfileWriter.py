@@ -71,7 +71,7 @@ def updateStructuralData(imageT1, timeStep):
                         newVoxel = 0
                     if(newVoxel>255):
                         newVoxel = 255
-                    imageT1[i,j,k] = newVoxel
+                    imageT1[i,j,k] = int(newVoxel)
 
 
 intensityProfile = {"hyper":20, "hyper2":50, "iso":0, "hypo":-40, "hypo2": -80}
