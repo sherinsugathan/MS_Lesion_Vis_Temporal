@@ -12,16 +12,16 @@ from itertools import cycle
 import networkx as nx
 
 
-rootPath = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
-fileNameT1 = rootPath + "\\structural\\T1_nu.nii"
+rootPath = "C:\\Sherin\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
+fileNameT1 = rootPath + "\\structural\\T2_nu.nii"
 #fileNameMaskLabels = rootPath + "\\lesionMask\\ConnectedComponents.nii"
-G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+G = nx.read_gml("C:\\Sherin\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
 UG = G.to_undirected()
 sub_graphs = list(nx.connected_components(UG))
 
 dataCount = 81
 
-# Get nodeID for a label and timestep.
+# Get nodeID for a label and timsestep.
 def getNodeIDfromLabelAndTimeStep(label, timeStep):
     nodeIDList = list(G.nodes)
     for id in nodeIDList:
@@ -71,20 +71,27 @@ def updateStructuralData(imageT1, timeStep):
                         newVoxel = 0
                     if(newVoxel>255):
                         newVoxel = 255
-                    imageT1[i,j,k] = newVoxel
+                    imageT1[i,j,k] = int(newVoxel)
 
 
-intensityProfile = {"hyper":20, "hyper2":50, "iso":0, "hypo":-40, "hypo2": -80}
+intensityProfile = {"hyper":40, "hyper2":60, "hyper3":80, "iso":0, "hypo":-60, "hypo2": -80}
 #0: HYPER
 #1: ISO 
 #2: HYPO 
 
+# For T1
+#prof1= ["hypo", "iso", "hyper", "hyper2"]
+#prof2= ["hypo", "iso", "hyper"]
+#prof3= ["iso", "hypo"]
+#prof4= ["hypo", "hypo2"]
+#prof5= ["hyper", "iso"]
 
-prof1= ["hypo", "iso", "hyper", "hyper2"]
-prof2= ["hypo", "iso", "hyper"]
-prof3= ["iso", "hypo"]
-prof4= ["hypo", "hypo2"]
-prof5= ["hyper", "iso"]
+# For T2
+prof1= ["hyper", "hyper2", "hyper", "hyper3"]
+prof2= ["hyper", "iso", "hyper2"]
+prof3= ["hyper", "hyper2"]
+prof4= ["hyper2", "hyper3"]
+prof5= ["hyper", "hyper3"]
 profilePool = []
 profilePool.append(prof1)
 profilePool.append(prof2)
@@ -134,6 +141,7 @@ for timeStep in range(dataCount):
     dimensions = imageT1.GetSize()
     updateStructuralData(imageT1, timeStep)
     print("Processed Volume", timeStep)
-    sitk.WriteImage(imageT1, "C:\\temp\\T1_"+str(timeStep)+".nii")
+    sitk.WriteImage(imageT1, "C:\\temp\\T2_"+str(timeStep)+".nii")
+
 
 print("File writes complete")

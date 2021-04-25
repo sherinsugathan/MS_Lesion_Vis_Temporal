@@ -7,21 +7,21 @@ import SimpleITK as sitk
 import json
 
 def IntensityStatisticsJSONWriter():
-    rootFolder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
+    rootFolder = "C:\\Sherin\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
     jsonPath = rootFolder + "preProcess\\lesionStatistics.json"
     dataCount = 81
     dataDictMain = {}
     for timeStep in range(dataCount):
         data = {}
         print("Processing timestep:", timeStep)
-        maskFileName = rootFolder + "lesionMask\\ConsensusT1VoxelSpaceCorrected" + str(timeStep) + ".nii"
+        maskFileName = rootFolder + "lesionMask\\ConsensusT2VoxelSpaceCorrected" + str(timeStep) + ".nii"
         #maskFileName = rootFolder + "lesionMask\\Consensus" + str(timeStep) + ".nii"
-        structuralData = rootFolder + "structural\\T1_" + str(timeStep) + ".nii"
+        structuralData = rootFolder + "structural\\T2_" + str(timeStep) + ".nii"
         imageMask = sitk.ReadImage(maskFileName)
         imageStructural = sitk.ReadImage(structuralData)
         connectedComponentFilter = sitk.ConnectedComponentImageFilter()
         connectedComponentImage = connectedComponentFilter.Execute(imageMask)
-        sitk.WriteImage(connectedComponentImage, "D:\\connectedTest.nii")
+        #sitk.WriteImage(connectedComponentImage, "D:\\connectedTest.nii")
         objectCount = connectedComponentFilter.GetObjectCount()
         
         
@@ -43,14 +43,14 @@ def IntensityStatisticsJSONWriter():
         for jsonElementIndex in (range(1,numberOfLesionElements+1)):
             for p in r[0][str(jsonElementIndex)]:
                 lesionDataDict = p
-                lesionDataDict["Maximum"] = labelStatFilter.GetMaximum(jsonElementIndex)
-                lesionDataDict["Mean"] = labelStatFilter.GetMean(jsonElementIndex)
-                lesionDataDict["Median"] = labelStatFilter.GetMedian(jsonElementIndex)
-                lesionDataDict["Minimum"] = labelStatFilter.GetMinimum(jsonElementIndex)
-                lesionDataDict["Sigma"] = labelStatFilter.GetSigma(jsonElementIndex)
-                lesionDataDict["Sum"] = labelStatFilter.GetSum(jsonElementIndex)
-                print(lesionDataDict["Sum"])
-                lesionDataDict["Variance"] = labelStatFilter.GetVariance(jsonElementIndex)
+                lesionDataDict["MaximumT2"] = labelStatFilter.GetMaximum(jsonElementIndex)
+                lesionDataDict["MeanT2"] = labelStatFilter.GetMean(jsonElementIndex)
+                lesionDataDict["MedianT2"] = labelStatFilter.GetMedian(jsonElementIndex)
+                lesionDataDict["MinimumT2"] = labelStatFilter.GetMinimum(jsonElementIndex)
+                lesionDataDict["SigmaT2"] = labelStatFilter.GetSigma(jsonElementIndex)
+                lesionDataDict["SumT2"] = labelStatFilter.GetSum(jsonElementIndex)
+                #print(lesionDataDict["Sum"])
+                lesionDataDict["VarianceT2"] = labelStatFilter.GetVariance(jsonElementIndex)
                 data[jsonElementIndex]=[]
                 data[jsonElementIndex].append(lesionDataDict)
 
