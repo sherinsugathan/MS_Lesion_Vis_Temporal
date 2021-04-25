@@ -21,7 +21,6 @@ def GetColorForLabel(labelFile, labelID):
     annotationDataItem = meta[labelID]
     clr = annotationDataItem["color"]
     return clr
-
     
 
 def MakeCellData(tableSize, lut, colors):

@@ -301,6 +301,37 @@ class CustomMouseInteractorSurface(vtk.vtkInteractorStyleTrackballCamera):
 
 '''
 ##########################################################################
+    Smooth polydata.
+    Returns: Smoeethened surface.
+##########################################################################
+'''
+def smoothPolyData(polyData):
+    smoother = vtk.vtkWindowedSincPolyDataFilter()
+    #smoother.SetInputConnection(sphereSource->GetOutputPort())
+    smoother.SetInputData(polyData)
+    smoother.SetNumberOfIterations(9)
+    smoother.BoundarySmoothingOff()
+    smoother.FeatureEdgeSmoothingOff()
+    smoother.SetFeatureAngle(120.0)
+    smoother.SetPassBand(.001)
+    smoother.NonManifoldSmoothingOn()
+    smoother.NormalizeCoordinatesOn()
+    smoother.Update()
+
+    normalGenerator = vtk.vtkPolyDataNormals()
+    normalGenerator.SetInputData(smoother.GetOutput())
+    normalGenerator.ComputePointNormalsOn()
+    normalGenerator.ComputeCellNormalsOff()
+    normalGenerator.AutoOrientNormalsOn()
+    normalGenerator.ConsistencyOn()
+    normalGenerator.SplittingOff()
+    normalGenerator.Update()
+    
+    return normalGenerator.GetOutput()
+
+
+'''
+##########################################################################
     Read a surface and smoothens it.
     Returns: Smoeethened surface.
 ##########################################################################
