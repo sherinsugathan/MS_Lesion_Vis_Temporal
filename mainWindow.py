@@ -50,6 +50,7 @@ import random
 from scipy.ndimage.filters import gaussian_filter1d
 import seaborn as sns
 import SimpleITK as sitk
+from qt_range_slider import QtRangeSlider
 
 # Main window class.
 class mainWindow(Qt.QMainWindow):
@@ -61,6 +62,14 @@ class mainWindow(Qt.QMainWindow):
         self.initUI()
         self.initVTK()
         self.showMaximized()
+        self.slider = QtRangeSlider(self, 0, 80, 0, 80)
+        self.slider3DCompare = QtRangeSlider(self, 0, 80, 0, 80)
+        self.gridLayout_14.addWidget(self.slider, 0,9)
+        self.gridLayout_16.addWidget(self.slider3DCompare,0,0)
+        self.slider.left_thumb_value_changed.connect(self.graphRangeSliderChanged)
+        self.slider3DCompare.left_thumb_value_changed.connect(self.compare3DRangeSliderChangedLeft)
+        self.slider3DCompare.right_thumb_value_changed.connect(self.compare3DRangeSliderChangedRight)
+        self.slider3DCompare.setEnabled(False)
 
     def showDialog(self):
         msgBox = QMessageBox()
@@ -92,10 +101,17 @@ class mainWindow(Qt.QMainWindow):
         self.comboBox_ProjectionMethods.addItem("Heat Equation")
         self.comboBox_ProjectionMethods.addItem("Danielsson")
 
+        # Constants
+        self.NAWM_INTENSITY_T1 = 215
+        self.NAWM_INTENSITY_T2 = 58
+        self.R_ISO = 0.1
+
         # Handlers
         #self.pushButton_LoadFolder.clicked.connect(self.on_click_browseFolder) # Attaching button click handler.
         self.pushButton_LoadFolder.clicked.connect(self.autoLoadData) # Attaching button click handler.
+        self.pushButton_Compare.clicked.connect(self.compareDataAndUpdateSurface) # Attaching button click handler.
         self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
+        self.horizontalSlider_Riso.valueChanged.connect(self.on_sliderChangedRiso) # Attaching slider value (Riso) changed handler.
         self.mprA_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRA)
         self.mprB_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRB)
         self.mprC_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRC)
@@ -103,6 +119,10 @@ class mainWindow(Qt.QMainWindow):
         self.comboBox_ProjectionMethods.currentTextChanged.connect(self.on_combobox_changed_ProjectionMethods) # Attaching handler for projection methods combobox selection change.
         self.checkBox_AllLesions.stateChanged.connect(self.displayAllLesions_changed) # Display all lesions in intensity graph
         self.checkBox_LesionBorder.stateChanged.connect(self.displayLesionBorder_changed) # Display lesion border in intensity graph
+        self.checkBox_ShowClasses.stateChanged.connect(self.checkBox_ShowClasses_changed) # Display lesion classes in the intensity graph.
+        self.checkBox_RangeCompare.stateChanged.connect(self.checkBox_RangeCompare_changed) # Enables comparison view for lesions.
+        self.spinBox_RangeMin.valueChanged.connect(self.spinBoxMinChanged)
+        self.spinBox_RangeMax.valueChanged.connect(self.spinBoxMaxChanged)
 
     # Initialize vtk
     def initVTK(self):
@@ -208,7 +228,17 @@ class mainWindow(Qt.QMainWindow):
         self.buttonGroupModalities.setExclusive(True)
         self.buttonGroupModalities.buttonClicked.connect(self.on_buttonGroupModalityChanged)
 
-        
+    def spinBoxMinChanged(self, val):
+        if(val>=self.spinBox_RangeMax.value()):
+            self.spinBox_RangeMin.setValue(self.spinBox_RangeMax.value()-1)
+        else:
+            self.slider3DCompare.set_left_thumb_value(val)
+
+    def spinBoxMaxChanged(self, val):
+        if(val<=self.spinBox_RangeMin.value()):
+            self.spinBox_RangeMax.setValue(self.spinBox_RangeMin.value()+1)
+        else:
+            self.slider3DCompare.set_right_thumb_value(val)
 
     def reportProgress(self, n):
         self.progressBar.setValue(n)
@@ -235,6 +265,9 @@ class mainWindow(Qt.QMainWindow):
     @pyqtSlot()
     def on_combobox_changed_ProjectionMethods(self): 
         self.on_sliderChangedTimePoint()
+
+    def enableControls(self):
+        self.checkBox_RangeCompare.setEnabled(True)
 
     # Handler for mode change inside button group (surfaces)
     @pyqtSlot(QAbstractButton)
@@ -281,6 +314,12 @@ class mainWindow(Qt.QMainWindow):
     def renderData(self):
         Utils.smoothSurface(self.surfaceActors[0])
         self.dataCount = len(self.LesionActorList)
+        self.spinBox_RangeMin.setMinimum(0)
+        self.spinBox_RangeMin.setMaximum(int(self.dataCount-1))
+        self.spinBox_RangeMin.setValue(0)
+        self.spinBox_RangeMax.setMinimum(0)
+        self.spinBox_RangeMax.setMaximum(int(self.dataCount-1))
+        self.spinBox_RangeMax.setValue(5)
         self.horizontalSlider_TimePoint.setMaximum(self.dataCount-1)
         for lesion in self.LesionActorList[0]:
             self.ren.AddActor(lesion)
@@ -307,6 +346,7 @@ class mainWindow(Qt.QMainWindow):
         self.activateControls() # Activate controls.
         self.ren.AddActor2D(self.textActorLesionStatistics) # Add lesion statistics overlay.
         self.dataFolderInitialized = True
+        self.enableControls()
         self.currentTimeStep = self.horizontalSlider_TimePoint.value()
         self.numberOfPointsLh = self.surfaceActors[3].GetMapper().GetInput().GetNumberOfPoints()
         self.numberOfPointsRh = self.surfaceActors[4].GetMapper().GetInput().GetNumberOfPoints()
@@ -866,11 +906,12 @@ class mainWindow(Qt.QMainWindow):
 
         max_weight = 0.5
         displayEdges = self.checkBox_LesionBorder.isChecked()
+        displayIntensityClasses = self.checkBox_ShowClasses.isChecked()
 
         if(self.buttonGroupModalities.checkedButton().text() == "T1"): # T1 white matter intensity (NAWM)
-            self.frameIntensityPlot.setStyleSheet('background-color: rgb(220,220,220);border-color: rgb(57,57,57);border-style: solid;border-width: 2px; border-radius: 10px;')
+            self.frameIntensityPlot.setStyleSheet('background-color:rgb(' + str(self.NAWM_INTENSITY_T1) +','+ str(self.NAWM_INTENSITY_T1) + ',' + str(self.NAWM_INTENSITY_T1)+');border-color: rgb(57,57,57);border-style: solid;border-width: 2px; border-radius: 10px;')
         if(self.buttonGroupModalities.checkedButton().text() == "T2"): # T2 white matter intensity (NAWM)
-            self.frameIntensityPlot.setStyleSheet('background-color: rgb(58,58,58);border-color: rgb(57,57,57);border-style: solid;border-width: 2px; border-radius: 10px;')
+            self.frameIntensityPlot.setStyleSheet('background-color:rgb(' + str(self.NAWM_INTENSITY_T2) +','+ str(self.NAWM_INTENSITY_T2) + ',' + str(self.NAWM_INTENSITY_T2)+');border-color: rgb(57,57,57);border-style: solid;border-width: 2px; border-radius: 10px;')
 
         ax.set_aspect('equal', 'box')
         #ax.xaxis.set_major_locator(plt.NullLocator())
@@ -879,6 +920,22 @@ class mainWindow(Qt.QMainWindow):
         for (x, y), w in np.ndenumerate(matrix):
             #color = 'white' if w > 0 else 'black'
             color = (w, w, w)
+            if displayIntensityClasses: # show intensity classifications (hyper, hypo, iso)
+                if(self.buttonGroupModalities.checkedButton().text() == "T1"): # T1 white matter intensity (NAWM)
+                    intensityDifference = w - self.NAWM_INTENSITY_T1/255
+                if(self.buttonGroupModalities.checkedButton().text() == "T2"): # T2 white matter intensity (NAWM)
+                    intensityDifference = w - self.NAWM_INTENSITY_T2/255
+                if(intensityDifference > self.R_ISO): # hyper
+                    color = 'white'
+                elif(intensityDifference < self.R_ISO*-1): # hypo
+                    color = 'black'
+                else:
+                    if(self.buttonGroupModalities.checkedButton().text() == "T1"): # T1 white matter intensity (NAWM)
+                        color = (self.NAWM_INTENSITY_T1/255, self.NAWM_INTENSITY_T1/255, self.NAWM_INTENSITY_T1/255)
+                    if(self.buttonGroupModalities.checkedButton().text() == "T2"): # T2 white matter intensity (NAWM)
+                        color = (self.NAWM_INTENSITY_T2/255, self.NAWM_INTENSITY_T2/255, self.NAWM_INTENSITY_T2/255)
+            else: # intensity display as it is.
+                color = (w, w, w)
             if displayEdges:
                 edgeColor = (0.6,0.6,0.6)
             else:
@@ -990,6 +1047,26 @@ class mainWindow(Qt.QMainWindow):
         self.plotIntensityGraph()
         self.canvasIntensity.draw()
 
+    # Handler for show intensity classes change
+    @pyqtSlot()
+    def checkBox_ShowClasses_changed(self):
+        self.plotIntensityGraph()
+        self.canvasIntensity.draw()
+
+    # Handler for displaying range comparison for lesions
+    @pyqtSlot()
+    def checkBox_RangeCompare_changed(self):
+        if(self.checkBox_RangeCompare.isChecked() == True):
+            self.spinBox_RangeMin.setEnabled(True)
+            self.spinBox_RangeMax.setEnabled(True)
+            self.pushButton_Compare.setEnabled(True)
+            self.slider3DCompare.setEnabled(True)
+        else:
+            self.spinBox_RangeMin.setEnabled(False)
+            self.spinBox_RangeMax.setEnabled(False)
+            self.pushButton_Compare.setEnabled(False)
+            self.slider3DCompare.setEnabled(False)
+
     # Handler for time point slider change
     @pyqtSlot()
     def on_sliderChangedTimePoint(self):
@@ -1020,7 +1097,18 @@ class mainWindow(Qt.QMainWindow):
             self.ren.AddActor(lesion)
         self.ren.AddActor(self.surfaceActors[0]) # ventricle
         self.ren.AddActor(self.textActorLesionStatistics) # Text overlay
+
+        #self.ren.ResetCamera()
         self.iren.Render()
+
+    # Handler for Riso slider change
+    @pyqtSlot()
+    def on_sliderChangedRiso(self):
+        sliderValue = self.horizontalSlider_Riso.value()
+        self.R_ISO = sliderValue * (0.3/99)
+        self.label_Riso.setText(str("{:.1f}".format(self.R_ISO*100)+"%"))
+        self.plotIntensityGraph()
+        self.canvasIntensity.draw()
 
     # Compute projection for a selected lesion and apply it on active surface.
     def computeApplyProjection(self, highlightLesionID, surfaceLh, surfaceRh, sliderValue = None):
@@ -1094,6 +1182,170 @@ class mainWindow(Qt.QMainWindow):
             self.worker.progress.connect(self.reportProgress)
             self.worker.finished.connect(self.renderData)
             self.readThread.start()
+
+    # Slider to capture range (left) for 3d comparison.
+    def compare3DRangeSliderChangedLeft(self,val):
+        self.spinBox_RangeMin.setValue(val)
+
+    # Slider to capture range (right) for 3d comparison.
+    def compare3DRangeSliderChangedRight(self,val):
+        self.spinBox_RangeMax.setValue(val)
+
+    # Slider to capture range for graph comparison.
+    def graphRangeSliderChanged(self,val):
+        print("graph slider changed", val)
+
+    # Compare lesion changes between two time points and then update lesion surface display.
+    def compareDataAndUpdateSurface(self):
+        baselineIndex = self.spinBox_RangeMin.value()
+        followupIndex = self.spinBox_RangeMax.value()
+        #print(baselineIndex, followupIndex)
+        rootFolder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
+        connectedComponentOutputFileName = rootFolder + "lesionMask\\ConnectedComponentsTemp.nii"
+        
+        # Creating uinion image
+        maskFileName1 = rootFolder + "lesionMask\\Consensus" + str(baselineIndex) + ".nii"
+        maskFileName2 = rootFolder + "lesionMask\\Consensus" + str(followupIndex) + ".nii"
+        niftiReaderLesionMask1 = vtk.vtkNIFTIImageReader()
+        niftiReaderLesionMask1.SetFileName(maskFileName1)
+        niftiReaderLesionMask1.Update()
+        niftiReaderLesionMask2 = vtk.vtkNIFTIImageReader()
+        niftiReaderLesionMask2.SetFileName(maskFileName2)
+        niftiReaderLesionMask2.Update()
+        orImageFilter = vtk.vtkImageLogic()
+        orImageFilter.SetInput1Data(niftiReaderLesionMask1.GetOutput())
+        orImageFilter.SetInput2Data(niftiReaderLesionMask2.GetOutput())
+        orImageFilter.SetOperationToOr()
+        orImageFilter.Update()
+        writer = vtk.vtkNIFTIImageWriter()
+        writer.SetFileName("D:\\union.nii")
+        writer.SetInputData(orImageFilter.GetOutput())
+        writer.Write()
+
+        # Creating subtracted image
+        castedImage1 = vtk.vtkImageCast()
+        castedImage1.SetInputData(niftiReaderLesionMask1.GetOutput())
+        castedImage1.SetOutputScalarTypeToFloat()
+        castedImage1.Update()
+        castedImage2 = vtk.vtkImageCast()
+        castedImage2.SetInputData(niftiReaderLesionMask2.GetOutput())
+        castedImage2.SetOutputScalarTypeToFloat()
+        castedImage2.Update()
+        subtractImageFilter = vtk.vtkImageMathematics()
+        subtractImageFilter.SetInput1Data(castedImage1.GetOutput())
+        subtractImageFilter.SetInput2Data(castedImage2.GetOutput())
+        subtractImageFilter.SetOperationToSubtract()
+        subtractImageFilter.Update()
+        writer.SetFileName("D:\\shr.nii")
+        writer.SetInputData(subtractImageFilter.GetOutput())
+        writer.Write()
+
+        uinionImage = sitk.ReadImage("D:\\union.nii")
+        connectedComponentFilter = sitk.ConnectedComponentImageFilter()
+        connectedComponentImage = connectedComponentFilter.Execute(uinionImage)
+        sitk.WriteImage(connectedComponentImage, connectedComponentOutputFileName)
+        lesionCount = connectedComponentFilter.GetObjectCount()
+        # Load lesion mask
+        niftiReaderLesionMask = vtk.vtkNIFTIImageReader()
+        niftiReaderLesionMask.SetFileName(connectedComponentOutputFileName)
+        niftiReaderLesionMask.Update()
+
+        # Read QForm matrix from mask data.
+        QFormMatrixMask = niftiReaderLesionMask1.GetQFormMatrix()
+        qFormListMask = [0] * 16 #the matrix is 4x4
+        QFormMatrixMask.DeepCopy(qFormListMask, QFormMatrixMask)
+        transform = vtk.vtkTransform()
+        transform.Identity()
+        transform.SetMatrix(qFormListMask)
+        transform.Update()
+
+        surface = vtk.vtkDiscreteMarchingCubes()
+        surface.SetInputConnection(niftiReaderLesionMask.GetOutputPort())
+        for i in range(lesionCount):
+            surface.SetValue(i,i+1)
+        surface.Update()
+
+        transform = vtk.vtkTransform()
+        transform.Identity()
+        transform.SetMatrix(qFormListMask)
+        transform.Update()
+        transformFilter = vtk.vtkTransformFilter()
+        transformFilter.SetInputConnection(surface.GetOutputPort())
+        transformFilter.SetTransform(transform)
+        transformFilter.Update()
+
+        niftiReaderDifferenceImage = vtk.vtkNIFTIImageReader()
+        niftiReaderDifferenceImage.SetFileName("D:\\shr.nii")
+        niftiReaderDifferenceImage.Update()
+
+        transformVolumeFilter = vtk.vtkTransformFilter()
+        transformVolumeFilter.SetInputConnection(niftiReaderDifferenceImage.GetOutputPort())
+        transformVolumeFilter.SetTransform(transform)
+        transformVolumeFilter.Update()
+
+        multiBlockDataset = vtk.vtkMultiBlockDataSet()
+        for i in range(lesionCount):
+            threshold = vtk.vtkThreshold()
+            #threshold.SetInputData(surface.GetOutput())
+            threshold.SetInputData(transformFilter.GetOutput())
+            threshold.ThresholdBetween(i+1,i+1)
+            threshold.Update()
+            geometryFilter = vtk.vtkGeometryFilter()
+            geometryFilter.SetInputData(threshold.GetOutput())
+            geometryFilter.Update()
+            lesionMapper = vtk.vtkOpenGLPolyDataMapper()
+            lesionMapper.SetInputData(geometryFilter.GetOutput())
+            lesionMapper.Update()   
+            probeFilter = vtk.vtkProbeFilter()
+            #probeFilter.SetSourceData(niftiReaderDifferenceImage.GetOutput())
+            probeFilter.SetSourceData(transformVolumeFilter.GetOutput())
+            probeFilter.SetInputData(lesionMapper.GetInput())
+            probeFilter.CategoricalDataOff()
+            probeFilter.Update()    
+
+            scalars = probeFilter.GetOutput().GetPointData().GetScalars()
+            lesionMapper.GetInput().GetPointData().SetActiveScalars("difference")
+            lesionMapper.GetInput().GetPointData().SetScalars(scalars)
+            lesionMapper.SetScalarRange(-127,127)
+            numberOfPoints = scalars.GetNumberOfTuples()
+
+            #transformFilter = vtk.vtkTransformFilter()
+            #transformFilter.SetInputData(lesionMapper.GetInput())
+            #transformFilter.SetTransform(transform)
+            #transformFilter.Update()
+            #multiBlockDataset.SetBlock(i,transformFilter.GetOutput())
+            multiBlockDataset.SetBlock(i,lesionMapper.GetInput())
+
+        nc = vtk.vtkNamedColors()
+
+        lut = vtk.vtkLookupTable()
+        lut.SetNumberOfTableValues(3)
+        lut.SetTableRange(-128, 128)
+        lut.Build()
+
+        lut.SetTableValue(0,nc.GetColor4d("LightCoral"))
+        lut.SetTableValue(1,nc.GetColor4d("LightSlateGray"))
+        lut.SetTableValue(2,nc.GetColor4d("PaleGreen"))
+
+        actorList = []
+        for i in range(multiBlockDataset.GetNumberOfBlocks()):
+            block = multiBlockDataset.GetBlock(i)
+            newpoly = Utils.smoothPolyData(block)
+
+            mapper = vtk.vtkPolyDataMapper()
+            #mapper.SetInputData(block)
+            mapper.SetInputData(newpoly)
+            mapper.SetScalarRange(-128,128)
+            mapper.SetLookupTable(lut)
+            lesionActor = vtk.vtkActor()
+            lesionActor.SetMapper(mapper)
+            actorList.append(lesionActor)
+        
+        # Update renderer
+        self.ren.RemoveAllViewProps()
+        for lesion in actorList:
+            self.ren.AddActor(lesion)
+        self.iren.Render()
 
     # Handler for browse folder button click.
     @pyqtSlot()
