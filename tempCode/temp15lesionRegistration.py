@@ -139,7 +139,7 @@ for i in range(multiBlockDataset.GetNumberOfBlocks()):
     mapper.SetLookupTable(lut)
     lesionActor = vtk.vtkActor()
     lesionActor.SetMapper(mapper)
-    #actorList2.append(lesionActor)
+    actorList2.append(lesionActor)
 
 ###################################################
 

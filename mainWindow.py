@@ -19,7 +19,7 @@ from PyQt5.QtCore import pyqtSlot, QThread
 from PyQt5 import QtCore, QtGui
 from PyQt5 import Qt
 from PyQt5.QtCore import QTimer
-from OpenGL import GL
+#from OpenGL import GL
 
 # Pyinstaller exe requirements
 #import pkg_resources.py2_warn
@@ -1345,6 +1345,7 @@ class mainWindow(Qt.QMainWindow):
         self.ren.RemoveAllViewProps()
         for lesion in actorList:
             self.ren.AddActor(lesion)
+        self.ren.AddActor(self.surfaceActors[0]) # ventricle
         self.iren.Render()
 
     # Handler for browse folder button click.
