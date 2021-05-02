@@ -898,6 +898,12 @@ class mainWindow(Qt.QMainWindow):
 
         self.canvasDefault.draw()
 
+    def computeIntensityDifference(self, matrix):
+        output = []
+        for i in range(len(matrix)-1):
+            output.append([m - n for m,n in zip(matrix[i+1], matrix[i])])
+        return output
+
     def hinton(self, matrix, max_weight=None, ax=None):
         """Draw Hinton diagram for visualizing a weight matrix."""
         ax = ax if ax is not None else plt.gca()
@@ -916,8 +922,11 @@ class mainWindow(Qt.QMainWindow):
         ax.set_aspect('equal', 'box')
         #ax.xaxis.set_major_locator(plt.NullLocator())
         #ax.yaxis.set_major_locator(plt.NullLocator())
+        #print(len(matrix))
+        intDifference = self.computeIntensityDifference(matrix)
 
         for (x, y), w in np.ndenumerate(matrix):
+            
             #color = 'white' if w > 0 else 'black'
             color = (w, w, w)
             if displayIntensityClasses: # show intensity classifications (hyper, hypo, iso)
@@ -944,7 +953,13 @@ class mainWindow(Qt.QMainWindow):
                 size = 0
             else:
                 size = np.sqrt(np.abs(0.5) / max_weight)
+                if(x<80):
+                    if(intDifference[x][y] > 0):
+                        plt.plot(x, y, marker=r'$\wedge$', color = "red")
+                    else:
+                        plt.plot(x, y, marker=r'$\vee$', color = "blue")
             #size = np.sqrt(np.abs(w) / max_weight)
+            
             rect = plt.Rectangle([x - size / 2, y - size / 2], size, size, facecolor=color, edgecolor=edgeColor)
             ax.add_patch(rect)
 
@@ -1002,7 +1017,7 @@ class mainWindow(Qt.QMainWindow):
                 intensityDiffArray[timeList] = [elem for elem in diffList ]
                 intensityMatrix.append(intensityDiffArray)
                 #print(intensityDiffArray)
-
+        
         old = np.random.rand(81, len(intensityMatrix))
         new = np.array(intensityMatrix).transpose()
         return new #-0.5
