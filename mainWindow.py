@@ -86,8 +86,8 @@ class mainWindow(Qt.QMainWindow):
     def initUI(self):  
         vtk.vtkObject.GlobalWarningDisplayOff() # Supress warnings.
         #print("\033[1;101m STARTING APPLICATION... \033[0m")
-        pmMain = Qt.QPixmap("icons\\AppLogo.png")
-        self.logoLabel.setPixmap(pmMain.scaled(self.logoLabel.size().width(), self.logoLabel.size().height(), 1,1))
+        #pmMain = Qt.QPixmap("icons\\AppLogo.png")
+        #self.logoLabel.setPixmap(pmMain.scaled(self.logoLabel.size().width(), self.logoLabel.size().height(), 1,1))
         #self.showDialog()
         self.comboBox_LesionAttributes.addItem("Physical Size")
         self.comboBox_LesionAttributes.addItem("Elongation")
@@ -777,7 +777,7 @@ class mainWindow(Qt.QMainWindow):
         thisline = event.artist
         nodeID = thisline.get_label()
         self.selectedNodeID = nodeID
-        
+        print("ghello", nodeID)
         #artist = event.artist
         #ind = event.ind
         #print('onpick1 line:', labelValue)
@@ -955,9 +955,12 @@ class mainWindow(Qt.QMainWindow):
                 size = np.sqrt(np.abs(0.5) / max_weight)
                 if(x<80):
                     if(intDifference[x][y] > 0):
-                        plt.plot(x, y, marker=r'$\wedge$', color = "red")
-                    else:
-                        plt.plot(x, y, marker=r'$\vee$', color = "blue")
+                        plt.plot(x+1, y, marker=r'$\wedge$', color = "red")
+                    if(intDifference[x][y] < 0):
+                        plt.plot(x+1, y, marker=r'$\vee$', color = "blue")
+                    #if(intDifference[x][y] == 0):
+                    #    plt.plot(x+1, y, marker=r'$\leftarrow$', color = "green")
+                         
             #size = np.sqrt(np.abs(w) / max_weight)
             
             rect = plt.Rectangle([x - size / 2, y - size / 2], size, size, facecolor=color, edgecolor=edgeColor)
@@ -1175,6 +1178,18 @@ class mainWindow(Qt.QMainWindow):
                 result = [elem[1] for elem in temporalData if elem[0]==queryTimeStep]
                 if(len(result)!=0):
                     return result[0]
+        return None
+
+    # Get node ID for picked lesion.
+    def getNodeIDforPickedLesion(self, pickedLesionID):
+        timeStep = self.horizontalSlider_TimePoint.value()
+        nodeIDList = list(self.G.nodes)
+        for id in nodeIDList:
+            timeList = self.G.nodes[id]["time"]
+            labelList = self.G.nodes[id]["lesionLabel"]
+            temporalData = list(zip(timeList, labelList))
+            if((self.currentTimeStep, pickedLesionID) in list(temporalData)):
+                return id
         return None
 
     # Load data automatically - To be removed in production.
