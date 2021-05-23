@@ -18,7 +18,7 @@
     <normaloff>icons/msvisicon.ico</normaloff>icons/msvisicon.ico</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(255,255,255);
+   <string notr="true">background-color: rgb(33,33,33);
 color:white;</string>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -51,7 +51,7 @@ color:white;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(231,231,231);
-background-color: rgb(255,255,255);
+background-color: rgb(33,33,33);
 font-family: &quot;Google Sans&quot;;
 border-color: rgb(22, 157, 221);
 border-style: solid;</string>
@@ -78,11 +78,10 @@ border-style: solid;</string>
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">border-width: 1px;
-border-radius:6px;
-border-color: rgb(200,200,200);
-font-family: &quot;Google Sans&quot;;
-color:rgb(50,50,50);</string>
+          <string notr="true">border-width: 2px;
+border-radius: 4px;
+border-color: rgb(57,57,57);
+font-family: &quot;Google Sans&quot;;</string>
          </property>
         </widget>
        </item>
@@ -95,11 +94,11 @@ color:rgb(50,50,50);</string>
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: rgb(50,50,50);
-border-color: rgb(200,200,200);
+          <string notr="true">color: rgb(149,189,149);
+border-color: rgb(57,57,57);
 border-style: solid;
-border-width: 1px;
-border-radius: 15px;
+border-width: 2px;
+border-radius: 4px;
 </string>
          </property>
          <property name="text">
@@ -123,7 +122,7 @@ border-radius: 15px;
        <item row="26" column="1">
         <widget class="QLabel" name="label_16">
          <property name="styleSheet">
-          <string notr="true">color: rgb(50,50,50);
+          <string notr="true">color: rgb(149,189,149);
 font-family: &quot;Google Sans&quot;;
 font-weight: bold;</string>
          </property>
@@ -168,18 +167,18 @@ font-weight: bold;</string>
              <property name="styleSheet">
               <string notr="true">QPushButton:hover#pushButton_DefaultGraph
 {
-background-color: rgb(200,200,200);
+background-color: rgb(71,71,71);
 }
 QPushButton:pressed#pushButton_DefaultGraph {background-color:rgb(100,100,100);}
 QPushButton:checked#pushButton_DefaultGraph {background-color:rgb(143, 180,146);border-color: rgb(96,171,96);}
 QPushButton#pushButton_DefaultGraph
 {
-background-color: rgb(200,200,200);
+background-color: rgb(46,46,46);
 color: rgb(231,231,231);
 border-style: outset;
-border-width: 1px;
+border-width: 2px;
 border-radius: 4px;
-border-color: rgb(180,180,180);
+border-color: rgb(57,57,57);
 font: bold 11px;
 padding: 6px;
 color: rgb(231,231,231);
@@ -226,12 +225,12 @@ QPushButton:pressed#pushButton_GraphView {background-color:rgb(100,100,100);}
 QPushButton:checked#pushButton_GraphView {background-color:rgb(143, 180,146);border-color: rgb(96,171,96);}
 QPushButton#pushButton_GraphView
 {
-background-color: rgb(200,200,200);
+background-color: rgb(46,46,46);
 color: rgb(231,231,231);
 border-style: outset;
-border-width: 1px;
+border-width: 2px;
 border-radius: 4px;
-border-color: rgb(180,180,180);
+border-color: rgb(57,57,57);
 font: bold 11px;
 padding: 6px;
 color: rgb(231,231,231);
@@ -270,18 +269,20 @@ border-style: solid;
            </property>
            <property name="styleSheet">
             <string notr="true">
-QCheckBox::indicator {
-color: rgb(200,200,200);
-}
+QCheckBox::indicator
+{
+background: rgb(33,33,33);
+border: 2px solid rgb(149,189,149);
 
+}
+QCheckBox::indicator:checked {
+background-color: rgb(183,241,183);
+}
 font-family: &quot;Google Sans&quot;;
-color: rgb(50,50,50);</string>
+color: rgb(231,231,231);</string>
            </property>
            <property name="text">
             <string>Range Compare</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -291,10 +292,9 @@ color: rgb(50,50,50);</string>
             <bool>false</bool>
            </property>
            <property name="styleSheet">
-            <string notr="true">border-width: 1px;
-border-radius: 10px;
-border-color: rgb(200,200,200);
-color:rgb(50,50,50);</string>
+            <string notr="true">border-width: 2px;
+border-radius: 1px;
+border-color: rgb(57,57,57);</string>
            </property>
            <property name="readOnly">
             <bool>false</bool>
@@ -307,10 +307,9 @@ color:rgb(50,50,50);</string>
             <bool>false</bool>
            </property>
            <property name="styleSheet">
-            <string notr="true">border-width: 1px;
-border-radius: 10px;
-border-color: rgb(200,200,200);
-color:rgb(50,50,50);</string>
+            <string notr="true">border-width: 2px;
+border-radius: 1px;
+border-color: rgb(57,57,57);</string>
            </property>
            <property name="readOnly">
             <bool>false</bool>
@@ -324,18 +323,18 @@ color:rgb(50,50,50);</string>
          <property name="styleSheet">
           <string notr="true">QPushButton:hover#pushButton_LoadFolder
 {
-background-color: rgb(200,200,200);
+background-color: rgb(71,71,71);
 }
-QPushButton:pressed#pushButton_LoadFolder {background-color:rgb(160,160,160);color:rgb(50,50,50);}
+QPushButton:pressed#pushButton_LoadFolder {background-color:rgb(100,100,100);color:rgb(10,10,10);}
 QPushButton#pushButton_LoadFolder
 {
-background-color: rgb(240,240,240);
+background-color: rgb(46,46,46);
 border-style: outset;
-border-width: 1px;
-border-radius: 15px;
-border-color: rgb(200,200,200);
+border-width: 2px;
+border-radius: 4px;
+border-color: rgb(57,57,57);
 padding: 6px;
-color: rgb(50,50,50);
+color: rgb(231,231,231);
 font-family: &quot;Google Sans&quot;;
 border-style: solid;
 }</string>
@@ -350,18 +349,18 @@ border-style: solid;
          <property name="styleSheet">
           <string notr="true">QPushButton:hover#pushButton_ResetView
 {
-background-color: rgb(200,200,200);
+background-color: rgb(71,71,71);
 }
-QPushButton:pressed#pushButton_ResetView {background-color:rgb(160,160,160);color:rgb(50,50,50);}
+QPushButton:pressed#pushButton_ResetView {background-color:rgb(100,100,100);color:rgb(10,10,10);}
 QPushButton#pushButton_ResetView
 {
-background-color: rgb(240,240,240);
+background-color: rgb(46,46,46);
 border-style: outset;
-border-width: 1px;
-border-radius: 15px;
-border-color: rgb(200,200,200);
+border-width: 2px;
+border-radius: 4px;
+border-color: rgb(57,57,57);
 padding: 6px;
-color: rgb(50,50,50);
+color: rgb(231,231,231);
 font-family: &quot;Google Sans&quot;;
 border-style: solid;
 }</string>
@@ -374,7 +373,7 @@ border-style: solid;
        <item row="30" column="1">
         <widget class="QLabel" name="label_3">
          <property name="styleSheet">
-          <string notr="true">color: rgb(50,50,50);
+          <string notr="true">color: rgb(149,189,149);
 font-family: &quot;Google Sans&quot;;
 font-weight: bold;</string>
          </property>
@@ -405,7 +404,7 @@ font-weight: bold;</string>
        <item row="22" column="1">
         <widget class="QLabel" name="label_2">
          <property name="styleSheet">
-          <string notr="true">color: rgb(50,50,50);
+          <string notr="true">color: rgb(149,189,149);
 font-family: &quot;Google Sans&quot;;
 font-weight: bold;</string>
          </property>
@@ -428,19 +427,19 @@ font-weight: bold;</string>
          <property name="styleSheet">
           <string notr="true">QPushButton:hover#pushButton_Screenshot
 {
-background-color: rgb(200,200,200);
+background-color: rgb(71,71,71);
 }
-QPushButton:pressed#pushButton_Screenshot {background-color:rgb(160,160,160);color:rgb(50,50,50);}
+QPushButton:pressed#pushButton_Screenshot {background-color:rgb(100,100,100);color:rgb(10,10,10);}
 QPushButton#pushButton_Screenshot
 {
-background-color: rgb(240,240,240);
+background-color: rgb(46,46,46);
 border-style: outset;
-border-width: 1px;
-border-radius: 15px;
-border-color: rgb(200,200,200);
-padding: 6px;
-color: rgb(50,50,50);
+border-width: 2px;
+border-radius: 4px;
+border-color: rgb(57,57,57);
 font-family: &quot;Google Sans&quot;;
+padding: 6px;
+color: rgb(231,231,231);
 border-style: solid;
 }</string>
          </property>
@@ -468,7 +467,7 @@ border-style: solid;
        <item row="2" column="1">
         <widget class="QLabel" name="label">
          <property name="styleSheet">
-          <string notr="true">color: rgb(50,50,50);
+          <string notr="true">color: rgb(149,189,149);
 font-family: &quot;Google Sans&quot;;
 font-weight: bold;</string>
          </property>
@@ -493,18 +492,18 @@ font-weight: bold;</string>
            <property name="styleSheet">
             <string notr="true">QPushButton:hover#pushButton_Compare
 {
-background-color: rgb(200,200,200);
+background-color: rgb(71,71,71);
 }
-QPushButton:pressed#pushButton_Compare {background-color:rgb(160,160,160);color:rgb(50,50,50);}
+QPushButton:pressed#pushButton_Compare {background-color:rgb(100,100,100);color:rgb(10,10,10);}
 QPushButton#pushButton_Compare
 {
-background-color: rgb(240,240,240);
+background-color: rgb(46,46,46);
 border-style: outset;
-border-width: 1px;
-border-radius: 15px;
-border-color: rgb(200,200,200);
+border-width: 2px;
+border-radius: 4px;
+border-color: rgb(57,57,57);
 padding: 6px;
-color: rgb(50,50,50);
+color: rgb(231,231,231);
 font-family: &quot;Google Sans&quot;;
 border-style: solid;
 }</string>
@@ -520,19 +519,15 @@ border-style: solid;
         <widget class="QProgressBar" name="progressBar">
          <property name="styleSheet">
           <string notr="true">QProgressBar:horizontal {
-border-color: rgb(200,200,200);
+border-color: rgb(67,67,67);
 border-style: solid;
 border-width: 1px;
-border-radius: 10px;
-background: rgb(255,255,255);
+border-radius: 4px;
+background: rgb(71,71,71);
 text-align: center;
 }
 QProgressBar::chunk:horizontal {
-background: rgb(143,180,146);
-border-radius: 10px;
-}
-QProgressBar{
-color:rgb(50,50,50);
+background: rgb(70,121,85);
 }</string>
          </property>
          <property name="value">
@@ -594,9 +589,10 @@ color:rgb(50,50,50);
              </size>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-color: rgb(244,246,253);
+             <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(57,57,57);
 border-style: solid;
-border-width: 0px;
+border-width: 2px;
 border-radius: 10px;</string>
             </property>
             <property name="frameShape">
@@ -622,9 +618,10 @@ border-radius: 10px;</string>
              </size>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-color: rgb(244,246,253);
+             <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(57,57,57);
 border-style: solid;
-border-width: 0px;
+border-width: 2px;
 border-radius: 10px;</string>
             </property>
             <property name="frameShape">
@@ -674,9 +671,10 @@ border-radius: 10px;</string>
                </size>
               </property>
               <property name="styleSheet">
-               <string notr="true">background-color: rgb(244,246,253);
+               <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(57,57,57);
 border-style: solid;
-border-width: 0px;
+border-width: 2px;
 border-radius: 10px;</string>
               </property>
               <property name="frameShape">
@@ -706,9 +704,10 @@ border-radius: 10px;</string>
             <item row="0" column="0">
              <widget class="QFrame" name="frameGraphVis">
               <property name="styleSheet">
-               <string notr="true">background-color: rgb(244,246,253);
+               <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(57,57,57);
 border-style: solid;
-border-width: 0px;
+border-width: 2px;
 border-radius: 10px;</string>
               </property>
               <property name="frameShape">
@@ -744,9 +743,10 @@ border-radius: 10px;</string>
                </size>
               </property>
               <property name="styleSheet">
-               <string notr="true">background-color: rgb(244,246,253);
+               <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(57,57,57);
 border-style: solid;
-border-width: 0px;
+border-width: 2px;
 border-radius: 10px;</string>
               </property>
               <property name="frameShape">
@@ -823,8 +823,7 @@ border-radius: 10px;</string>
                 </size>
                </property>
                <property name="styleSheet">
-                <string notr="true">color: rgb(50,50,50);
-font-family: &quot;Google Sans&quot;;</string>
+                <string notr="true">font-family: &quot;Google Sans&quot;;</string>
                </property>
                <property name="text">
                 <string>no sequence loaded</string>
@@ -844,21 +843,21 @@ font-family: &quot;Google Sans&quot;;</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">.QSlider::handle:horizontal {
-    background:  #8fb492;
+    background:  #477d3f;
     border: 0px solid #474747;
     height: 5px;
 	width:20px;
 line-height: 20px; 
 	margin-top: -6px; 
 	margin-bottom: -6px; 
-	border-radius: 7px; 
+	border-radius: 10px; 
 }
 
 .QSlider::groove:horizontal {
-    border: 1px solid #c8c8c8;
+    border: 2px solid #393939;
     height: 2px;
 
-    background: rgb(240,240,240);
+    background: rgb(46,46,46);
 border-radius: 4px;
     /*margin: 0 12px;*/
 }</string>
@@ -886,7 +885,7 @@ border-radius: 4px;
                <property name="styleSheet">
                 <string notr="true">QRadioButton {
 font-family: &quot;Google Sans&quot;;
-color: rgb(50,50,50);
+color: rgb(231,231,231);
 
 }
 
@@ -898,12 +897,12 @@ QRadioButton::indicator {
 
 QRadioButton::indicator:checked {
     background-color:       rgb(149,189,149);
-    border:                2px solid;
+    border:                 2px solid;
 	border-color:  rgb(183,241,183);
 }
 
 QRadioButton::indicator:unchecked {
-    background-color:       rgb(240,240,240);
+    background-color:       rgb(33,33,33);
     border:                 2px solid gray;
 	border-color:  rgb(149,189,149);
 }</string>
@@ -924,7 +923,7 @@ QRadioButton::indicator:unchecked {
                <property name="styleSheet">
                 <string notr="true">QRadioButton {
 font-family: &quot;Google Sans&quot;;
-color: rgb(50,50,50);
+color: rgb(231,231,231);
 
 }
 
@@ -936,12 +935,12 @@ QRadioButton::indicator {
 
 QRadioButton::indicator:checked {
     background-color:       rgb(149,189,149);
-    border:                2px solid;
+    border:                 2px solid;
 	border-color:  rgb(183,241,183);
 }
 
 QRadioButton::indicator:unchecked {
-    background-color:       rgb(240,240,240);
+    background-color:       rgb(33,33,33);
     border:                 2px solid gray;
 	border-color:  rgb(149,189,149);
 }</string>
@@ -972,7 +971,7 @@ QRadioButton::indicator:unchecked {
     subcontrol-origin: padding;
     subcontrol-position: top right;
     width: 15px;
-	color: rgb(50,50,50);
+	font: 9pt &quot;Google Sans&quot;;
     border-left-width: 0px;
     border-left-color: darkgray;
     border-left-style: solid; /* just a single line */
@@ -982,23 +981,21 @@ QRadioButton::indicator:unchecked {
 
 .QComboBox::down-arrow {
 	border-width: 0px;
-	border-radius: 10px;
     image: url(icons/downArrow.png);
 }
 
 .QComboBox QAbstractItemView {
-    border: 1px solid rgb(200,200,200);
-    selection-background-color: rgb(200,200,200);
-color: rgb(50,50,50);
+    border: 2px solid rgb(20, 52, 30);
+    selection-background-color: rgb(20, 52, 30);
 }
 
 .QComboBox{
-border-color: rgb(200,200,200);
-color: rgb(50,50,50);
+border-color: rgb(57,57,57);
+color: rgb(149, 189, 149);
 border-style: solid;
-border-width: 1px;
-font-family: &quot;Google Sans&quot;;
-border-radius: 10px;
+border-width: 2px;
+font: 9pt &quot;Google Sans&quot;;
+border-radius: 4px;
 }
 </string>
              </property>
@@ -1007,8 +1004,8 @@ border-radius: 10px;
            <item row="2" column="0">
             <widget class="QLabel" name="label_4">
              <property name="styleSheet">
-              <string notr="true">color: rgb(50,50,50);
-font-family: &quot;Google Sans&quot;;</string>
+              <string notr="true">font-family: &quot;Google Sans&quot;;
+color: rgb(231,231,231);</string>
              </property>
              <property name="text">
               <string>Projection</string>
@@ -1033,21 +1030,21 @@ font-family: &quot;Google Sans&quot;;</string>
            <widget class="QSlider" name="horizontalSlider_Riso">
             <property name="styleSheet">
              <string notr="true">.QSlider::handle:horizontal {
-    background:  #8fb492;
+    background:  #477d3f;
     border: 0px solid #474747;
     height: 5px;
 	width:20px;
 line-height: 20px; 
 	margin-top: -6px; 
 	margin-bottom: -6px; 
-	border-radius: 7px; 
+	border-radius: 10px; 
 }
 
 .QSlider::groove:horizontal {
-    border: 1px solid #c8c8c8;
+    border: 2px solid #393939;
     height: 2px;
 
-    background: rgb(240,240,240);
+    background: rgb(46,46,46);
 border-radius: 4px;
     /*margin: 0 12px;*/
 }</string>
@@ -1064,8 +1061,17 @@ border-radius: 4px;
            <widget class="QCheckBox" name="checkBox_AllLesions">
             <property name="styleSheet">
              <string notr="true">
+QCheckBox::indicator
+{
+background: rgb(33,33,33);
+border: 2px solid rgb(149,189,149);
+
+}
+QCheckBox::indicator:checked {
+background-color: rgb(183,241,183);
+}
 font-family: &quot;Google Sans&quot;;
-color: rgb(50,50,50);</string>
+color: rgb(231,231,231);</string>
             </property>
             <property name="text">
              <string>All Lesions</string>
@@ -1081,8 +1087,8 @@ color: rgb(50,50,50);</string>
              </size>
             </property>
             <property name="styleSheet">
-             <string notr="true">color: rgb(50,50,50);
-font-family: &quot;Google Sans&quot;;</string>
+             <string notr="true">font-family: &quot;Google Sans&quot;;
+color: rgb(231,231,231);</string>
             </property>
             <property name="text">
              <string>5.0%</string>
@@ -1093,8 +1099,17 @@ font-family: &quot;Google Sans&quot;;</string>
            <widget class="QCheckBox" name="checkBox_ShowClasses">
             <property name="styleSheet">
              <string notr="true">
+QCheckBox::indicator
+{
+background: rgb(33,33,33);
+border: 2px solid rgb(149,189,149);
+
+}
+QCheckBox::indicator:checked {
+background-color: rgb(183,241,183);
+}
 font-family: &quot;Google Sans&quot;;
-color: rgb(50,50,50);</string>
+color: rgb(231,231,231);</string>
             </property>
             <property name="text">
              <string>Show Classes</string>
@@ -1120,7 +1135,7 @@ color: rgb(50,50,50);</string>
     subcontrol-origin: padding;
     subcontrol-position: top right;
     width: 15px;
-	color: rgb(50,50,50);
+	font-family: &quot;Google Sans&quot;;
     border-left-width: 0px;
     border-left-color: darkgray;
     border-left-style: solid; /* just a single line */
@@ -1130,23 +1145,21 @@ color: rgb(50,50,50);</string>
 
 .QComboBox::down-arrow {
 	border-width: 0px;
-	border-radius: 10px;
     image: url(icons/downArrow.png);
 }
 
 .QComboBox QAbstractItemView {
-    border: 1px solid rgb(200,200,200);
-    selection-background-color: rgb(200,200,200);
-color: rgb(50,50,50);
+    border: 2px solid rgb(20, 52, 30);
+    selection-background-color: rgb(20, 52, 30);
 }
 
 .QComboBox{
-border-color: rgb(200,200,200);
-color: rgb(50,50,50);
+border-color: rgb(57,57,57);
+color: rgb(149, 189, 149);
 border-style: solid;
-border-width: 1px;
+border-width: 2px;
 font-family: &quot;Google Sans&quot;;
-border-radius: 10px;
+border-radius: 4px;
 }
 </string>
             </property>
@@ -1158,8 +1171,8 @@ border-radius: 10px;
           <item row="0" column="6">
            <widget class="QLabel" name="label_6">
             <property name="styleSheet">
-             <string notr="true">color: rgb(50,50,50);
-font-family: &quot;Google Sans&quot;;</string>
+             <string notr="true">font-family: &quot;Google Sans&quot;;
+color: rgb(231,231,231);</string>
             </property>
             <property name="text">
              <string>IsoRange</string>
@@ -1179,24 +1192,24 @@ font-family: &quot;Google Sans&quot;;</string>
               <property name="styleSheet">
                <string notr="true">QRadioButton {
 font-family: &quot;Google Sans&quot;;
-color: rgb(50,50,50);
+color: rgb(231,231,231);
 
 }
 
 QRadioButton::indicator {
     width:                  10px;
     height:                 10px;
-    border-radius:          7px;
+    border-radius:         7px;
 }
 
 QRadioButton::indicator:checked {
     background-color:       rgb(149,189,149);
-    border:                2px solid;
+    border:                 2px solid;
 	border-color:  rgb(183,241,183);
 }
 
 QRadioButton::indicator:unchecked {
-    background-color:       rgb(240,240,240);
+    background-color:       rgb(33,33,33);
     border:                 2px solid gray;
 	border-color:  rgb(149,189,149);
 }</string>
@@ -1217,8 +1230,7 @@ QRadioButton::indicator:unchecked {
               <property name="styleSheet">
                <string notr="true">QRadioButton {
 font-family: &quot;Google Sans&quot;;
-color: rgb(50,50,50);
-
+color: rgb(231,231,231);
 }
 
 QRadioButton::indicator {
@@ -1229,12 +1241,12 @@ QRadioButton::indicator {
 
 QRadioButton::indicator:checked {
     background-color:       rgb(149,189,149);
-    border:                2px solid;
+    border:                 2px solid;
 	border-color:  rgb(183,241,183);
 }
 
 QRadioButton::indicator:unchecked {
-    background-color:       rgb(240,240,240);
+    background-color:       rgb(33,33,33);
     border:                 2px solid gray;
 	border-color:  rgb(149,189,149);
 }</string>
@@ -1255,8 +1267,7 @@ QRadioButton::indicator:unchecked {
               <property name="styleSheet">
                <string notr="true">QRadioButton {
 font-family: &quot;Google Sans&quot;;
-color: rgb(50,50,50);
-
+color: rgb(231,231,231);
 }
 
 QRadioButton::indicator {
@@ -1267,12 +1278,12 @@ QRadioButton::indicator {
 
 QRadioButton::indicator:checked {
     background-color:       rgb(149,189,149);
-    border:                2px solid;
+    border:                 2px solid;
 	border-color:  rgb(183,241,183);
 }
 
 QRadioButton::indicator:unchecked {
-    background-color:       rgb(240,240,240);
+    background-color:       rgb(33,33,33);
     border:                 2px solid gray;
 	border-color:  rgb(149,189,149);
 }</string>
@@ -1291,8 +1302,17 @@ QRadioButton::indicator:unchecked {
            <widget class="QCheckBox" name="checkBox_LesionBorder">
             <property name="styleSheet">
              <string notr="true">
+QCheckBox::indicator
+{
+background: rgb(33,33,33);
+border: 2px solid rgb(149,189,149);
+
+}
+QCheckBox::indicator:checked {
+background-color: rgb(183,241,183);
+}
 font-family: &quot;Google Sans&quot;;
-color: rgb(50,50,50);</string>
+color: rgb(231,231,231);</string>
             </property>
             <property name="text">
              <string>Lesion Border</string>
@@ -1441,20 +1461,20 @@ border-style: solid;
         </property>
         <property name="styleSheet">
          <string notr="true">.QSlider::handle:vertical {
-    background: #8fb492;
+    background: #477d3f;
     border: 0px solid #474747;
     height: 20px;
 	width: 5px;
     /*margin: -30px -30px;*/
 	margin-left: -6px; 
 	margin-right: -6px; 
-	border-radius: 7px;
+	border-radius: 10px;
 }
 
 .QSlider::groove:vertical {
-    border: 1px solid #c8c8c8;
+    border: 2px solid #393939;
     width: 2px;
-    background: rgb(240,240,240);
+    background: rgb(46,46,46);
     margin: 0 0px;
 }</string>
         </property>
@@ -1484,10 +1504,10 @@ border-style: solid;
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(0,0,0);
-border-color: rgb(0,0,0);
+         <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(57,57,57);
 border-style: solid;
-border-width: 1px;
+border-width: 2px;
 border-radius: 10px;</string>
         </property>
         <property name="frameShape">
@@ -1513,10 +1533,10 @@ border-radius: 10px;</string>
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(0,0,0);
-border-color: rgb(0,0,0);
+         <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(57,57,57);
 border-style: solid;
-border-width: 1px;
+border-width: 2px;
 border-radius: 10px;</string>
         </property>
         <property name="frameShape">
@@ -1534,20 +1554,20 @@ border-radius: 10px;</string>
         </property>
         <property name="styleSheet">
          <string notr="true">.QSlider::handle:vertical {
-    background: #8fb492;
+    background: #477d3f;
     border: 0px solid #474747;
     height: 20px;
 	width: 5px;
     /*margin: -30px -30px;*/
 	margin-left: -6px; 
 	margin-right: -6px; 
-	border-radius: 7px;
+	border-radius: 10px;
 }
 
 .QSlider::groove:vertical {
-    border: 1px solid #c8c8c8;
+    border: 2px solid #393939;
     width: 2px;
-    background: rgb(240,240,240);
+    background: rgb(46,46,46);
     margin: 0 0px;
 }</string>
         </property>
@@ -1569,20 +1589,20 @@ border-radius: 10px;</string>
         </property>
         <property name="styleSheet">
          <string notr="true">.QSlider::handle:vertical {
-    background: #8fb492;
+    background: #477d3f;
     border: 0px solid #474747;
     height: 20px;
 	width: 5px;
     /*margin: -30px -30px;*/
 	margin-left: -6px; 
 	margin-right: -6px; 
-	border-radius: 7px;
+	border-radius: 10px;
 }
 
 .QSlider::groove:vertical {
-    border: 1px solid #c8c8c8;
+    border: 2px solid #393939;
     width: 2px;
-    background: rgb(240,240,240);
+    background: rgb(46,46,46);
     margin: 0 0px;
 }</string>
         </property>
@@ -1612,10 +1632,10 @@ border-radius: 10px;</string>
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(0,0,0);
-border-color: rgb(0,0,0);
+         <string notr="true">background-color: rgb(16,16,16);
+border-color: rgb(57,57,57);
 border-style: solid;
-border-width: 1px;
+border-width: 2px;
 border-radius: 10px;</string>
         </property>
         <property name="frameShape">
@@ -1643,7 +1663,7 @@ border-radius: 10px;</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="radioGroup_Modality"/>
   <buttongroup name="radioGroup_BrainSurface"/>
+  <buttongroup name="radioGroup_Modality"/>
  </buttongroups>
 </ui>
