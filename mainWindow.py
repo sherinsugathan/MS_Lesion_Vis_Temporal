@@ -47,6 +47,7 @@ from matplotlib.figure import Figure
 import nibabel as nib
 import json
 import random
+import pickle
 from scipy.ndimage.filters import gaussian_filter1d
 import seaborn as sns
 import SimpleITK as sitk
@@ -215,6 +216,12 @@ class mainWindow(Qt.QMainWindow):
         self.buttonGroupGraphs.setExclusive(True)
         self.buttonGroupGraphs.buttonClicked.connect(self.on_buttonGroupGraphsChanged)
 
+        self.buttonGroupIntensityGraphs = QButtonGroup()
+        self.buttonGroupIntensityGraphs.addButton(self.pushButton_hinton)
+        self.buttonGroupIntensityGraphs.addButton(self.pushButton_Violin)
+        self.buttonGroupIntensityGraphs.setExclusive(True)
+        self.buttonGroupIntensityGraphs.buttonClicked.connect(self.on_buttonGroupIntensityGraphsChanged)
+
         self.buttonGroupSurfaces = QButtonGroup()
         self.buttonGroupSurfaces.addButton(self.radioButton_White)
         self.buttonGroupSurfaces.addButton(self.radioButton_Inflated)
@@ -289,7 +296,16 @@ class mainWindow(Qt.QMainWindow):
                 self.surfaceActors[4].GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
             self.irenDual.Render()
 
-    # Handler for mode change inside button group (graphs)
+    # Handler for mode change inside button group (intensity graphs)
+    @pyqtSlot(QAbstractButton)
+    def on_buttonGroupIntensityGraphsChanged(self, btn):
+        if(self.dataFolderInitialized == True and self.selectedNodeID != None):
+            if(self.buttonGroupIntensityGraphs.checkedId() == -2): # Hinton graph
+                self.stackedWidget_Graphs.setCurrentIndex(2)
+            if(self.buttonGroupIntensityGraphs.checkedId() == -3): # Violin plot
+                self.stackedWidget_Graphs.setCurrentIndex(3)
+
+    # Handler for mode change inside button group (node and stream graphs)
     @pyqtSlot(QAbstractButton)
     def on_buttonGroupGraphsChanged(self, btn):
         if(self.dataFolderInitialized == True):
@@ -343,6 +359,7 @@ class mainWindow(Qt.QMainWindow):
         self.initializeGraphVis() # Load graph visualization.
         self.readInitializestructuralData()
         self.initializeIntensityGraph() # Load intensity visualization.
+        self.initializeViolinGraph() # Load violin graph.
         self.activateControls() # Activate controls.
         self.ren.AddActor2D(self.textActorLesionStatistics) # Add lesion statistics overlay.
         self.dataFolderInitialized = True
@@ -564,6 +581,19 @@ class mainWindow(Qt.QMainWindow):
         self.canvasIntensity.mpl_connect('button_press_event', self.onClickIntensityGraphCanvas)
         self.selectedNodeID = 2
 
+    def initializeViolinGraph(self):
+        self.vl_violin = Qt.QVBoxLayout()
+        #self.figureViolin = plt.figure(figsize = [15,10], num = 6, frameon=False, clear=True, dpi=100)
+        self.figureViolin = plt.figure(facecolor=(0.9568627450980392,0.9647058823529412,0.992156862745098))
+        self.canvasViolin = FigureCanvas(self.figureViolin)
+        self.canvasViolin.setParent(self.frame_Violin)
+        self.vl_violin.addWidget(self.canvasViolin)
+        self.vl_violin.setStretchFactor(self.canvasViolin, 1)
+        self.vl_violin.setSpacing(0)
+        self.vl_violin.setContentsMargins(0, 0, 0, 0)
+        self.frame_Violin.setLayout(self.vl_violin)
+
+
     def onScrollMPRA(self, event):
         currentSlide = self.midSliceX
         if(event.button == 'up'):
@@ -757,7 +787,7 @@ class mainWindow(Qt.QMainWindow):
 
         if(event.xdata != None):
             x_loc = int(round(event.xdata))
-            print("click inside graph at", x_loc)
+            #print("click inside graph at", x_loc)
             #self.selectedNodeID = 
             self.updateDefaultGraph(x_loc, None)
             if event.dblclick:
@@ -766,18 +796,22 @@ class mainWindow(Qt.QMainWindow):
                 if(self.selectedNodeID != None):
                     self.plotIntensityGraph()
                     self.canvasIntensity.draw()
-                    self.stackedWidget_Graphs.setCurrentIndex(2)
+                    self.plotViolin()
+                    self.canvasViolin.draw()
+                    if(self.buttonGroupIntensityGraphs.checkedId() == -2): # hinton style selected.
+                        self.stackedWidget_Graphs.setCurrentIndex(2)
+                    if(self.buttonGroupIntensityGraphs.checkedId() == -3): # violin plot selected.
+                        self.stackedWidget_Graphs.setCurrentIndex(3)
         else:
             print("click outside graph")
+            self.selectedNodeID = None
             self.updateDefaultGraph(None, None)
-
 
 
     def onPickDefaultStreamGraphCanvas(self, event):
         thisline = event.artist
         nodeID = thisline.get_label()
         self.selectedNodeID = nodeID
-        print("ghello", nodeID)
         #artist = event.artist
         #ind = event.ind
         #print('onpick1 line:', labelValue)
@@ -854,7 +888,7 @@ class mainWindow(Qt.QMainWindow):
         plt.xlim(xmax=self.dataCount-1)
         #self.axDefault.xaxis.set_ticks(np.arange(0, self.dataCount-1, 1))
         plt.minorticks_on()
-        self.axDefault.xaxis.grid(True, which='both', color='#999999', linestyle='-', alpha=0.2) # add vertical grid lines.
+        self.axDefault.xaxis.grid(True, which='both', color='#f4f6fd', linestyle='-', alpha=0.2) # add vertical grid lines.
         #self.axDefault.grid()
         #fig.savefig("test.png")
         #plt.show()
@@ -984,6 +1018,54 @@ class mainWindow(Qt.QMainWindow):
         plt.xlim(xmin=-1)
         plt.xlim(xmax=self.dataCount+1)
 
+    # violin plot
+    def plotViolin(self): 
+        # Clearing old figures.
+        self.figureViolin.clear()
+        #self.figureViolin.tight_layout()
+        plt.figure(6)
+        self.axViolin = self.figureViolin.add_subplot(111, xlim=(0,81), ylim=(0,255),autoscale_on=True)
+        #self.axViolin.axis("off")
+        self.axViolin.set_facecolor((0.9568627450980392,0.9647058823529412,0.992156862745098))
+        self.axViolin.xaxis.label.set_color((0.5,0.5,0.5))        #setting up X-axis label color 
+        self.axViolin.yaxis.label.set_color((0.5,0.5,0.5))          #setting up Y-axis label color
+        self.axViolin.tick_params(axis='x', colors=(0.5,0.5,0.5))    #setting up X-axis tick color 
+        self.axViolin.tick_params(axis='y', colors=(0.5,0.5,0.5))  #setting up Y-axis tick color 
+        self.axViolin.spines['left'].set_color((0.5,0.5,0.5))        # setting up Y-axis tick color 
+        self.axViolin.spines['top'].set_color((0.5,0.5,0.5))
+        self.axViolin.spines['right'].set_color((0.5,0.5,0.5))
+        self.axViolin.spines['bottom'].set_color((0.5,0.5,0.5))
+        nodeID = self.selectedNodeID
+        perLabelIntensityDataRoot = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\structural\\"
+        modalities = ["T1", "T2"]
+        T1file = perLabelIntensityDataRoot + "voxelIntensitiesT1.pkl"
+        # read intensity data from file.
+        a_file = open(T1file, "rb")
+        lesionLabelWiseVoxelData = pickle.load(a_file)
+        G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+        nodeIDList = list(G.nodes)
+        timeList = G.nodes[str(nodeID)]["time"]
+        labelList = G.nodes[str(nodeID)]["lesionLabel"]
+        temporalData = list(zip(timeList, labelList))
+        data = []
+        timeIndex = 0
+        for item in temporalData:
+            data.append(lesionLabelWiseVoxelData[item[0]][item[1]-1])
+        # build a violin plot
+        self.axViolin.violinplot(data, showmeans=False, showmedians=True)
+        # add title and axis labels
+        #self.axViolin.set_title('')
+        self.axViolin.set_xlabel('followup')
+        self.axViolin.set_ylabel('intensity')
+        self.axViolin.set_xticks(timeList)
+        # add horizontal grid lines
+        #self.axViolin.yaxis.grid(True)
+        # Add support for zooming and panning
+        scale = 1.1
+        zp = Utils.ZoomPan()
+        figZoom = zp.zoom_factory(self.axViolin, base_scale = scale)
+        figPan = zp.pan_factory(self.axViolin)
+
     def readDiffListFromJSON(self, timeList, labelList):  
         intensityList = []
         propertyString = "Mean"
@@ -1108,11 +1190,11 @@ class mainWindow(Qt.QMainWindow):
         self.label_currentDataIndex.setText(str(sliderValue))
         self.ren.RemoveAllViewProps()
         for lesion in self.LesionActorList[sliderValue]:
-            lesion.GetProperty().SetColor(0.7804, 0.4824, 0.4824) # default lesion color
+            lesion.GetProperty().SetColor(0.6196078431372549, 0.7372549019607843, 0.8549019607843137) # default lesion color
             lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
             if(self.userPickedLesionID!=None):
                 if(lesionID == highlightLesionID-1):
-                    lesion.GetProperty().SetColor(0.4627, 0.4627, 0.9568) # A blueish color.
+                    lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843) # yellowish color
             self.ren.AddActor(lesion)
         self.ren.AddActor(self.surfaceActors[0]) # ventricle
         self.ren.AddActor(self.textActorLesionStatistics) # Text overlay
@@ -1164,7 +1246,7 @@ class mainWindow(Qt.QMainWindow):
         if(timeStep == None):
             timeStep = self.horizontalSlider_TimePoint.value()
         for lesion in self.LesionActorList[timeStep]:
-            lesion.GetProperty().SetColor(0.7804, 0.4824, 0.4824) # default lesion color
+            lesion.GetProperty().SetColor(0.6196078431372549, 0.7372549019607843, 0.8549019607843137) # default lesion color
 
     # Get lesion ID of any timestep provided the current ID and timestep.
     def getLinkedLesionIDFromTimeStep(self, currentLesionID, queryTimeStep=None):
