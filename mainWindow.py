@@ -113,9 +113,6 @@ class mainWindow(Qt.QMainWindow):
         self.pushButton_Compare.clicked.connect(self.compareDataAndUpdateSurface) # Attaching button click handler.
         self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
         self.horizontalSlider_Riso.valueChanged.connect(self.on_sliderChangedRiso) # Attaching slider value (Riso) changed handler.
-        self.mprA_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRA)
-        self.mprB_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRB)
-        self.mprC_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRC)
         self.comboBox_LesionAttributes.currentTextChanged.connect(self.on_combobox_changed_LesionAttributes) # Attaching handler for lesion filter combobox selection change.
         self.comboBox_ProjectionMethods.currentTextChanged.connect(self.on_combobox_changed_ProjectionMethods) # Attaching handler for projection methods combobox selection change.
         self.checkBox_AllLesions.stateChanged.connect(self.displayAllLesions_changed) # Display all lesions in intensity graph
@@ -419,6 +416,7 @@ class mainWindow(Qt.QMainWindow):
         my_cmap = self.MPROverlayColorMap
         my_cmap.set_under('k', alpha=0) # For setting background to alpha 0
 
+        self.slice_MPRA = np.ma.masked_where(self.slice_MPRA <1, self.slice_MPRA)
         self.MPRA = plt.imshow(self.slice_MPRA, cmap='Greys_r', aspect=aspectCoronalData)
         self.MPRAMask = plt.imshow(self.sliceMask_MPRA, cmap=my_cmap, aspect=aspectCoronalMask,  alpha=maskAlpha, interpolation='none', clim=[0.9, 1])
         self.sliceNumberHandleMPRA = self.axMPRA.text(5, 5, str(self.midSliceX), verticalalignment='top', horizontalalignment='left', color='green', fontsize=12)
@@ -476,6 +474,7 @@ class mainWindow(Qt.QMainWindow):
         self.epi_img = nib.load(fileName)
         self.mask_img = nib.load(fileNameOverlay)
         self.epi_img_data = self.epi_img.get_fdata() # Read structural
+        
         self.mask_data = self.mask_img.get_fdata() # Read mask data
         
 
@@ -499,7 +498,9 @@ class mainWindow(Qt.QMainWindow):
         self.slice_MPRA = self.epi_img_data[self.midSliceX, :, :]
         self.slice_MPRB = self.epi_img_data[:, self.midSliceY, :]
         self.slice_MPRC = self.epi_img_data[:, :, self.midSliceZ]
-
+        self.slice_MPRA = np.ma.masked_where(self.slice_MPRA==0, self.slice_MPRA)
+        self.slice_MPRB = np.ma.masked_where(self.slice_MPRB==0, self.slice_MPRB)
+        self.slice_MPRC = np.ma.masked_where(self.slice_MPRC==0, self.slice_MPRC)
         self.sliceMask_MPRA = self.alpha_mask[self.midSliceX, :, :]
         self.sliceMask_MPRB = self.alpha_mask[:, self.midSliceY, :]
         self.sliceMask_MPRC = self.alpha_mask[:, :, self.midSliceZ]
@@ -515,15 +516,19 @@ class mainWindow(Qt.QMainWindow):
         self.mprB_Slice_Slider.setValue(self.midSliceY)
         self.mprC_Slice_Slider.setValue(self.midSliceZ)
 
+        self.mprA_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRA)
+        self.mprB_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRB)
+        self.mprC_Slice_Slider.valueChanged.connect(self.on_sliderChangedMPRC)
+
     # Display orientation cube.
     def displayOrientationCube(self):
         self.axesActor = vtk.vtkAnnotatedCubeActor()
         self.axesActor.SetXPlusFaceText('R')
         self.axesActor.SetXMinusFaceText('L')
-        self.axesActor.SetYMinusFaceText('H')
-        self.axesActor.SetYPlusFaceText('F')
-        self.axesActor.SetZMinusFaceText('P')
-        self.axesActor.SetZPlusFaceText('A')
+        self.axesActor.SetYMinusFaceText('P')
+        self.axesActor.SetYPlusFaceText('A')
+        self.axesActor.SetZMinusFaceText('I')
+        self.axesActor.SetZPlusFaceText('S')
         self.axesActor.GetTextEdgesProperty().SetColor(1,1,1)
         self.axesActor.GetTextEdgesProperty().SetLineWidth(1)
         self.axesActor.GetCubeProperty().SetColor(0.7804, 0.4824, 0.4824)
@@ -537,10 +542,10 @@ class mainWindow(Qt.QMainWindow):
         self.axesActorDual = vtk.vtkAnnotatedCubeActor()
         self.axesActorDual.SetXPlusFaceText('R')
         self.axesActorDual.SetXMinusFaceText('L')
-        self.axesActorDual.SetYMinusFaceText('H')
-        self.axesActorDual.SetYPlusFaceText('F')
-        self.axesActorDual.SetZMinusFaceText('P')
-        self.axesActorDual.SetZPlusFaceText('A')
+        self.axesActorDual.SetYMinusFaceText('P')
+        self.axesActorDual.SetYPlusFaceText('A')
+        self.axesActorDual.SetZMinusFaceText('I')
+        self.axesActorDual.SetZPlusFaceText('S')
         self.axesActorDual.GetTextEdgesProperty().SetColor(1,1,1)
         self.axesActorDual.GetTextEdgesProperty().SetLineWidth(1)
         self.axesActorDual.GetCubeProperty().SetColor(0.7804, 0.4824, 0.4824)
@@ -660,6 +665,7 @@ class mainWindow(Qt.QMainWindow):
         plt.figure(0)
         self.midSliceX = self.mprA_Slice_Slider.value()
         self.slice_MPRA = np.rot90(self.epi_img_data[self.midSliceX, :, :])
+        self.slice_MPRA = np.ma.masked_where(self.slice_MPRA==0, self.slice_MPRA)
         self.sliceMask_MPRA = np.rot90(self.alpha_mask[self.midSliceX, :, :])
         self.MPRA.set_data(self.slice_MPRA)
         self.sliceNumberHandleMPRA.set_text(self.midSliceX)
@@ -672,6 +678,7 @@ class mainWindow(Qt.QMainWindow):
         plt.figure(1)
         self.midSliceY = self.mprB_Slice_Slider.value()
         self.slice_MPRB = np.rot90(self.epi_img_data[:, self.midSliceY, :])
+        self.slice_MPRB = np.ma.masked_where(self.slice_MPRB==0, self.slice_MPRB)
         self.sliceMask_MPRB = np.rot90(self.alpha_mask[:, self.midSliceY, :])
         self.MPRB.set_data(self.slice_MPRB)
         self.sliceNumberHandleMPRB.set_text(self.midSliceY)
@@ -688,7 +695,8 @@ class mainWindow(Qt.QMainWindow):
             self.sliceMask_MPRC = np.rot90(self.alpha_mask[:, :, self.midSliceZ])
         else:
             self.slice_MPRC = np.rot90(self.epi_img_data[:, :, self.midSliceZ], 3)
-            self.sliceMask_MPRC = np.rot90(self.alpha_mask[:, :, self.midSliceZ], 3)            
+            self.sliceMask_MPRC = np.rot90(self.alpha_mask[:, :, self.midSliceZ], 3)    
+        self.slice_MPRC = np.ma.masked_where(self.slice_MPRC==0, self.slice_MPRC)        
         self.MPRC.set_data(self.slice_MPRC)
         self.sliceNumberHandleMPRC.set_text(self.midSliceZ)
         self.MPRCMask.set_data(self.sliceMask_MPRC)
@@ -1052,7 +1060,7 @@ class mainWindow(Qt.QMainWindow):
         for item in temporalData:
             data.append(lesionLabelWiseVoxelData[item[0]][item[1]-1])
         # build a violin plot
-        self.axViolin.violinplot(data, showmeans=False, showmedians=True)
+        self.axViolin.violinplot(data, showmeans=False, showmedians=True, showextrema=False)
         # add title and axis labels
         #self.axViolin.set_title('')
         self.axViolin.set_xlabel('followup')

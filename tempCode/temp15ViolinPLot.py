@@ -74,8 +74,6 @@ print(len(temporalData))
 
 
 
-
-
 #dataList = lesionLabelWiseVoxelData[0]
 #print(len(dataList))
 
