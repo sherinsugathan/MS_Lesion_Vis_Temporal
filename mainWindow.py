@@ -130,7 +130,8 @@ class mainWindow(Qt.QMainWindow):
         self.vtkWidget = QVTKRenderWindowInteractor(self.frame)
         self.vl.addWidget(self.vtkWidget)
         self.ren = vtk.vtkRenderer()
-        self.ren.SetBackground(0.9568627450980392,0.9647058823529412,0.992156862745098)
+        #self.ren.SetBackground(0.9568627450980392,0.9647058823529412,0.992156862745098)
+        self.ren.SetBackground(0.9411764705882353, 0.9411764705882353, 0.9411764705882353)
         self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
         self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
         self.iren.SetRenderWindow(self.vtkWidget.GetRenderWindow())
@@ -148,7 +149,8 @@ class mainWindow(Qt.QMainWindow):
         self.vtkWidgetDual = QVTKRenderWindowInteractor(self.frameDual)
         self.vlDual.addWidget(self.vtkWidgetDual)
         self.renDual = vtk.vtkRenderer()
-        self.renDual.SetBackground(0.9568627450980392,0.9647058823529412,0.992156862745098)
+        #self.renDual.SetBackground(0.9568627450980392,0.9647058823529412,0.992156862745098)
+        self.renDual.SetBackground(0.9411764705882353, 0.9411764705882353, 0.9411764705882353)
         self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.renDual)
         self.irenDual = self.vtkWidgetDual.GetRenderWindow().GetInteractor()
         self.irenDual.SetRenderWindow(self.vtkWidgetDual.GetRenderWindow())
@@ -297,7 +299,7 @@ class mainWindow(Qt.QMainWindow):
     @pyqtSlot(QAbstractButton)
     def on_buttonGroupIntensityGraphsChanged(self, btn):
         if(self.dataFolderInitialized == True and self.selectedNodeID != None):
-            if(self.buttonGroupIntensityGraphs.checkedId() == -2): # Hinton graph
+            if(self.buttonGroupIntensityGraphs.checkedId() == -2): # Hinton
                 self.stackedWidget_Graphs.setCurrentIndex(2)
             if(self.buttonGroupIntensityGraphs.checkedId() == -3): # Violin plot
                 self.stackedWidget_Graphs.setCurrentIndex(3)
@@ -462,6 +464,11 @@ class mainWindow(Qt.QMainWindow):
         self.MPRCMask = plt.imshow(self.sliceMask_MPRC, cmap=my_cmap, aspect=aspectCoronalMask,  alpha=maskAlpha, interpolation='none', clim=[0.9, 1])
         self.sliceNumberHandleMPRC = self.axMPRC.text(5, 5, str(self.midSliceZ), verticalalignment='top', horizontalalignment='left', color='green', fontsize=12)
 
+        # scale = 1.1
+        # zpMPRA = Utils.ZoomPan()
+        # figZoomMPRA = zpMPRA.zoom_factory(self.axMPRA, base_scale = scale)
+        # figPanMPRA = zpMPRA.pan_factory(self.axMPRA)
+
         self.canvasMPRA.draw()
         self.canvasMPRB.draw()
         self.canvasMPRC.draw()
@@ -589,7 +596,7 @@ class mainWindow(Qt.QMainWindow):
     def initializeViolinGraph(self):
         self.vl_violin = Qt.QVBoxLayout()
         #self.figureViolin = plt.figure(figsize = [15,10], num = 6, frameon=False, clear=True, dpi=100)
-        self.figureViolin = plt.figure(facecolor=(0.9568627450980392,0.9647058823529412,0.992156862745098))
+        self.figureViolin = plt.figure(facecolor=(0.9411764705882353, 0.9411764705882353, 0.9411764705882353))
         self.canvasViolin = FigureCanvas(self.figureViolin)
         self.canvasViolin.setParent(self.frame_Violin)
         self.vl_violin.addWidget(self.canvasViolin)
@@ -876,7 +883,7 @@ class mainWindow(Qt.QMainWindow):
         ys = dataArray
         self.polyCollection = self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList, linewidth=0.5, edgecolor='gray', colors = self.plotColors)
         #self.axDefault.set_facecolor((0.0627, 0.0627, 0.0627))
-        self.axDefault.set_facecolor((0.9568627450980392,0.9647058823529412,0.992156862745098))
+        self.axDefault.set_facecolor((0.9411764705882353, 0.9411764705882353, 0.9411764705882353))
         self.axDefault.xaxis.label.set_color((0.2,0.2,0.2))
         self.axDefault.yaxis.label.set_color((0.2,0.2,0.2))
         self.axDefault.spines['bottom'].set_color((0.3411, 0.4824, 0.3608))
@@ -887,9 +894,9 @@ class mainWindow(Qt.QMainWindow):
         self.axDefault.spines['top'].set_visible(False)
         self.axDefault.tick_params(axis='x', colors=(0.2,0.2,0.2))
         self.axDefault.tick_params(axis='y', colors=(0.2,0.2,0.2))
-        self.axDefault.set_xlabel("followup instance", fontname="Arial", fontsize=12)
-        self.axDefault.set_ylabel(lesionAttributeString, fontname="Arial", fontsize=12)
-        self.axDefault.set_title("activity graph", fontname="Arial", fontsize=8)
+        self.axDefault.set_xlabel("followup instance", fontname="Arial")#, fontsize=12)
+        self.axDefault.set_ylabel(lesionAttributeString, fontname="Arial")#, fontsize=12)
+        #self.axDefault.set_title("activity graph", fontname="Arial", fontsize=8)
         self.axDefault.title.set_color((0.2,0.2,0.2))
         plt.subplots_adjust(left=0.05, right=0.98, top=0.96, bottom=0.1)
         plt.xlim(xmin=0)
@@ -906,6 +913,10 @@ class mainWindow(Qt.QMainWindow):
         self.defaultGraphBackup = self.canvasDefault.copy_from_bbox(self.axDefault.bbox)
 
         self.vLine = None
+        scale = 1.5
+        zpDefault = Utils.ZoomPan()
+        figZoomDefault = zpDefault.zoom_factory(self.axDefault, base_scale = scale)
+        figPanDefault = zpDefault.pan_factory(self.axDefault)
 
     # update default graph
     def updateDefaultGraph(self, vlineXloc=None, updateColorIndex=None):
@@ -1034,7 +1045,7 @@ class mainWindow(Qt.QMainWindow):
         plt.figure(6)
         self.axViolin = self.figureViolin.add_subplot(111, xlim=(0,81), ylim=(0,255),autoscale_on=True)
         #self.axViolin.axis("off")
-        self.axViolin.set_facecolor((0.9568627450980392,0.9647058823529412,0.992156862745098))
+        self.axViolin.set_facecolor((0.9411764705882353, 0.9411764705882353, 0.9411764705882353))
         self.axViolin.xaxis.label.set_color((0.5,0.5,0.5))        #setting up X-axis label color 
         self.axViolin.yaxis.label.set_color((0.5,0.5,0.5))          #setting up Y-axis label color
         self.axViolin.tick_params(axis='x', colors=(0.5,0.5,0.5))    #setting up X-axis tick color 
@@ -1069,10 +1080,10 @@ class mainWindow(Qt.QMainWindow):
         # add horizontal grid lines
         #self.axViolin.yaxis.grid(True)
         # Add support for zooming and panning
-        scale = 1.1
-        zp = Utils.ZoomPan()
-        figZoom = zp.zoom_factory(self.axViolin, base_scale = scale)
-        figPan = zp.pan_factory(self.axViolin)
+        scale = 1.5
+        zpViolin = Utils.ZoomPan()
+        figZoom = zpViolin.zoom_factory(self.axViolin, base_scale = scale)
+        figPan = zpViolin.pan_factory(self.axViolin)
 
     def readDiffListFromJSON(self, timeList, labelList):  
         intensityList = []

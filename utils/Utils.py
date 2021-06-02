@@ -176,8 +176,9 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
                     
                     nodeID = self.lesionvis.getNodeIDforPickedLesion(self.lesionvis.userPickedLesionID)
                     self.lesionvis.selectedNodeID = nodeID
-                    self.lesionvis.plotViolin()
-                    self.lesionvis.canvasViolin.draw()
+                    if(self.lesionvis.buttonGroupIntensityGraphs.checkedId() == -3): # Violin plot
+                        self.lesionvis.plotViolin()
+                        self.lesionvis.canvasViolin.draw()
                     self.lesionvis.updateDefaultGraph(None, nodeID)
                     self.lesionvis.on_sliderChangedTimePoint()
                     self.lesionvis.updateLesionOverlayText()
