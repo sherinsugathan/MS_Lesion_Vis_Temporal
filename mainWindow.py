@@ -39,6 +39,7 @@ import networkx as nx
 from matplotlib import colors
 import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.patches as mpatches
 import matplotlib.cm as cm
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
@@ -406,8 +407,8 @@ class mainWindow(Qt.QMainWindow):
         plt.axis('off')
         plt.subplots_adjust(wspace=None, hspace=None)
         if(refreshData == True):
-            self.slice_MPRA = np.rot90(self.slice_MPRA)
-            self.sliceMask_MPRA = np.rot90(self.sliceMask_MPRA)
+            self.slice_MPRA = np.fliplr(np.rot90(self.slice_MPRA))
+            self.sliceMask_MPRA = np.fliplr(np.rot90(self.sliceMask_MPRA))
         if(self.radioButton_FLAIR.isChecked() == True):
             aspectCoronalData = self.spacingData[2]/self.spacingData[1]
             aspectCoronalMask = self.spacingMask[2]/self.spacingMask[1]
@@ -671,9 +672,9 @@ class mainWindow(Qt.QMainWindow):
     def on_sliderChangedMPRA(self):
         plt.figure(0)
         self.midSliceX = self.mprA_Slice_Slider.value()
-        self.slice_MPRA = np.rot90(self.epi_img_data[self.midSliceX, :, :])
+        self.slice_MPRA = np.fliplr(np.rot90(self.epi_img_data[self.midSliceX, :, :]))
         self.slice_MPRA = np.ma.masked_where(self.slice_MPRA==0, self.slice_MPRA)
-        self.sliceMask_MPRA = np.rot90(self.alpha_mask[self.midSliceX, :, :])
+        self.sliceMask_MPRA = np.fliplr(np.rot90(self.alpha_mask[self.midSliceX, :, :]))
         self.MPRA.set_data(self.slice_MPRA)
         self.sliceNumberHandleMPRA.set_text(self.midSliceX)
         self.MPRAMask.set_data(self.sliceMask_MPRA)
@@ -753,7 +754,7 @@ class mainWindow(Qt.QMainWindow):
          
         nodeIDList = list(G.nodes)
         streamPlotDataColors = sns.color_palette("Set2", len(nodeIDList)) # visually pleasing colors from color brewer.
-        streamPlotDataColors = sns.color_palette("Set2", len(nodeIDList)) # visually pleasing colors from color brewer.
+        #streamPlotDataColors = sns.color_palette()
         nodesAndDegreesUndirected =  list(G.degree(nodeIDList))
         nodesAndDegreesDirectedOut =  list(G.out_degree(nodeIDList))
         nodesAndDegreesDirectedIn =  list(G.in_degree(nodeIDList))
@@ -862,6 +863,7 @@ class mainWindow(Qt.QMainWindow):
         dataArray = []
         self.graphLegendLabelList = []
         for id in nodeOrderForGraph:
+            print("Node order", id)
             self.graphLegendLabelList.append(str(id))
             timeList = self.G.nodes[id]["time"]
             labelList = self.G.nodes[id]["lesionLabel"]
@@ -876,12 +878,32 @@ class mainWindow(Qt.QMainWindow):
             #buckets = gaussian_filter1d(buckets, sigma = 2)
             arr = np.asarray(buckets, dtype=np.float64)
             dataArray.append(arr)
-
+    
         #x = np.linspace(0, self.dataCount, self.dataCount)
         x = list(range(self.dataCount))
         #random.shuffle(dataArray)
         ys = dataArray
-        self.polyCollection = self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList, linewidth=0.5, edgecolor='gray', colors = self.plotColors)
+        self.polyCollection = self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList,  colors = self.plotColors, alpha = 0.7,linewidth=1, linestyle=':', edgecolor=(0.6,0.6,0.6, 1.0))
+        
+        
+        #with open('D://polyCollection_data.pkl', 'wb') as output:
+        #    pickle.dump(self.polyCollection, output, pickle.HIGHEST_PROTOCOL)
+        #print(len(self.polyCollection))
+        #paths=self.polyCollection[0].get_paths()
+        #print(paths)
+        #print(self.polyCollection[0])
+        intensityArray = self.getIntensityDataForStackplotArtist(nodeOrderForGraph)
+        self.stackPlotArtistYcenters = Utils.computeArtistVerticalCenterLocationsForStackPlot(self.polyCollection)
+        #print("length is ", len(self.stackPlotArtistYcenters))
+        w1 = mpatches.Wedge([0,0], 80, theta1 = 0,theta2 = 180)
+        w2 = mpatches.Wedge([0,0], 80, theta1 = 180,theta2 = 360)
+        mod1glyph = w1.get_path()
+        mod2glyph = w2.get_path()
+        for yLocsIndex in range(len(self.stackPlotArtistYcenters)):
+            colors = plt.cm.seismic(intensityArray[yLocsIndex])
+            self.axDefault.scatter(x, self.stackPlotArtistYcenters[yLocsIndex], 90, c=colors, alpha=0.5, marker=mod1glyph)#, label="Luck")
+            self.axDefault.scatter(x, self.stackPlotArtistYcenters[yLocsIndex], 90, c=colors, alpha=0.5, marker=mod2glyph)#, label="Luck")
+  
         #self.axDefault.set_facecolor((0.0627, 0.0627, 0.0627))
         self.axDefault.set_facecolor((0.9411764705882353, 0.9411764705882353, 0.9411764705882353))
         self.axDefault.xaxis.label.set_color((0.2,0.2,0.2))
@@ -903,7 +925,8 @@ class mainWindow(Qt.QMainWindow):
         plt.xlim(xmax=self.dataCount-1)
         #self.axDefault.xaxis.set_ticks(np.arange(0, self.dataCount-1, 1))
         plt.minorticks_on()
-        self.axDefault.xaxis.grid(True, which='both', color='#f4f6fd', linestyle='-', alpha=0.2) # add vertical grid lines.
+        # Enable to add vertical grid lines in streamgraph.
+        #self.axDefault.xaxis.grid(True, which='both', color='#f4f6fd', linestyle='-', alpha=0.2) # add vertical grid lines.
         #self.axDefault.grid()
         #fig.savefig("test.png")
         #plt.show()
@@ -924,7 +947,7 @@ class mainWindow(Qt.QMainWindow):
         #self.canvasDefault.restore_region(self.defaultGraphBackup)
         if(vlineXloc != None):
             if(self.vLine == None):
-                self.vLine = plt.axvline(x=vlineXloc, linewidth=1, color='r', linestyle='--')
+                self.vLine = plt.axvline(x=vlineXloc, linewidth=2, color='r', linestyle=':', alpha=0.5)
             else:
                 self.vLine.set_xdata([vlineXloc])
         else:
@@ -1096,6 +1119,23 @@ class mainWindow(Qt.QMainWindow):
             intensityList.append(int(self.structureInfo[str(timeList[i])][0][str(labelList[i])][0][propertyString])/255)
             #print("min is", self.intMin, "max is", self.intMax)
         return intensityList
+
+    # Return intensity data for all stackplot artists.
+    def getIntensityDataForStackplotArtist(self, nodeOrderForGraph):
+        intensityMatrix = []
+        G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+        #nodeIDList = list(G.nodes)
+
+        dataCount = 81
+        for id in nodeOrderForGraph:
+            intensityDiffArray = np.empty(dataCount)*np.nan
+            timeList = G.nodes[id]["time"]
+            labelList = G.nodes[id]["lesionLabel"]
+            diffList = self.readDiffListFromJSON(timeList, labelList)
+            intensityDiffArray[timeList] = [elem for elem in diffList ]
+            intensityMatrix.append(intensityDiffArray)
+    
+        return intensityMatrix 
 
     # Compute and return intensity matrix for the graph
     def getIntensityDataMatrix(self, nodeID):

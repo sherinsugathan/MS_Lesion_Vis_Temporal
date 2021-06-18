@@ -3,6 +3,8 @@ from PyQt5 import QtCore, QtGui
 import vtk
 import os
 import glob
+import math
+import numpy as np
 
 class ReadThread(QObject): 
     progress = pyqtSignal(int)
@@ -40,6 +42,7 @@ class ReadThread(QObject):
                     actor = vtk.vtkActor()
                     actor.SetMapper(mapper)
                     actor.GetProperty().SetColor(0.6196078431372549, 0.7372549019607843, 0.8549019607843137)
+                    #actor.GetProperty().SetColor(0.9411764705882353, 0.2313725490196078, 0.1254901960784314)
                     actor.GetProperty().SetInformation(info)
                     smoothSurface(actor)
                     actor.GetMapper().ScalarVisibilityOff()
@@ -371,6 +374,41 @@ def smoothSurface(surfaceActor):
     #lesionActor = vtk.vtkActor()
     surfaceActor.SetMapper(mapper)
 
+
+'''
+##########################################################################
+    Function for computing y locations(middle) of all the artists in the polyCollection passed in.
+##########################################################################
+'''
+def computeArtistVerticalCenterLocationsForStackPlot(polyCollection):
+    numberOfArtists = len(polyCollection)
+    stackPlotMiddleLinesY = [None] * numberOfArtists
+    for i in range(numberOfArtists):
+        vertexList = polyCollection[i].get_paths()[0].vertices
+        vertexCount = int(math.ceil(len(vertexList)/2)) # only half (+x direction) is processed.
+        firstHalf = vertexList[1:vertexCount-1] # vertices in the forward direction. (first item (starting from 1:) removed)
+        #secondHalf = np.flip(vertexList[vertexCount:-1]) # vertices in the reverse direction. (last item (ending at :-2) removed)
+        secondHalf = np.flip(vertexList[vertexCount:-1]) # vertices in the reverse direction. (last item (ending at :-2) removed)
+        #print(firstHalf)
+        #print("Hellow")
+        #print(secondHalf)
+        firstHalfYValues = [y for x,y in firstHalf]
+        secondHalfYValues = [x for x,y in secondHalf]
+        #print(firstHalfYValues)
+        #print("Done")
+        #print(secondHalfYValues)
+
+        #print(firstHalfYValues)
+        average = np.true_divide(np.subtract(secondHalfYValues, firstHalfYValues),2)
+        # includeInSum = average!=0
+        # print(includeInSum)
+        firstHalfYValues = np.where(average == 0, float('nan'), firstHalfYValues)
+        result = np.add(average, firstHalfYValues) #Doing y1+(y2-y1)/2
+        #print(result)
+        stackPlotMiddleLinesY[i] = result
+        #quit()
+        #print(vertexCount)
+    return stackPlotMiddleLinesY
 
 '''
 ##########################################################################
