@@ -69,92 +69,7 @@ border-style: solid;</string>
        <property name="rightMargin">
         <number>0</number>
        </property>
-       <item row="22" column="1">
-        <layout class="QGridLayout" name="gridLayout_6">
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <property name="horizontalSpacing">
-          <number>7</number>
-         </property>
-         <property name="verticalSpacing">
-          <number>0</number>
-         </property>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="checkBox_RangeCompare">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">
-QCheckBox::indicator {
-color: rgb(200,200,200);
-}
-
-font-family: &quot;Google Sans&quot;;
-color: rgb(50,50,50);</string>
-           </property>
-           <property name="text">
-            <string>Range Compare</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QSpinBox" name="spinBox_RangeMin">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">border-width: 1px;
-border-radius: 10px;
-border-color: rgb(230,230,230);
-color:rgb(50,50,50);</string>
-           </property>
-           <property name="readOnly">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QSpinBox" name="spinBox_RangeMax">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">border-width: 1px;
-border-radius: 10px;
-border-color: rgb(230,230,230);
-color:rgb(50,50,50);</string>
-           </property>
-           <property name="readOnly">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="label">
-         <property name="styleSheet">
-          <string notr="true">color: rgb(50,50,50);
-font-family: &quot;Google Sans&quot;;
-</string>
-         </property>
-         <property name="text">
-          <string>CHOOSE PATIENT FOLDER</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="30" column="1">
+       <item row="31" column="1">
         <widget class="QTextEdit" name="textEdit_Information">
          <property name="maximumSize">
           <size>
@@ -171,79 +86,7 @@ color:rgb(50,50,50);</string>
          </property>
         </widget>
        </item>
-       <item row="28" column="1">
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="26" column="1">
-        <widget class="QPushButton" name="pushButton_ResetView">
-         <property name="styleSheet">
-          <string notr="true">QPushButton:hover#pushButton_ResetView
-{
-background-color: rgb(200,200,200);
-}
-QPushButton:pressed#pushButton_ResetView {background-color:rgb(160,160,160);color:rgb(50,50,50);}
-QPushButton#pushButton_ResetView
-{
-background-color: rgb(240,240,240);
-border-style: outset;
-border-width: 1px;
-border-radius: 10px;
-border-color: rgb(230,230,230);
-padding: 6px;
-color: rgb(50,50,50);
-font-family: &quot;Google Sans&quot;;
-border-style: solid;
-}</string>
-         </property>
-         <property name="text">
-          <string>Reset Views</string>
-         </property>
-        </widget>
-       </item>
-       <item row="32" column="1">
-        <widget class="QProgressBar" name="progressBar">
-         <property name="styleSheet">
-          <string notr="true">QProgressBar:horizontal {
-border-color: rgb(230,230,230);
-border-style: solid;
-border-width: 1px;
-border-radius: 10px;
-background: rgb(255,255,255);
-text-align: center;
-}
-QProgressBar::chunk:horizontal {
-background: rgb(143,180,146);
-border-radius: 10px;
-}
-QProgressBar{
-color:rgb(50,50,50);
-}</string>
-         </property>
-         <property name="value">
-          <number>0</number>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-         <property name="textVisible">
-          <bool>true</bool>
-         </property>
-         <property name="textDirection">
-          <enum>QProgressBar::TopToBottom</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="21" column="1">
+       <item row="22" column="1">
         <widget class="Line" name="line">
          <property name="autoFillBackground">
           <bool>false</bool>
@@ -253,56 +96,6 @@ color:rgb(50,50,50);
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="23" column="1">
-        <layout class="QGridLayout" name="gridLayout_16"/>
-       </item>
-       <item row="27" column="1">
-        <widget class="QPushButton" name="pushButton_Screenshot">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton:hover#pushButton_Screenshot
-{
-background-color: rgb(200,200,200);
-}
-QPushButton:pressed#pushButton_Screenshot {background-color:rgb(160,160,160);color:rgb(50,50,50);}
-QPushButton#pushButton_Screenshot
-{
-background-color: rgb(240,240,240);
-border-style: outset;
-border-width: 1px;
-border-radius: 10px;
-border-color: rgb(230,230,230);
-padding: 6px;
-color: rgb(50,50,50);
-font-family: &quot;Google Sans&quot;;
-border-style: solid;
-}</string>
-         </property>
-         <property name="text">
-          <string>Capture Rendered Image</string>
-         </property>
-        </widget>
-       </item>
-       <item row="29" column="1">
-        <widget class="QLabel" name="label_3">
-         <property name="styleSheet">
-          <string notr="true">color: rgb(50,50,50);
-font-family: &quot;Google Sans&quot;;
-</string>
-         </property>
-         <property name="text">
-          <string>INFORMATION</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
@@ -321,21 +114,6 @@ font-family: &quot;Google Sans&quot;;
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="25" column="1">
-        <widget class="QLabel" name="label_16">
-         <property name="styleSheet">
-          <string notr="true">color: rgb(50,50,50);
-font-family: &quot;Google Sans&quot;;
-</string>
-         </property>
-         <property name="text">
-          <string>GLOBAL COMMANDS</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
        </item>
        <item row="4" column="1">
         <widget class="QPushButton" name="pushButton_LoadFolder">
@@ -362,63 +140,6 @@ border-style: solid;
           <string>Browse...</string>
          </property>
         </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="lineEdit_DatasetFolder">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">color: rgb(50,50,50);
-border-color: rgb(230,230,230);
-border-style: solid;
-border-width: 1px;
-border-radius: 15px;
-</string>
-         </property>
-         <property name="text">
-          <string>D:\OneDrive - University of Bergen\Datasets\MS_Longitudinal\Subject1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="24" column="1">
-        <layout class="QGridLayout" name="gridLayout_17">
-         <property name="bottomMargin">
-          <number>10</number>
-         </property>
-         <item row="0" column="0">
-          <widget class="QPushButton" name="pushButton_Compare">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton:hover#pushButton_Compare
-{
-background-color: rgb(200,200,200);
-}
-QPushButton:pressed#pushButton_Compare {background-color:rgb(160,160,160);color:rgb(50,50,50);}
-QPushButton#pushButton_Compare
-{
-background-color: rgb(240,240,240);
-border-style: outset;
-border-width: 1px;
-border-radius: 10px;
-border-color: rgb(230,230,230);
-padding: 6px;
-color: rgb(50,50,50);
-font-family: &quot;Google Sans&quot;;
-border-style: solid;
-}</string>
-           </property>
-           <property name="text">
-            <string>Compare</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </item>
        <item row="5" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -647,6 +368,311 @@ border-style: solid;
           </widget>
          </item>
         </layout>
+       </item>
+       <item row="27" column="1">
+        <widget class="QPushButton" name="pushButton_ResetView">
+         <property name="styleSheet">
+          <string notr="true">QPushButton:hover#pushButton_ResetView
+{
+background-color: rgb(200,200,200);
+}
+QPushButton:pressed#pushButton_ResetView {background-color:rgb(160,160,160);color:rgb(50,50,50);}
+QPushButton#pushButton_ResetView
+{
+background-color: rgb(240,240,240);
+border-style: outset;
+border-width: 1px;
+border-radius: 10px;
+border-color: rgb(230,230,230);
+padding: 6px;
+color: rgb(50,50,50);
+font-family: &quot;Google Sans&quot;;
+border-style: solid;
+}</string>
+         </property>
+         <property name="text">
+          <string>Reset Views</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="lineEdit_DatasetFolder">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(50,50,50);
+border-color: rgb(230,230,230);
+border-style: solid;
+border-width: 1px;
+border-radius: 15px;
+</string>
+         </property>
+         <property name="text">
+          <string>D:\OneDrive - University of Bergen\Datasets\MS_Longitudinal\Subject1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="29" column="1">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="26" column="1">
+        <widget class="QLabel" name="label_16">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(50,50,50);
+font-family: &quot;Google Sans&quot;;
+</string>
+         </property>
+         <property name="text">
+          <string>GLOBAL COMMANDS</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="30" column="1">
+        <widget class="QLabel" name="label_3">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(50,50,50);
+font-family: &quot;Google Sans&quot;;
+</string>
+         </property>
+         <property name="text">
+          <string>INFORMATION</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="24" column="1">
+        <layout class="QGridLayout" name="gridLayout_16"/>
+       </item>
+       <item row="33" column="1">
+        <widget class="QProgressBar" name="progressBar">
+         <property name="styleSheet">
+          <string notr="true">QProgressBar:horizontal {
+border-color: rgb(230,230,230);
+border-style: solid;
+border-width: 1px;
+border-radius: 10px;
+background: rgb(255,255,255);
+text-align: center;
+}
+QProgressBar::chunk:horizontal {
+background: rgb(143,180,146);
+border-radius: 10px;
+}
+QProgressBar{
+color:rgb(50,50,50);
+}</string>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="textVisible">
+          <bool>true</bool>
+         </property>
+         <property name="textDirection">
+          <enum>QProgressBar::TopToBottom</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="label">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(50,50,50);
+font-family: &quot;Google Sans&quot;;
+</string>
+         </property>
+         <property name="text">
+          <string>CHOOSE PATIENT FOLDER</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="28" column="1">
+        <widget class="QPushButton" name="pushButton_Screenshot">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton:hover#pushButton_Screenshot
+{
+background-color: rgb(200,200,200);
+}
+QPushButton:pressed#pushButton_Screenshot {background-color:rgb(160,160,160);color:rgb(50,50,50);}
+QPushButton#pushButton_Screenshot
+{
+background-color: rgb(240,240,240);
+border-style: outset;
+border-width: 1px;
+border-radius: 10px;
+border-color: rgb(230,230,230);
+padding: 6px;
+color: rgb(50,50,50);
+font-family: &quot;Google Sans&quot;;
+border-style: solid;
+}</string>
+         </property>
+         <property name="text">
+          <string>Capture Rendered Image</string>
+         </property>
+        </widget>
+       </item>
+       <item row="25" column="1">
+        <layout class="QGridLayout" name="gridLayout_17">
+         <property name="bottomMargin">
+          <number>10</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QPushButton" name="pushButton_Compare">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton:hover#pushButton_Compare
+{
+background-color: rgb(200,200,200);
+}
+QPushButton:pressed#pushButton_Compare {background-color:rgb(160,160,160);color:rgb(50,50,50);}
+QPushButton#pushButton_Compare
+{
+background-color: rgb(240,240,240);
+border-style: outset;
+border-width: 1px;
+border-radius: 10px;
+border-color: rgb(230,230,230);
+padding: 6px;
+color: rgb(50,50,50);
+font-family: &quot;Google Sans&quot;;
+border-style: solid;
+}</string>
+           </property>
+           <property name="text">
+            <string>Compare</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="23" column="1">
+        <layout class="QGridLayout" name="gridLayout_6">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing">
+          <number>7</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>0</number>
+         </property>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="checkBox_RangeCompare">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">
+QCheckBox::indicator {
+color: rgb(200,200,200);
+}
+
+font-family: &quot;Google Sans&quot;;
+color: rgb(50,50,50);</string>
+           </property>
+           <property name="text">
+            <string>Range Compare</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSpinBox" name="spinBox_RangeMin">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border-width: 1px;
+border-radius: 10px;
+border-color: rgb(230,230,230);
+color:rgb(50,50,50);</string>
+           </property>
+           <property name="readOnly">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QSpinBox" name="spinBox_RangeMax">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border-width: 1px;
+border-radius: 10px;
+border-color: rgb(230,230,230);
+color:rgb(50,50,50);</string>
+           </property>
+           <property name="readOnly">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="21" column="1">
+        <widget class="QPushButton" name="pushButton_IntensityAnalysis">
+         <property name="styleSheet">
+          <string notr="true">QPushButton:hover#pushButton_IntensityAnalysis
+{
+background-color: rgb(200,200,200);
+}
+QPushButton:pressed#pushButton_IntensityAnalysis {background-color:rgb(160,160,160);color:rgb(50,50,50);}
+QPushButton#pushButton_IntensityAnalysis
+{
+background-color: rgb(240,240,240);
+border-style: outset;
+border-width: 1px;
+border-radius: 10px;
+border-color: rgb(230,230,230);
+padding: 6px;
+color: rgb(50,50,50);
+font-family: &quot;Google Sans&quot;;
+border-style: solid;
+}</string>
+         </property>
+         <property name="text">
+          <string>Intensity Analysis</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -889,6 +915,32 @@ border-style: solid;
 border-width: 0px;
 border-radius: 10px;</string>
               </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_5">
+           <layout class="QGridLayout" name="gridLayout_19">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QFrame" name="frameIntensityGlyph">
               <property name="frameShape">
                <enum>QFrame::StyledPanel</enum>
               </property>

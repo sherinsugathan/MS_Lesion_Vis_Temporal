@@ -15,6 +15,6 @@ import ResliceMaskToMRIVoxelSpace
 import CreateSyntheticHolesInNodifBrainMask
 
 #MeshToVolume.MeshToVolume()
-#LesionDataWriter.LesionDataWriter()
+LesionDataWriter.LesionDataWriter()
 #ResliceMaskToMRIVoxelSpace.ResliceMaskToMRIVoxelSpace()
-CreateSyntheticHolesInNodifBrainMask.CreateSyntheticHolesInNodifBrainMask()
+#CreateSyntheticHolesInNodifBrainMask.CreateSyntheticHolesInNodifBrainMask()

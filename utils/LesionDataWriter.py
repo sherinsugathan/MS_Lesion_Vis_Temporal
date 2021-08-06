@@ -65,8 +65,11 @@ def writeLesionSurfacesAsVTM(timeStep, connectedComponentsMaskFilePath, lesionCo
 
 
 def LesionDataWriter():
-    rootFolder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
-    dataCount = 81
+    #rootFolder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
+    rootFolder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subj2_1_MS_DTI\\"
+
+    #dataCount = 81
+    dataCount = 2
 
     dataDictMain = {}
     for i in range(dataCount):
@@ -74,6 +77,14 @@ def LesionDataWriter():
         connectedComponentOutputFileName = rootFolder + "lesionMask\\ConnectedComponents.nii"
         lesionVTMSurfacesOutputPath = rootFolder + "\\surfaces\\lesions\\"
         imageLesionMask = sitk.ReadImage(maskFileName)
+
+
+        if("float" in imageLesionMask.GetPixelIDTypeAsString()):
+            print("Converting float to integer...")
+            castImageFilter = sitk.CastImageFilter()
+            castImageFilter.SetOutputPixelType(sitk.sitkUInt8)
+            imageLesionMask = castImageFilter.Execute(imageLesionMask)
+
         # Connected component filter.
         connectedComponentFilter = sitk.ConnectedComponentImageFilter()
         connectedComponentImage = connectedComponentFilter.Execute(imageLesionMask)
@@ -122,3 +133,6 @@ def LesionDataWriter():
     with open(rootFolder + "preProcess\\lesionStatistics.json", "w") as fp:
         json.dump(dataDictMain, fp, indent=4)
     print("2. LesionDataWriter() Completed successfully")
+
+
+LesionDataWriter()
