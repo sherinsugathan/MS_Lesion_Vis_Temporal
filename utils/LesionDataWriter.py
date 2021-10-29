@@ -62,8 +62,6 @@ def writeLesionSurfacesAsVTM(timeStep, connectedComponentsMaskFilePath, lesionCo
     print("FILE WRITTEN SUCCESSFULLY")
 
 
-
-
 def LesionDataWriter():
     #rootFolder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
     rootFolder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subj2_1_MS_DTI\\"

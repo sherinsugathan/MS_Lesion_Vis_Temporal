@@ -134,7 +134,8 @@ class mainWindow(Qt.QMainWindow):
         self.vl.addWidget(self.vtkWidget)
         self.ren = vtk.vtkRenderer()
         #self.ren.SetBackground(0.9568627450980392,0.9647058823529412,0.992156862745098)
-        self.ren.SetBackground(0.9411764705882353, 0.9411764705882353, 0.9411764705882353)
+        #self.ren.SetBackground(0.9411764705882353, 0.9411764705882353, 0.9411764705882353)
+        self.ren.SetBackground(0.0705,0.0745,0.0941)
         self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
         self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
         self.iren.SetRenderWindow(self.vtkWidget.GetRenderWindow())
@@ -153,7 +154,8 @@ class mainWindow(Qt.QMainWindow):
         self.vlDual.addWidget(self.vtkWidgetDual)
         self.renDual = vtk.vtkRenderer()
         #self.renDual.SetBackground(0.9568627450980392,0.9647058823529412,0.992156862745098)
-        self.renDual.SetBackground(0.9411764705882353, 0.9411764705882353, 0.9411764705882353)
+        #self.renDual.SetBackground(0.9411764705882353, 0.9411764705882353, 0.9411764705882353)
+        self.renDual.SetBackground(0.0705,0.0745,0.0941)
         self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.renDual)
         self.irenDual = self.vtkWidgetDual.GetRenderWindow().GetInteractor()
         self.irenDual.SetRenderWindow(self.vtkWidgetDual.GetRenderWindow())
@@ -421,7 +423,7 @@ class mainWindow(Qt.QMainWindow):
         my_cmap = self.MPROverlayColorMap
         my_cmap.set_under('k', alpha=0) # For setting background to alpha 0
 
-        self.slice_MPRA = np.ma.masked_where(self.slice_MPRA <1, self.slice_MPRA)
+        #self.slice_MPRA = np.ma.masked_where(self.slice_MPRA <1, self.slice_MPRA)
         self.MPRA = plt.imshow(self.slice_MPRA, cmap='Greys_r', aspect=aspectCoronalData)
         self.MPRAMask = plt.imshow(self.sliceMask_MPRA, cmap=my_cmap, aspect=aspectCoronalMask,  alpha=maskAlpha, interpolation='none', clim=[0.9, 1])
         self.sliceNumberHandleMPRA = self.axMPRA.text(5, 5, str(self.midSliceX), verticalalignment='top', horizontalalignment='left', color='green', fontsize=12)
@@ -508,9 +510,9 @@ class mainWindow(Qt.QMainWindow):
         self.slice_MPRA = self.epi_img_data[self.midSliceX, :, :]
         self.slice_MPRB = self.epi_img_data[:, self.midSliceY, :]
         self.slice_MPRC = self.epi_img_data[:, :, self.midSliceZ]
-        self.slice_MPRA = np.ma.masked_where(self.slice_MPRA==0, self.slice_MPRA)
-        self.slice_MPRB = np.ma.masked_where(self.slice_MPRB==0, self.slice_MPRB)
-        self.slice_MPRC = np.ma.masked_where(self.slice_MPRC==0, self.slice_MPRC)
+        #self.slice_MPRA = np.ma.masked_where(self.slice_MPRA==0, self.slice_MPRA) # Make MRI data background transparent
+        #self.slice_MPRB = np.ma.masked_where(self.slice_MPRB==0, self.slice_MPRB) # Make MRI data background transparent
+        #self.slice_MPRC = np.ma.masked_where(self.slice_MPRC==0, self.slice_MPRC) # Make MRI data background transparent
         self.sliceMask_MPRA = self.alpha_mask[self.midSliceX, :, :]
         self.sliceMask_MPRB = self.alpha_mask[:, self.midSliceY, :]
         self.sliceMask_MPRC = self.alpha_mask[:, :, self.midSliceZ]
@@ -541,10 +543,10 @@ class mainWindow(Qt.QMainWindow):
         self.axesActor.SetZPlusFaceText('S')
         self.axesActor.GetTextEdgesProperty().SetColor(1,1,1)
         self.axesActor.GetTextEdgesProperty().SetLineWidth(1)
-        self.axesActor.GetCubeProperty().SetColor(0.7804, 0.4824, 0.4824)
+        self.axesActor.GetCubeProperty().SetColor(0.1294, 0.2705, 0.4117)
         self.axes = vtk.vtkOrientationMarkerWidget()
         self.axes.SetOrientationMarker(self.axesActor)
-        self.axes.SetViewport( 0.9, 0.9, 1.0, 1.0 )
+        self.axes.SetViewport( 0.93, 0.9, 1.0, 1.0 )
         self.axes.SetCurrentRenderer(self.ren)
         self.axes.SetInteractor(self.iren)
         self.axes.EnabledOn()
@@ -558,10 +560,10 @@ class mainWindow(Qt.QMainWindow):
         self.axesActorDual.SetZPlusFaceText('S')
         self.axesActorDual.GetTextEdgesProperty().SetColor(1,1,1)
         self.axesActorDual.GetTextEdgesProperty().SetLineWidth(1)
-        self.axesActorDual.GetCubeProperty().SetColor(0.7804, 0.4824, 0.4824)
+        self.axesActorDual.GetCubeProperty().SetColor(0.1294, 0.2705, 0.4117)
         self.axesDual = vtk.vtkOrientationMarkerWidget()
         self.axesDual.SetOrientationMarker(self.axesActorDual)
-        self.axesDual.SetViewport( 0.9, 0.9, 1.0, 1.0 )
+        self.axesDual.SetViewport( 0.93, 0.9, 1.0, 1.0 )
         self.axesDual.SetCurrentRenderer(self.renDual)
         self.axesDual.SetInteractor(self.irenDual)
         self.axesDual.EnabledOn()
@@ -702,7 +704,7 @@ class mainWindow(Qt.QMainWindow):
         plt.figure(0)
         self.midSliceX = self.mprA_Slice_Slider.value()
         self.slice_MPRA = np.fliplr(np.rot90(self.epi_img_data[self.midSliceX, :, :]))
-        self.slice_MPRA = np.ma.masked_where(self.slice_MPRA==0, self.slice_MPRA)
+        #self.slice_MPRA = np.ma.masked_where(self.slice_MPRA==0, self.slice_MPRA) # Make MRI data background transparent.
         self.sliceMask_MPRA = np.fliplr(np.rot90(self.alpha_mask[self.midSliceX, :, :]))
         self.MPRA.set_data(self.slice_MPRA)
         self.sliceNumberHandleMPRA.set_text(self.midSliceX)
@@ -715,7 +717,7 @@ class mainWindow(Qt.QMainWindow):
         plt.figure(1)
         self.midSliceY = self.mprB_Slice_Slider.value()
         self.slice_MPRB = np.rot90(self.epi_img_data[:, self.midSliceY, :])
-        self.slice_MPRB = np.ma.masked_where(self.slice_MPRB==0, self.slice_MPRB)
+        #self.slice_MPRB = np.ma.masked_where(self.slice_MPRB==0, self.slice_MPRB) # Make MRI data background transparent.
         self.sliceMask_MPRB = np.rot90(self.alpha_mask[:, self.midSliceY, :])
         self.MPRB.set_data(self.slice_MPRB)
         self.sliceNumberHandleMPRB.set_text(self.midSliceY)
@@ -733,7 +735,7 @@ class mainWindow(Qt.QMainWindow):
         else:
             self.slice_MPRC = np.rot90(self.epi_img_data[:, :, self.midSliceZ], 3)
             self.sliceMask_MPRC = np.rot90(self.alpha_mask[:, :, self.midSliceZ], 3)    
-        self.slice_MPRC = np.ma.masked_where(self.slice_MPRC==0, self.slice_MPRC)        
+        # self.slice_MPRC = np.ma.masked_where(self.slice_MPRC==0, self.slice_MPRC)  # Make MRI data background transparent.
         self.MPRC.set_data(self.slice_MPRC)
         self.sliceNumberHandleMPRC.set_text(self.midSliceZ)
         self.MPRCMask.set_data(self.sliceMask_MPRC)
@@ -923,7 +925,7 @@ class mainWindow(Qt.QMainWindow):
         x = list(range(self.dataCount))
         #random.shuffle(dataArray)
         ys = dataArray
-        self.polyCollection = self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList,  colors = self.plotColors, alpha = 0.7,linewidth=1, linestyle=':', edgecolor=(0.6,0.6,0.6, 1.0))
+        self.polyCollection = self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList,  colors = self.plotColors, alpha = 0.7,linewidth=1, linestyle='solid', edgecolor=(0.6,0.6,0.6, 1.0))
         
         
         #with open('D://polyCollection_data.pkl', 'wb') as output:
@@ -945,7 +947,8 @@ class mainWindow(Qt.QMainWindow):
             self.axDefault.scatter(x, self.stackPlotArtistYcenters[yLocsIndex], 90, c=colors, alpha=0.5, marker=mod2glyph)#, label="Luck")
   
         #self.axDefault.set_facecolor((0.0627, 0.0627, 0.0627))
-        self.axDefault.set_facecolor((0.9411764705882353, 0.9411764705882353, 0.9411764705882353))
+        #self.axDefault.set_facecolor((0.9411764705882353, 0.9411764705882353, 0.9411764705882353))
+        self.axDefault.set_facecolor((1,1,1))
         self.axDefault.xaxis.label.set_color((0.2,0.2,0.2))
         self.axDefault.yaxis.label.set_color((0.2,0.2,0.2))
         self.axDefault.spines['bottom'].set_color((0.3411, 0.4824, 0.3608))

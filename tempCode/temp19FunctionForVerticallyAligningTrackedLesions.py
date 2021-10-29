@@ -10,8 +10,6 @@ G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\
 connectedComponents = nx.weakly_connected_components(G)
 # Compute order.se nodes
 orderedNodes = []
-print(G.edges)
-quit()
 
 for item in connectedComponents:
     g = G.subgraph(item)
