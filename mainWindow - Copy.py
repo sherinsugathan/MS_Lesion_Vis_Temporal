@@ -54,16 +54,12 @@ from scipy.ndimage.filters import gaussian_filter1d
 import seaborn as sns
 import SimpleITK as sitk
 from qt_range_slider import QtRangeSlider
-import matplotlib.colors as mc
-import colorsys
-from matplotlib import font_manager # Add custom font without installing it.
 
 # Main window class.
 class mainWindow(Qt.QMainWindow):
     # Initialization
     def __init__(self):
         super(mainWindow, self).__init__()
-        self.intensityImage = None
         ui = os.path.join(os.path.dirname(__file__), 'mstemporal_uifile.ui')
         uic.loadUi(ui, self)
         self.initUI()
@@ -77,12 +73,6 @@ class mainWindow(Qt.QMainWindow):
         self.slider3DCompare.left_thumb_value_changed.connect(self.compare3DRangeSliderChangedLeft)
         self.slider3DCompare.right_thumb_value_changed.connect(self.compare3DRangeSliderChangedRight)
         self.slider3DCompare.setEnabled(False)
-        font_dirs = [os.path.dirname(os.path.realpath(__file__))+"\\asset\\GoogleSans"]
-        font_files = font_manager.findSystemFonts(fontpaths=font_dirs)
-        for font_file in font_files:
-            print(font_file)
-            font_manager.fontManager.addfont(font_file)
-
 
     def showDialog(self):
         msgBox = QMessageBox()
@@ -580,9 +570,7 @@ class mainWindow(Qt.QMainWindow):
 
     def initializeDefaultGraph(self):
         self.vl_default = Qt.QVBoxLayout()
-        #self.figureDefault = plt.figure(num = 3, frameon=False, clear=True)
-        self.figureDefault, (self.axDefaultIntensity, self.axDefault) = plt.subplots(2, 1, num=3, sharex = True, gridspec_kw={'height_ratios': [1, 4]})
-
+        self.figureDefault = plt.figure(num = 3, frameon=False, clear=True)
         self.canvasDefault = FigureCanvas(self.figureDefault)
         self.vl_default.addWidget(self.canvasDefault)
         self.frameDefaultGraph.setLayout(self.vl_default)
@@ -593,10 +581,7 @@ class mainWindow(Qt.QMainWindow):
         self.figureGraph = plt.figure(num = 4, frameon=False, clear=True)
         self.canvasGraph = FigureCanvas(self.figureGraph)
         self.vl_graph.addWidget(self.canvasGraph)
-        print("initializing node graph")
-        #self.frameGraphVis.setLayout(self.vl_graph)
-        self.frame_NodeGraph.setLayout(self.vl_graph)
-
+        self.frameGraphVis.setLayout(self.vl_graph)
         self.plotGraphVis()
 
     def initializeIntensityGraph(self):
@@ -768,19 +753,15 @@ class mainWindow(Qt.QMainWindow):
         self.figureGraph.clear()
         plt.figure(4)
         plt.rcParams['font.family'] = 'Google Sans'
-
+        plt.tight_layout()
         self.axGraph = self.figureGraph.add_subplot(111)
-        self.axGraph.set_title('Lesion Activity Graph', fontsize=10, fontweight='bold', color="#112840")
         #plt.subplots_adjust(wspace=None, hspace=None)
-        plt.subplots_adjust(left=0.09, bottom=0.09, right=0.95, top=0.95)
+        plt.subplots_adjust(left=0.05, bottom=0.05, right=0.98, top=0.98)
         G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
         edges = G.edges()
         weights = [3 for u,v in edges]
-        #plt.text(0.0, 1.0, 'Lesion Activity Graph', horizontalalignment='left')
-        nx.draw_planar(G, with_labels=True, node_size=700, node_color="#6ea8e3", node_shape="o", edge_color="#4c80b3", font_color="#112840", font_weight="normal", alpha=0.5, linewidths=2, width=weights, arrowsize=20)
-        #self.axGraph.text(0.1, 0.1, 'Random Noise', style='italic', fontsize=12, bbox={'facecolor': 'grey', 'alpha': 0.5})
+        nx.draw_planar(G, with_labels=True, node_size=800, node_color="#e54c66", node_shape="h", edge_color="#f39eac", font_color="#000000", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
         #nx.draw_shell(G, with_labels=True, node_size=800, node_color="#c87b7b", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
-        plt.tight_layout()
         self.canvasGraph.draw()
 
     # # Plot intensity graph
@@ -860,22 +841,17 @@ class mainWindow(Qt.QMainWindow):
 
     # Mouse button is pressed.
     def onClickDefaultStreamGraphCanvas(self, event):
-        print("button press called. remove me if not needed")
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
         #     ('double' if event.dblclick else 'single', event.button,
         #     event.x, event.y, event.xdata, event.ydata))
 
-        if(event.xdata == None or event.ydata == None):
-            print("Clearing selection as the user clicked outside the graph")
-            self.selectedNodeID = None
-            self.updateDefaultGraph(None, None)
-
-
-
-        return
-
         if(event.xdata != None and event.button == 1): # If left mouse button pressed
             x_loc = int(round(event.xdata))
+            #print("click inside graph at", x_loc)
+            #self.selectedNodeID = 
+            self.updateDefaultGraph(x_loc, None)
+
+
             if event.dblclick:
                 #print("double click in stream graph")
                 #print("Graph Y span is ", self.computeIntensityGraphYSpan())
@@ -898,7 +874,7 @@ class mainWindow(Qt.QMainWindow):
             #nodeID = thisline.get_label()
             #self.selectedNodeID = nodeID
 
-            #self.updateDefaultGraph(x_loc, None)
+            self.updateDefaultGraph(x_loc, None)
         else:
             print("click outside graph")
             self.selectedNodeID = None
@@ -914,19 +890,14 @@ class mainWindow(Qt.QMainWindow):
 
     # Stream Graph pick artist.
     def onPickDefaultStreamGraphCanvas(self, event):
-        if event.mouseevent.button == "up" or event.mouseevent.button == "down":  # If middle button events return
-            return
         thisline = event.artist
         nodeID = thisline.get_label()
         self.selectedNodeID = nodeID
-        xLoc, yLoc= int(round(event.mouseevent.xdata)), event.mouseevent.ydata
-
-        self.updateDefaultGraph(xLoc, nodeID)
-
-        #self.plotOverlayGlyphs(nodeID)
-        self.plotIntensityAnalysisPlot(int(nodeID))
-
-
+        #artist = event.artist
+        #ind = event.ind
+        #print('onpick1 line:', labelValue)
+        self.updateDefaultGraph(None, nodeID)
+        self.plotOverlayGlyphs(nodeID)
         self.overlayGlyphActive = True
 
     # Graph mouse move.
@@ -945,48 +916,16 @@ class mainWindow(Qt.QMainWindow):
     #             leaf_nodes_merge = [x for x in H.nodes() if H.out_degree(x)==1 and H.in_degree(x)==0]
     #             return max(len(leaf_nodes_merge), len(leaf_nodes_split))+1
 
-    # plot intensity graph for main streamgraph
-    def plotIntensityAnalysisPlot(self, nodeID=None):
-        if(nodeID == None): # no manual pick from user
-            nodeID = 0
-            # Z = np.random.rand(2, dataCount)
-            Z = np.vstack((self.intensityArray[nodeID], self.intensityArrayT2[nodeID]))
-            self.intensityImage = self.axDefaultIntensity.imshow(Z, aspect='auto')
-            self.axDefaultIntensity.set_yticks([0, 1])  # Set two values as ticks.
-            modalities = ["T1", "T2"]
-            self.axDefaultIntensity.set_yticklabels(modalities)
-            self.axDefaultIntensity.spines['right'].set_visible(False)
-            self.axDefaultIntensity.spines['top'].set_visible(False)
-            self.axDefaultIntensity.spines['bottom'].set_visible(False)
-            self.axDefaultIntensity.spines['left'].set_visible(False)
-        else:  # user picked an item from streamgraph
-            realNodeID = self.graphLegendLabelList.index(str(nodeID))
-            Z = np.vstack((self.intensityArray[realNodeID], self.intensityArrayT2[realNodeID]))
-            self.intensityImage.set_data(Z)  # update intensity plot data
-            self.canvasDefault.draw()
-
     # plot default graph
-    def plotDefaultGraph(self, lesionAttributeString = "PhysicalSize"):
+    def plotDefaultGraph(self, lesionAttributeString): 
         # clearing old figures
-        #self.figureDefault.clear()
-        #self.figureDefault.tight_layout()
+        self.figureDefault.clear()
+        self.figureDefault.tight_layout()
         plt.figure(3)
         # create an axis
-        # self.axDefault = self.figureDefault.add_subplot(111)
-        plt.subplots_adjust(wspace=0, hspace=0)
-
-        # create axes for default, defaultIntensity and nodeGraph
-        #self.axDefault = self.figureDefault.add_subplot(212)
-        #self.axDefaultIntensity = self.figureDefault.add_subplot(211, sharex = self.axDefault)
-
-        #self.figureDefault.tight_layout()
-        print("Crossed here 2")
-        #self.axDefaultIntensity.plot([1, 1])
-        #self.axNodeGraph.plot([1, 2])
-
+        self.axDefault = self.figureDefault.add_subplot(111)
         plt.subplots_adjust(wspace=None, hspace=None)
         #plt.axvline(x=40, linewidth=4, color='y')
-
 
         # Data for plotting
         self.G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
@@ -1018,7 +957,7 @@ class mainWindow(Qt.QMainWindow):
         x = list(range(self.dataCount))
         #random.shuffle(dataArray)
         ys = dataArray
-        self.polyCollection = self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList,  colors = self.plotColors, alpha = 0.7,linewidth=0.5, linestyle='solid', edgecolor=(0.9,0.9,0.9, 1.0))
+        self.polyCollection = self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList,  colors = self.plotColors, alpha = 0.7,linewidth=0.5, linestyle='solid', edgecolor=(0.5,0.5,0.5, 1.0))
         
         
         #with open('D://polyCollection_data.pkl', 'wb') as output:
@@ -1029,13 +968,6 @@ class mainWindow(Qt.QMainWindow):
         #print(self.polyCollection[0])
 
         #self.plotOverlayGlyphs()
-
-        # # PLOTTING OVERLAY GLYPHS. (new)
-        self.intensityArray = self.getIntensityDataForStackplotArtist(self.nodeOrderForGraph)
-        self.intensityArrayT2 = self.getIntensityDataForStackplotArtist(self.nodeOrderForGraph, "MeanT2")
-        self.plotIntensityAnalysisPlot()
-        #print("Type of array is ", type(self.intensityArray[0]))
-        #print(self.intensityArray[0].shape)
 
         # # PLOTTING OVERLAY GLYPHS. (deprecated)
         # intensityArray = self.getIntensityDataForStackplotArtist(self.nodeOrderForGraph)
@@ -1067,7 +999,7 @@ class mainWindow(Qt.QMainWindow):
         self.axDefault.set_ylabel(lesionAttributeString, fontname="Arial")#, fontsize=12)
         #self.axDefault.set_title("activity graph", fontname="Arial", fontsize=8)
         self.axDefault.title.set_color((0.2,0.2,0.2))
-        plt.subplots_adjust(left=0.065, right=0.98, top=0.96, bottom=0.1)
+        plt.subplots_adjust(left=0.05, right=0.98, top=0.96, bottom=0.1)
         plt.xlim(xmin=0)
         plt.xlim(xmax=self.dataCount-1)
         #self.axDefault.xaxis.set_ticks(np.arange(0, self.dataCount-1, 1))
@@ -1080,8 +1012,8 @@ class mainWindow(Qt.QMainWindow):
         self.canvasDefault.draw()
         self.canvasDefault.mpl_connect('pick_event', self.onPickDefaultStreamGraphCanvas)
         self.canvasDefault.mpl_connect('button_press_event', self.onClickDefaultStreamGraphCanvas)
-        #self.canvasDefault.mpl_connect('button_release_event', self.onReleaseDefaultStreamGraphCanvas)
-        #self.canvasDefault.mpl_connect('motion_notify_event', self.onMouseMoveDefaultStreamGraphCanvas)
+        self.canvasDefault.mpl_connect('button_release_event', self.onReleaseDefaultStreamGraphCanvas)
+        self.canvasDefault.mpl_connect('motion_notify_event', self.onMouseMoveDefaultStreamGraphCanvas)
         self.defaultGraphBackup = self.canvasDefault.copy_from_bbox(self.axDefault.bbox)
 
         self.vLine = None
@@ -1093,6 +1025,7 @@ class mainWindow(Qt.QMainWindow):
     # Function to plot intensity glyphs in default graph.
     def plotOverlayGlyphs(self, nodeID):
         # PLOTTING OVERLAY GLYPHS.
+
         x = np.array(list(range(self.dataCount)))
         intensityArray = self.getIntensityDataForStackplotArtist(self.nodeOrderForGraph)
         #print(len(intensityArray))
@@ -1101,8 +1034,7 @@ class mainWindow(Qt.QMainWindow):
         y_min, y_max = self.axDefault.get_ylim() # get range of y values
 
         for elem in self.stackPlotArtistYcenters:
-            elem[elem >= -1] = 100
-            #elem[elem >= -1] = y_max
+            elem[elem >= -1] = y_max - 200 # TODO: change the hardcoding
         #self.stackPlotArtistYcenters = np.full(81,170)
         #print("length is ", len(self.stackPlotArtistYcenters[0]))
         w1 = mpatches.Wedge([0,0], 80, theta1 = 0,theta2 = 180)
@@ -1115,8 +1047,8 @@ class mainWindow(Qt.QMainWindow):
 
         colors = plt.cm.seismic(intensityArray[yIndex])
         if (self.overlayGlyphActive == False):
-            self.sc1 = self.axDefaultIntensity.scatter(x, self.stackPlotArtistYcenters[yIndex],90, c=colors, alpha=0.5, marker="s")  # , label="Luck")
-            self.sc2 = self.axDefaultIntensity.scatter(x, self.stackPlotArtistYcenters[yIndex]+40,90, c=colors, alpha=0.5, marker="s")  # , label="Luck")
+            self.sc1 = self.axDefault.scatter(x, self.stackPlotArtistYcenters[yIndex], 90, c=colors, alpha=0.5, marker=mod1glyph)  # , label="Luck")
+            self.sc2 = self.axDefault.scatter(x, self.stackPlotArtistYcenters[yIndex], 90, c=colors, alpha=0.5, marker=mod2glyph)  # , label="Luck")
 
             #self.sc1 = self.axDefault.scatter(x, self.stackPlotArtistYcenters, 90, c=colors, alpha=0.5, marker=mod1glyph)  # , label="Luck")
             #self.sc2 = self.axDefault.scatter(x, self.stackPlotArtistYcenters, 90, c=colors, alpha=0.5, marker=mod2glyph)  # , label="Luck")
@@ -1125,7 +1057,7 @@ class mainWindow(Qt.QMainWindow):
             #print("Hi Sheirn2", np.shape(self.stackPlotArtistYcenters[yIndex]))
         else:
             offsetValues = np.transpose(np.vstack((x, self.stackPlotArtistYcenters[yIndex])))
-            offsetValues2 = np.transpose(np.vstack((x, self.stackPlotArtistYcenters[yIndex]+92)))
+            #offsetValues = np.transpose(np.vstack((x, self.stackPlotArtistYcenters)))
             self.sc1.set_offsets(offsetValues)
             self.sc2.set_offsets(offsetValues)
             #self.sc1.set_data(x,self.stackPlotArtistYcenters[yIndex], 90, c=colors, alpha=0.5, marker=mod1glyph)
@@ -1148,28 +1080,26 @@ class mainWindow(Qt.QMainWindow):
             else:
                 self.vLine.set_xdata([vlineXloc])
         else:
-            if self.vLine is not None:
+            if(self.vLine != None):
                 self.vLine.remove()
                 self.vLine = None
 
-        if updateColorIndex is not None:
+        if(updateColorIndex!=None):
             tempColors = list(self.plotColors)
             newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(updateColorIndex)], 0.6)
-
 
             for i in range(len(self.polyCollection)):
                 self.polyCollection[i].set_facecolor(tempColors[i])
 
-            # Enable this to color the whole tracked lesion polyCollection. DEPRECATED NOW.
-            # for item in self.sub_graphs:
-            #     if updateColorIndex in item:
-            #         for nodeIndex in item:
-            #             self.polyCollection[self.graphLegendLabelList.index(nodeIndex)].set_facecolor(newColor)
+            updateIndex = self.graphLegendLabelList.index(updateColorIndex)
+            for item in self.sub_graphs:
+                if(updateColorIndex in item):
+                    for nodeIndex in item:
+                        self.polyCollection[self.graphLegendLabelList.index(nodeIndex)].set_facecolor(newColor)
 
-            self.polyCollection[self.graphLegendLabelList.index(updateColorIndex)].set_facecolor(newColor)
-
-        #print("Enter here", vlineXloc, updateColorIndex)
-        if(updateColorIndex==None): # Reset graph to default colors.
+        print("Enter here", vlineXloc, updateColorIndex)
+        if(vlineXloc==None and updateColorIndex==None): # Reset graph to default colors.
+            print("Enter here")
             tempColors = list(self.plotColors)
             for i in range(len(self.polyCollection)):
                 self.polyCollection[i].set_facecolor(tempColors[i])
@@ -1441,6 +1371,8 @@ class mainWindow(Qt.QMainWindow):
         return new #-0.5
 
     def adjust_lightness(self, color, amount=0.5):
+        import matplotlib.colors as mc
+        import colorsys
         try:
             c = mc.cnames[color]
         except:

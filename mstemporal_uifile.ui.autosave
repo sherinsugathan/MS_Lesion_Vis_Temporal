@@ -1368,105 +1368,6 @@ border-style: solid;</string>
        <property name="rightMargin">
         <number>0</number>
        </property>
-       <item row="28" column="1">
-        <widget class="QProgressBar" name="progressBar">
-         <property name="styleSheet">
-          <string notr="true">QProgressBar:horizontal {
-border-color: rgb(230,230,230);
-border-style: solid;
-border-width: 1px;
-border-radius: 10px;
-background: rgb(211,232,252);
-text-align: center;
-}
-QProgressBar::chunk:horizontal {
-background: rgb(163,209,255);
-border-radius: 10px;
-}
-QProgressBar{
-color: rgb(33,69,105);
-font: 10pt &quot;Google Sans&quot;;
-font-weight:500;
-}</string>
-         </property>
-         <property name="value">
-          <number>0</number>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-         <property name="textVisible">
-          <bool>true</bool>
-         </property>
-         <property name="textDirection">
-          <enum>QProgressBar::TopToBottom</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="23" column="1">
-        <layout class="QGridLayout" name="gridLayout_17">
-         <property name="bottomMargin">
-          <number>10</number>
-         </property>
-        </layout>
-       </item>
-       <item row="19" column="1">
-        <widget class="QPushButton" name="pushButton_IntensityAnalysis">
-         <property name="styleSheet">
-          <string notr="true">QPushButton:hover#pushButton_IntensityAnalysis
-{
-background-color: rgb(163,209,255);
-}
-QPushButton:pressed#pushButton_IntensityAnalysis {background-color:rgb(111,163,214);}
-QPushButton#pushButton_IntensityAnalysis
-{
-background-color: rgb(211,232,252);
-color: rgb(33,69,105);
-border-style: outset;
-border-width: 0px;
-border-radius: 4px;
-border-color: rgb(77,106,117);
-padding:6px;
-font: 10pt &quot;Google Sans&quot;;
-border-style: solid;
-font-weight:500;
-}</string>
-         </property>
-         <property name="text">
-          <string>Intensity Analysis</string>
-         </property>
-        </widget>
-       </item>
-       <item row="26" column="1">
-        <widget class="QTextEdit" name="textEdit_Information">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">border-width: 1px;
-border-radius:6px;
-border-color: rgb(230,230,230);
-font: 10pt &quot;Courier New&quot;;
-color:rgb(0,0,0);</string>
-         </property>
-        </widget>
-       </item>
-       <item row="20" column="1">
-        <widget class="Line" name="line">
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Plain</enum>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
        <item row="24" column="1">
         <widget class="QPushButton" name="pushButton_ResetView">
          <property name="styleSheet">
@@ -1493,9 +1394,6 @@ font-weight:500;
           <string>Reset Views</string>
          </property>
         </widget>
-       </item>
-       <item row="22" column="1">
-        <layout class="QGridLayout" name="gridLayout_16"/>
        </item>
        <item row="25" column="1">
         <layout class="QGridLayout" name="gridLayout_2">
@@ -1709,6 +1607,36 @@ QSlider::handle:vertical:hover {
          </item>
         </layout>
        </item>
+       <item row="26" column="1">
+        <widget class="QTextEdit" name="textEdit_Information">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border-width: 1px;
+border-radius:6px;
+border-color: rgb(230,230,230);
+font: 10pt &quot;Courier New&quot;;
+color:rgb(0,0,0);</string>
+         </property>
+        </widget>
+       </item>
+       <item row="20" column="1">
+        <widget class="Line" name="line">
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="1">
         <widget class="QLineEdit" name="lineEdit_DatasetFolder">
          <property name="minimumSize">
@@ -1727,6 +1655,41 @@ font: 10pt &quot;Google Sans&quot;;</string>
          </property>
          <property name="text">
           <string>D:\OneDrive - University of Bergen\Datasets\MS_Longitudinal\Subject1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="28" column="1">
+        <widget class="QProgressBar" name="progressBar">
+         <property name="styleSheet">
+          <string notr="true">QProgressBar:horizontal {
+border-color: rgb(230,230,230);
+border-style: solid;
+border-width: 1px;
+border-radius: 10px;
+background: rgb(211,232,252);
+text-align: center;
+}
+QProgressBar::chunk:horizontal {
+background: rgb(163,209,255);
+border-radius: 10px;
+}
+QProgressBar{
+color: rgb(33,69,105);
+font: 10pt &quot;Google Sans&quot;;
+font-weight:500;
+}</string>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="textVisible">
+          <bool>true</bool>
+         </property>
+         <property name="textDirection">
+          <enum>QProgressBar::TopToBottom</enum>
          </property>
         </widget>
        </item>
@@ -1756,6 +1719,36 @@ font-weight:500;
           <string>Load Dataset</string>
          </property>
         </widget>
+       </item>
+       <item row="19" column="1">
+        <widget class="QPushButton" name="pushButton_IntensityAnalysis">
+         <property name="styleSheet">
+          <string notr="true">QPushButton:hover#pushButton_IntensityAnalysis
+{
+background-color: rgb(163,209,255);
+}
+QPushButton:pressed#pushButton_IntensityAnalysis {background-color:rgb(111,163,214);}
+QPushButton#pushButton_IntensityAnalysis
+{
+background-color: rgb(211,232,252);
+color: rgb(33,69,105);
+border-style: outset;
+border-width: 0px;
+border-radius: 4px;
+border-color: rgb(77,106,117);
+padding:6px;
+font: 10pt &quot;Google Sans&quot;;
+border-style: solid;
+font-weight:500;
+}</string>
+         </property>
+         <property name="text">
+          <string>Intensity Analysis</string>
+         </property>
+        </widget>
+       </item>
+       <item row="21" column="1">
+        <layout class="QGridLayout" name="gridLayout_16"/>
        </item>
       </layout>
      </widget>

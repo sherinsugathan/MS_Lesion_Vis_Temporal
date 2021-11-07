@@ -430,6 +430,7 @@ class ZoomPan:
 
     def zoom_factory(self, ax, base_scale = 2.):
         def zoom(event):
+            if event.button == 3: return  # Do not scroll if user is using right mouse button.
             cur_xlim = ax.get_xlim()
             cur_ylim = ax.get_ylim()
 
@@ -464,6 +465,7 @@ class ZoomPan:
 
     def pan_factory(self, ax):
         def onPress(event):
+            if event.button == 3: return # Do not pan if user is using right mouse button.
             if event.inaxes != ax: return
             self.cur_xlim = ax.get_xlim()
             self.cur_ylim = ax.get_ylim()
