@@ -419,73 +419,6 @@ border-radius:2px;
              </property>
             </widget>
            </item>
-           <item row="2" column="4">
-            <layout class="QGridLayout" name="gridLayout_6">
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <property name="horizontalSpacing">
-              <number>7</number>
-             </property>
-             <property name="verticalSpacing">
-              <number>0</number>
-             </property>
-             <item row="1" column="0">
-              <widget class="QCheckBox" name="checkBox_RangeCompare">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">font: 10pt &quot;Google Sans&quot;;
-font-weight:500;
-color: rgb(33,69,105);</string>
-               </property>
-               <property name="text">
-                <string>Range Compare</string>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QSpinBox" name="spinBox_RangeMin">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border-width: 0px;
-font: 10pt &quot;Google Sans&quot;;
-font-weight:500;
-
-color: rgb(33,69,105);</string>
-               </property>
-               <property name="readOnly">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QSpinBox" name="spinBox_RangeMax">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border-width: 0px;
-color: rgb(33,69,105);
-font: 10pt &quot;Google Sans&quot;;
-font-weight:500;</string>
-               </property>
-               <property name="readOnly">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
            <item row="2" column="3">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <property name="topMargin">
@@ -701,7 +634,7 @@ border-style: solid;
              </item>
             </layout>
            </item>
-           <item row="2" column="7">
+           <item row="2" column="8">
             <layout class="QGridLayout" name="gridLayout_10">
              <property name="rightMargin">
               <number>0</number>
@@ -792,7 +725,7 @@ QRadioButton::indicator:unchecked {
              </item>
             </layout>
            </item>
-           <item row="2" column="6">
+           <item row="2" column="7">
             <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
              <property name="spacing">
               <number>0</number>
@@ -883,13 +816,98 @@ font-weight:500;</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="5">
-            <widget class="QPushButton" name="pushButton_Compare">
-             <property name="enabled">
-              <bool>false</bool>
+           <item row="2" column="4">
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <property name="rightMargin">
+              <number>0</number>
              </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton:hover#pushButton_Compare
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <layout class="QGridLayout" name="gridLayout_6">
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <property name="horizontalSpacing">
+                <number>7</number>
+               </property>
+               <property name="verticalSpacing">
+                <number>0</number>
+               </property>
+               <item row="1" column="0">
+                <widget class="QCheckBox" name="checkBox_RangeCompare">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">font: 10pt &quot;Google Sans&quot;;
+font-weight:500;
+color: rgb(33,69,105);</string>
+                 </property>
+                 <property name="text">
+                  <string>Range Compare</string>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QSpinBox" name="spinBox_RangeMax">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>50</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">border-width: 0px;
+color: rgb(33,69,105);
+font: 10pt &quot;Google Sans&quot;;
+font-weight:500;</string>
+                 </property>
+                 <property name="readOnly">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QSpinBox" name="spinBox_RangeMin">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>50</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">border-width: 0px;
+font: 10pt &quot;Google Sans&quot;;
+font-weight:500;
+
+color: rgb(33,69,105);</string>
+                 </property>
+                 <property name="readOnly">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="3">
+                <widget class="QPushButton" name="pushButton_Compare">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">QPushButton:hover#pushButton_Compare
 {
 background-color: rgb(163,209,255);
 }
@@ -907,11 +925,18 @@ font: 10pt &quot;Google Sans&quot;;
 border-style: solid;
 font-weight:500;
 }</string>
-             </property>
-             <property name="text">
-              <string>Compare</string>
-             </property>
-            </widget>
+                 </property>
+                 <property name="text">
+                  <string>Compare</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QGridLayout" name="gridLayout_16"/>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
@@ -1368,7 +1393,7 @@ border-style: solid;</string>
        <property name="rightMargin">
         <number>0</number>
        </property>
-       <item row="24" column="1">
+       <item row="23" column="1">
         <widget class="QPushButton" name="pushButton_ResetView">
          <property name="styleSheet">
           <string notr="true">QPushButton:hover#pushButton_ResetView
@@ -1395,7 +1420,7 @@ font-weight:500;
          </property>
         </widget>
        </item>
-       <item row="25" column="1">
+       <item row="24" column="1">
         <layout class="QGridLayout" name="gridLayout_2">
          <property name="horizontalSpacing">
           <number>0</number>
@@ -1607,7 +1632,7 @@ QSlider::handle:vertical:hover {
          </item>
         </layout>
        </item>
-       <item row="26" column="1">
+       <item row="25" column="1">
         <widget class="QTextEdit" name="textEdit_Information">
          <property name="maximumSize">
           <size>
@@ -1658,7 +1683,7 @@ font: 10pt &quot;Google Sans&quot;;</string>
          </property>
         </widget>
        </item>
-       <item row="28" column="1">
+       <item row="27" column="1">
         <widget class="QProgressBar" name="progressBar">
          <property name="styleSheet">
           <string notr="true">QProgressBar:horizontal {
@@ -1746,9 +1771,6 @@ font-weight:500;
           <string>Intensity Analysis</string>
          </property>
         </widget>
-       </item>
-       <item row="21" column="1">
-        <layout class="QGridLayout" name="gridLayout_16"/>
        </item>
       </layout>
      </widget>

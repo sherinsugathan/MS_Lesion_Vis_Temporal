@@ -57,6 +57,7 @@ from qt_range_slider import QtRangeSlider
 import matplotlib.colors as mc
 import colorsys
 from matplotlib import font_manager # Add custom font without installing it.
+from matplotlib.ticker import AutoMinorLocator
 
 # Main window class.
 class mainWindow(Qt.QMainWindow):
@@ -64,31 +65,46 @@ class mainWindow(Qt.QMainWindow):
     def __init__(self):
         super(mainWindow, self).__init__()
         self.intensityImage = None
+        font_dirs = [os.path.dirname(os.path.realpath(__file__))+"\\asset\\fonts"]
+        font_files = font_manager.findSystemFonts(fontpaths=font_dirs)
+        for font_file in font_files:
+            print(font_file)
+            #font_manager.fontManager.addfont(font_file)
+            QtGui.QFontDatabase.addApplicationFont(font_file)
+
+        #self.setFont(QtGui.QFont("Roboto Black", 20))
+        #self.fontFamily = 'Roboto Black'
+        #self.fontColor = 'black'
+        #self.fontSize = '12'
+
         ui = os.path.join(os.path.dirname(__file__), 'mstemporal_uifile.ui')
         uic.loadUi(ui, self)
         self.initUI()
         self.initVTK()
         self.showMaximized()
-        self.slider = QtRangeSlider(self, 0, 80, 0, 80)
-        self.slider3DCompare = QtRangeSlider(self, 0, 80, 0, 80)
-        self.gridLayout_14.addWidget(self.slider, 0,9)
-        self.gridLayout_16.addWidget(self.slider3DCompare,0,0)
-        self.slider.left_thumb_value_changed.connect(self.graphRangeSliderChanged)
-        self.slider3DCompare.left_thumb_value_changed.connect(self.compare3DRangeSliderChangedLeft)
-        self.slider3DCompare.right_thumb_value_changed.connect(self.compare3DRangeSliderChangedRight)
-        self.slider3DCompare.setEnabled(False)
-        font_dirs = [os.path.dirname(os.path.realpath(__file__))+"\\asset\\GoogleSans"]
-        font_files = font_manager.findSystemFonts(fontpaths=font_dirs)
-        for font_file in font_files:
-            print(font_file)
-            font_manager.fontManager.addfont(font_file)
+
+        # self.slider = QtRangeSlider(self, 0, 80, 0, 80)
+        # self.slider3DCompare = QtRangeSlider(self, 0, 80, 0, 80)
+        # self.gridLayout_14.addWidget(self.slider, 0,9)
+        #self.gridLayout_16.addWidget(self.slider3DCompare,0,0)
+        # self.slider.left_thumb_value_changed.connect(self.graphRangeSliderChanged)
+        # self.slider3DCompare.left_thumb_value_changed.connect(self.compare3DRangeSliderChangedLeft)
+        # self.slider3DCompare.right_thumb_value_changed.connect(self.compare3DRangeSliderChangedRight)
+        # self.slider3DCompare.setEnabled(False)
+
+        # font_dirs = [os.path.dirname(os.path.realpath(__file__))+"\\asset\\GoogleSans"]
+        # font_files = font_manager.findSystemFonts(fontpaths=font_dirs)
+        # for font_file in font_files:
+        #     print(font_file)
+        #     font_manager.fontManager.addfont(font_file)
+
 
 
     def showDialog(self):
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information)
         msgBox.setText("Loading Data...Please wait...")
-        msgBox.setStyleSheet("background-color: rgb(46,46,46); color:rgb(200,200,200); font: 10pt 'Google Sans';")
+        msgBox.setStyleSheet("background-color: rgb(46,46,46); color:rgb(200,200,200); font: 10pt 'Open Sans';")
         msgBox.setEscapeButton(None)
         msgBox.exec()
         dlg = QDialog(self)
@@ -96,7 +112,8 @@ class mainWindow(Qt.QMainWindow):
         dlg.exec_()
 
     # UI setup.
-    def initUI(self):  
+    def initUI(self):
+        #self.setStyleSheet('font-family: %s; color: %s; background-color: rgb(28,33,39);' % (self.fontFamily, self.fontColor))
         vtk.vtkObject.GlobalWarningDisplayOff() # Supress warnings.
         #print("\033[1;101m STARTING APPLICATION... \033[0m")
         #pmMain = Qt.QPixmap("icons\\AppLogo.png")
@@ -145,7 +162,8 @@ class mainWindow(Qt.QMainWindow):
         self.ren = vtk.vtkRenderer()
         #self.ren.SetBackground(0.9568627450980392,0.9647058823529412,0.992156862745098)
         #self.ren.SetBackground(0.9411764705882353, 0.9411764705882353, 0.9411764705882353)
-        self.ren.SetBackground(0.0705,0.0745,0.0941)
+        #self.ren.SetBackground(0.0705,0.0745,0.0941)
+        self.ren.SetBackground(1.0,1.0,1.0)
         self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
         self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
         self.iren.SetRenderWindow(self.vtkWidget.GetRenderWindow())
@@ -165,7 +183,8 @@ class mainWindow(Qt.QMainWindow):
         self.renDual = vtk.vtkRenderer()
         #self.renDual.SetBackground(0.9568627450980392,0.9647058823529412,0.992156862745098)
         #self.renDual.SetBackground(0.9411764705882353, 0.9411764705882353, 0.9411764705882353)
-        self.renDual.SetBackground(0.0705,0.0745,0.0941)
+        #self.renDual.SetBackground(0.0705,0.0745,0.0941)
+        self.renDual.SetBackground(1.0, 1.0, 1.0)
         self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.renDual)
         self.irenDual = self.vtkWidgetDual.GetRenderWindow().GetInteractor()
         self.irenDual.SetRenderWindow(self.vtkWidgetDual.GetRenderWindow())
@@ -253,13 +272,15 @@ class mainWindow(Qt.QMainWindow):
         if(val>=self.spinBox_RangeMax.value()):
             self.spinBox_RangeMin.setValue(self.spinBox_RangeMax.value()-1)
         else:
-            self.slider3DCompare.set_left_thumb_value(val)
+            #self.slider3DCompare.set_left_thumb_value(val)
+            pass
 
     def spinBoxMaxChanged(self, val):
         if(val<=self.spinBox_RangeMin.value()):
             self.spinBox_RangeMax.setValue(self.spinBox_RangeMin.value()+1)
         else:
-            self.slider3DCompare.set_right_thumb_value(val)
+            #self.slider3DCompare.set_right_thumb_value(val)
+            pass
 
     def reportProgress(self, n):
         self.progressBar.setValue(n)
@@ -367,15 +388,15 @@ class mainWindow(Qt.QMainWindow):
         self.irenDual.Render()
 
         self.readInitializeLesionJSONData() # Read lesion data from JSON file.
-        self.displayOrientationCube() # Display orientation cube
+        self.displayOrientationCube()  # Display orientation cube
         self.LoadStructuralSlices(self.folder, "T1", 0, True) # load slices
-        self.initializeDefaultGraph() # Load graph data
-        self.initializeGraphVis() # Load graph visualization.
+        self.initializeDefaultGraph()  # Load graph data
+        self.initializeGraphVis()  # Load graph visualization.
         self.readInitializestructuralData()
-        self.initializeIntensityGraph() # Load intensity visualization.
-        self.initializeViolinGraph() # Load violin graph.
-        self.activateControls() # Activate controls.
-        self.ren.AddActor2D(self.textActorLesionStatistics) # Add lesion statistics overlay.
+        self.initializeIntensityGraph()  # Load intensity visualization.
+        self.initializeViolinGraph()  # Load violin graph.
+        self.activateControls()  # Activate controls.
+        self.ren.AddActor2D(self.textActorLesionStatistics)  # Add lesion statistics overlay.
         self.dataFolderInitialized = True
         self.enableControls()
         self.currentTimeStep = self.horizontalSlider_TimePoint.value()
@@ -385,6 +406,9 @@ class mainWindow(Qt.QMainWindow):
         self.vtk_colorsRh.SetNumberOfTuples(self.numberOfPointsRh)
         self.vertexIndexArrayLh = np.arange(self.numberOfPointsLh)
         self.vertexIndexArrayRh = np.arange(self.numberOfPointsRh)
+
+        self.iren.Render()
+        self.irenDual.Render()
 
     # Read structural data information.
     def readInitializestructuralData(self):
@@ -551,9 +575,9 @@ class mainWindow(Qt.QMainWindow):
         self.axesActor.SetYPlusFaceText('A')
         self.axesActor.SetZMinusFaceText('I')
         self.axesActor.SetZPlusFaceText('S')
-        self.axesActor.GetTextEdgesProperty().SetColor(1,1,1)
+        self.axesActor.GetTextEdgesProperty().SetColor(1.0,1.0,1.0)
         self.axesActor.GetTextEdgesProperty().SetLineWidth(1)
-        self.axesActor.GetCubeProperty().SetColor(0.1294, 0.2705, 0.4117)
+        self.axesActor.GetCubeProperty().SetColor(0.7255, 0.8470, 0.7725)
         self.axes = vtk.vtkOrientationMarkerWidget()
         self.axes.SetOrientationMarker(self.axesActor)
         self.axes.SetViewport( 0.93, 0.9, 1.0, 1.0 )
@@ -570,7 +594,7 @@ class mainWindow(Qt.QMainWindow):
         self.axesActorDual.SetZPlusFaceText('S')
         self.axesActorDual.GetTextEdgesProperty().SetColor(1,1,1)
         self.axesActorDual.GetTextEdgesProperty().SetLineWidth(1)
-        self.axesActorDual.GetCubeProperty().SetColor(0.1294, 0.2705, 0.4117)
+        self.axesActorDual.GetCubeProperty().SetColor(0.7255, 0.8470, 0.7725)
         self.axesDual = vtk.vtkOrientationMarkerWidget()
         self.axesDual.SetOrientationMarker(self.axesActorDual)
         self.axesDual.SetViewport( 0.93, 0.9, 1.0, 1.0 )
@@ -589,14 +613,12 @@ class mainWindow(Qt.QMainWindow):
         self.plotDefaultGraph("PhysicalSize")
 
     def initializeGraphVis(self):
+        print("initializing node graph...")
         self.vl_graph = Qt.QVBoxLayout()
         self.figureGraph = plt.figure(num = 4, frameon=False, clear=True)
         self.canvasGraph = FigureCanvas(self.figureGraph)
         self.vl_graph.addWidget(self.canvasGraph)
-        print("initializing node graph")
-        #self.frameGraphVis.setLayout(self.vl_graph)
         self.frame_NodeGraph.setLayout(self.vl_graph)
-
         self.plotGraphVis()
 
     def initializeIntensityGraph(self):
@@ -767,7 +789,7 @@ class mainWindow(Qt.QMainWindow):
     def plotGraphVis(self):
         self.figureGraph.clear()
         plt.figure(4)
-        plt.rcParams['font.family'] = 'Google Sans'
+        plt.rcParams['font.family'] = 'Open Sans'
 
         self.axGraph = self.figureGraph.add_subplot(111)
         self.axGraph.set_title('Lesion Activity Graph', fontsize=10, fontweight='bold', color="#112840")
@@ -959,6 +981,12 @@ class mainWindow(Qt.QMainWindow):
             self.axDefaultIntensity.spines['top'].set_visible(False)
             self.axDefaultIntensity.spines['bottom'].set_visible(False)
             self.axDefaultIntensity.spines['left'].set_visible(False)
+            # Gridlines based on minor ticks
+            #self.axDefaultIntensity.hlines(y=np.arange(0, self.dataCount), xmin=np.full(self.dataCount, 0), color="white")
+            #self.axDefaultIntensity.vlines(x=np.arange(0, 10) + 0.5, ymin=np.full(10, 0) - 0.5, ymax=np.full(10, 10) - 0.5, color="black")
+            minor_locator = AutoMinorLocator(2)
+            self.axDefaultIntensity.xaxis.set_minor_locator(minor_locator)
+            self.axDefaultIntensity.grid(which='minor', color='w', linestyle='-', linewidth=1)
         else:  # user picked an item from streamgraph
             realNodeID = self.graphLegendLabelList.index(str(nodeID))
             Z = np.vstack((self.intensityArray[realNodeID], self.intensityArrayT2[realNodeID]))
@@ -979,14 +1007,8 @@ class mainWindow(Qt.QMainWindow):
         #self.axDefault = self.figureDefault.add_subplot(212)
         #self.axDefaultIntensity = self.figureDefault.add_subplot(211, sharex = self.axDefault)
 
-        #self.figureDefault.tight_layout()
-        print("Crossed here 2")
-        #self.axDefaultIntensity.plot([1, 1])
-        #self.axNodeGraph.plot([1, 2])
-
+        self.figureDefault.tight_layout()
         plt.subplots_adjust(wspace=None, hspace=None)
-        #plt.axvline(x=40, linewidth=4, color='y')
-
 
         # Data for plotting
         self.G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
@@ -1063,15 +1085,20 @@ class mainWindow(Qt.QMainWindow):
         self.axDefault.spines['top'].set_visible(False)
         self.axDefault.tick_params(axis='x', colors=(0.2,0.2,0.2))
         self.axDefault.tick_params(axis='y', colors=(0.2,0.2,0.2))
+        self.axDefault.set_xticks(list(range(self.dataCount)))
+        self.axDefault.tick_params(axis='x', which='minor', length=1)
         self.axDefault.set_xlabel("followup instance", fontname="Arial")#, fontsize=12)
         self.axDefault.set_ylabel(lesionAttributeString, fontname="Arial")#, fontsize=12)
         #self.axDefault.set_title("activity graph", fontname="Arial", fontsize=8)
         self.axDefault.title.set_color((0.2,0.2,0.2))
+
         plt.subplots_adjust(left=0.065, right=0.98, top=0.96, bottom=0.1)
         plt.xlim(xmin=0)
         plt.xlim(xmax=self.dataCount-1)
         #self.axDefault.xaxis.set_ticks(np.arange(0, self.dataCount-1, 1))
-        plt.minorticks_on()
+        #plt.minorticks_on()
+        minor_locator = AutoMinorLocator(2)
+        self.axDefault.xaxis.set_minor_locator(minor_locator)
         # Enable to add vertical grid lines in streamgraph.
         #self.axDefault.xaxis.grid(True, which='both', color='#f4f6fd', linestyle='-', alpha=0.2) # add vertical grid lines.
         #self.axDefault.grid()
@@ -1491,12 +1518,12 @@ class mainWindow(Qt.QMainWindow):
             self.spinBox_RangeMin.setEnabled(True)
             self.spinBox_RangeMax.setEnabled(True)
             self.pushButton_Compare.setEnabled(True)
-            self.slider3DCompare.setEnabled(True)
+            #self.slider3DCompare.setEnabled(True) #  TODO remove completely
         else:
             self.spinBox_RangeMin.setEnabled(False)
             self.spinBox_RangeMax.setEnabled(False)
             self.pushButton_Compare.setEnabled(False)
-            self.slider3DCompare.setEnabled(False)
+            #self.slider3DCompare.setEnabled(False)
 
     # Handler for time point slider change
     @pyqtSlot()
