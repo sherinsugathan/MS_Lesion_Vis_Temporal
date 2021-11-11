@@ -513,7 +513,7 @@ border-color:rgb(150,150,150);
            <number>6</number>
           </property>
           <property name="leftMargin">
-           <number>10</number>
+           <number>0</number>
           </property>
           <property name="rightMargin">
            <number>15</number>
@@ -524,7 +524,8 @@ border-color:rgb(150,150,150);
              <string notr="true">border-style: solid;
 border-width: 1px;
 border-radius: 10px;
-border-color: rgb(211,211,211);</string>
+border-color: rgb(211,211,211);
+background-color:rgb(247,247,247);</string>
             </property>
             <property name="title">
              <string/>
@@ -556,6 +557,9 @@ border-width: 0px;</string>
                <property name="text">
                 <string>Projection</string>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
               </widget>
              </item>
              <item>
@@ -565,6 +569,15 @@ border-width: 0px;</string>
                  <width>0</width>
                  <height>0</height>
                 </size>
+               </property>
+               <property name="toolTip">
+                <string/>
+               </property>
+               <property name="statusTip">
+                <string/>
+               </property>
+               <property name="whatsThis">
+                <string/>
                </property>
                <property name="styleSheet">
                 <string notr="true">.QComboBox::drop-down {
@@ -601,6 +614,12 @@ font: 10pt &quot;Open Sans&quot;;
 border-radius:2px;
 }
 </string>
+               </property>
+               <property name="editable">
+                <bool>false</bool>
+               </property>
+               <property name="currentText">
+                <string/>
                </property>
               </widget>
              </item>
@@ -661,7 +680,7 @@ border-width: 0px;</string>
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>50</width>
+                     <width>16777215</width>
                      <height>16777215</height>
                     </size>
                    </property>
@@ -685,7 +704,7 @@ background-color:rgb(255,255,255);</string>
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>50</width>
+                     <width>16777215</width>
                      <height>16777215</height>
                     </size>
                    </property>
@@ -966,28 +985,6 @@ border-style: solid;
               </layout>
              </item>
              <item>
-              <widget class="QLabel" name="label_currentDataIndex">
-               <property name="minimumSize">
-                <size>
-                 <width>35</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">color:rgb(70,70,70);
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
-border-width: 0px;</string>
-               </property>
-               <property name="text">
-                <string>no sequence loaded</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
               <spacer name="verticalSpacer">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -999,6 +996,50 @@ border-width: 0px;</string>
                 </size>
                </property>
               </spacer>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_6">
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="label">
+                 <property name="styleSheet">
+                  <string notr="true">border-width: 0px;
+font: 10pt &quot;Open Sans&quot;;
+font-weight:500;</string>
+                 </property>
+                 <property name="text">
+                  <string>Followup</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_currentDataIndex">
+                 <property name="minimumSize">
+                  <size>
+                   <width>35</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color:rgb(70,70,70);
+font: 12pt &quot;Open Sans&quot;;
+font-weight:500;
+border-width: 0px;</string>
+                 </property>
+                 <property name="text">
+                  <string>#</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
            </widget>
@@ -1062,7 +1103,14 @@ background-color:rgb(255,255,255);</string>
            </widget>
           </item>
           <item>
-           <widget class="QGroupBox" name="groupBox_2">
+           <widget class="QGroupBox" name="groupBox_SurfaceView">
+            <property name="styleSheet">
+             <string notr="true">border-style: solid;
+border-width: 1px;
+border-radius: 10px;
+border-color: rgb(211,211,211);
+background-color:rgb(247,247,247);</string>
+            </property>
             <property name="title">
              <string/>
             </property>
@@ -1073,6 +1121,9 @@ background-color:rgb(255,255,255);</string>
                 <string>Surface</string>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_5">
+                <property name="topMargin">
+                 <number>30</number>
+                </property>
                 <item>
                  <widget class="QRadioButton" name="radioButton_White">
                   <property name="styleSheet">
@@ -1080,6 +1131,7 @@ background-color:rgb(255,255,255);</string>
 font: 10pt &quot;Open Sans&quot;;
 font-weight:500;
 color:rgb(70,70,70);
+border-width: 0px;
 }
 
 QRadioButton::indicator {
@@ -1118,6 +1170,7 @@ QRadioButton::indicator:unchecked {
 font: 10pt &quot;Open Sans&quot;;
 font-weight:500;
 color:rgb(70,70,70);
+border-width: 0px;
 }
 
 QRadioButton::indicator {
@@ -1630,7 +1683,7 @@ QRadioButton::indicator:unchecked {
 
 .QComboBox::down-arrow {
 	border-width: 0px;
-	border-radius: 10px;
+	border-radius: 2px;
     image: url(icons/downArrow.png);
 }
 
@@ -1642,11 +1695,12 @@ color: rgb(50,50,50);
 
 .QComboBox{
 border-color: rgb(230,230,230);
+background-color:rgb(255,255,255);
 border-style: solid;
 border-width: 1px;
 color: rgb(33,69,105);
 font: 10pt &quot;Open Sans&quot;;
-border-radius: 2px;
+border-radius:2px;
 }
 </string>
             </property>
@@ -1661,7 +1715,7 @@ border-radius: 2px;
              <string notr="true">border-color: rgb(230,230,230);
 font: 10pt &quot;Open Sans&quot;;
 font-weight:500;
-color: rgb(33,33,33);</string>
+color: rgb(70,70,70);</string>
             </property>
             <property name="text">
              <string>Lesion Border</string>
@@ -1714,7 +1768,7 @@ border-color:rgb(150,150,150);
           <item row="0" column="7">
            <widget class="QLabel" name="label_6">
             <property name="styleSheet">
-             <string notr="true">color: rgb(33,33,33);
+             <string notr="true">color: rgb(70,70,70);
 font: 10pt &quot;Open Sans&quot;;
 font-weight:500;</string>
             </property>
@@ -1729,7 +1783,7 @@ font-weight:500;</string>
              <string notr="true">font: 10pt &quot;Open Sans&quot;;
 font-weight:500;
 color: rgb(33,33,33);
-border-color: rgb(230,230,230);</string>
+color: rgb(70,70,70);</string>
             </property>
             <property name="text">
              <string>Show Classes</string>
@@ -1742,7 +1796,7 @@ border-color: rgb(230,230,230);</string>
              <string notr="true">border-color: rgb(230,230,230);
 font: 10pt &quot;Open Sans&quot;;
 font-weight:500;
-color: rgb(33,33,33);</string>
+color: rgb(70,70,70);</string>
             </property>
             <property name="text">
              <string>All Lesions</string>
@@ -1758,7 +1812,7 @@ color: rgb(33,33,33);</string>
              </size>
             </property>
             <property name="styleSheet">
-             <string notr="true">color: rgb(33,33,33);
+             <string notr="true">color: rgb(70,70,70);
 font: 10pt &quot;Open Sans&quot;;
 font-weight:500;</string>
             </property>

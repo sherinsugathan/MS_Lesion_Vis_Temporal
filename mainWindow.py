@@ -936,20 +936,15 @@ class mainWindow(Qt.QMainWindow):
 
     # Stream Graph pick artist.
     def onPickDefaultStreamGraphCanvas(self, event):
-        if event.mouseevent.button == "up" or event.mouseevent.button == "down":  # If middle button events return
-            return
-        thisline = event.artist
-        nodeID = thisline.get_label()
-        self.selectedNodeID = nodeID
-        xLoc, yLoc= int(round(event.mouseevent.xdata)), event.mouseevent.ydata
-
-        self.updateDefaultGraph(xLoc, nodeID)
-
-        #self.plotOverlayGlyphs(nodeID)
-        self.plotIntensityAnalysisPlot(int(nodeID))
-
-
-        self.overlayGlyphActive = True
+        if event.mouseevent.button == 1:  #  Return if user is pressing middle or right mouse button.
+            thisline = event.artist
+            nodeID = thisline.get_label()
+            self.selectedNodeID = nodeID
+            xLoc, yLoc= int(round(event.mouseevent.xdata)), event.mouseevent.ydata
+            self.updateDefaultGraph(xLoc, nodeID)
+            #self.plotOverlayGlyphs(nodeID)
+            self.plotIntensityAnalysisPlot(int(nodeID))
+            self.overlayGlyphActive = True
 
     # Graph mouse move.
     def onMouseMoveDefaultStreamGraphCanvas(self, event):
@@ -981,12 +976,14 @@ class mainWindow(Qt.QMainWindow):
             self.axDefaultIntensity.spines['top'].set_visible(False)
             self.axDefaultIntensity.spines['bottom'].set_visible(False)
             self.axDefaultIntensity.spines['left'].set_visible(False)
-            # Gridlines based on minor ticks
+
             #self.axDefaultIntensity.hlines(y=np.arange(0, self.dataCount), xmin=np.full(self.dataCount, 0), color="white")
             #self.axDefaultIntensity.vlines(x=np.arange(0, 10) + 0.5, ymin=np.full(10, 0) - 0.5, ymax=np.full(10, 10) - 0.5, color="black")
+
+            # Gridlines based on minor ticks
             minor_locator = AutoMinorLocator(2)
             self.axDefaultIntensity.xaxis.set_minor_locator(minor_locator)
-            self.axDefaultIntensity.grid(which='minor', color='w', linestyle='-', linewidth=1)
+            self.axDefaultIntensity.grid(which='minor', color='#ffffff', alpha=0.2, linestyle='-', linewidth=1)
         else:  # user picked an item from streamgraph
             realNodeID = self.graphLegendLabelList.index(str(nodeID))
             Z = np.vstack((self.intensityArray[realNodeID], self.intensityArrayT2[realNodeID]))
@@ -1112,7 +1109,7 @@ class mainWindow(Qt.QMainWindow):
         self.defaultGraphBackup = self.canvasDefault.copy_from_bbox(self.axDefault.bbox)
 
         self.vLine = None
-        scale = 1.5
+        scale = 1.1
         zpDefault = Utils.ZoomPan()
         figZoomDefault = zpDefault.zoom_factory(self.axDefault, base_scale = scale)
         figPanDefault = zpDefault.pan_factory(self.axDefault)

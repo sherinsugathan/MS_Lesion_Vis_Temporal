@@ -434,6 +434,7 @@ class ZoomPan:
             cur_xlim = ax.get_xlim()
             cur_ylim = ax.get_ylim()
 
+
             xdata = event.xdata # get event x location
             ydata = event.ydata # get event y location
 
@@ -453,6 +454,12 @@ class ZoomPan:
 
             relx = (cur_xlim[1] - xdata)/(cur_xlim[1] - cur_xlim[0])
             rely = (cur_ylim[1] - ydata)/(cur_ylim[1] - cur_ylim[0])
+
+            # Check if zoom out allowed.
+            newxlim = [xdata - new_width * (1-relx), xdata + new_width * (relx)]
+            #print(newxlim[0], newxlim[1])
+            if newxlim[0] < 0 or newxlim[0] > 80:  # If user is trying to zoom out too much. X values starts at 0. Anything less than that can be hidden.
+                return;
 
             ax.set_xlim([xdata - new_width * (1-relx), xdata + new_width * (relx)])
             ax.set_ylim([ydata - new_height * (1-rely), ydata + new_height * (rely)])
@@ -483,6 +490,10 @@ class ZoomPan:
             dy = event.ydata - self.ypress
             self.cur_xlim -= dx
             self.cur_ylim -= dy
+
+            # Check if panning is going off limits
+            if self.cur_xlim[0] < 0 or self.cur_xlim[1] > 80:
+                return
             ax.set_xlim(self.cur_xlim)
             ax.set_ylim(self.cur_ylim)
 
