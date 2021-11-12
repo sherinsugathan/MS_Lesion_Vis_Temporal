@@ -456,13 +456,25 @@ class ZoomPan:
             rely = (cur_ylim[1] - ydata)/(cur_ylim[1] - cur_ylim[0])
 
             # Check if zoom out allowed.
-            newxlim = [xdata - new_width * (1-relx), xdata + new_width * (relx)]
+            #newxlim = [xdata - new_width * (1-relx), xdata + new_width * (relx)]
+            #newylim = [ydata - new_height * (1-rely), ydata + new_height * (rely)]
             #print(newxlim[0], newxlim[1])
-            if newxlim[0] < 0 or newxlim[0] > 80:  # If user is trying to zoom out too much. X values starts at 0. Anything less than that can be hidden.
-                return;
+            #skipXScale = False
+            #skipYScale = False
+            #if newxlim[0] < 0 or newxlim[0] > 80:  # If user is trying to zoom out too much. X values starts at 0. Anything less than that can be hidden.
+            #    skipXScale = True
+            #if newylim[0] < 0:
+            #    skipYScale = True
 
-            ax.set_xlim([xdata - new_width * (1-relx), xdata + new_width * (relx)])
-            ax.set_ylim([ydata - new_height * (1-rely), ydata + new_height * (rely)])
+            # if(skipXScale == False):
+            #     ax.set_xlim([xdata - new_width * (1-relx), xdata + new_width * (relx)])
+            #     ax.figure.canvas.draw()
+            # if (skipYScale == False):
+            #     ax.set_ylim([ydata - new_height * (1-rely), ydata + new_height * (rely)])
+            #     ax.figure.canvas.draw()
+
+            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
             ax.figure.canvas.draw()
 
         fig = ax.get_figure() # get the figure of interest

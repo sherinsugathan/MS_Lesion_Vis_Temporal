@@ -967,6 +967,7 @@ class mainWindow(Qt.QMainWindow):
             # Z = np.random.rand(2, dataCount)
             Z = np.vstack((self.intensityArray[nodeID], self.intensityArrayT2[nodeID]))
             self.intensityImage = self.axDefaultIntensity.imshow(Z, aspect='auto')
+            #self.intensityImage = self.axDefaultIntensity.pcolormesh(Z)
             self.axDefaultIntensity.set_yticks([0, 1])  # Set two values as ticks.
             modalities = ["T1", "T2"]
             self.axDefaultIntensity.set_yticklabels(modalities)
@@ -974,10 +975,12 @@ class mainWindow(Qt.QMainWindow):
             self.axDefaultIntensity.spines['top'].set_visible(False)
             self.axDefaultIntensity.spines['bottom'].set_visible(False)
             self.axDefaultIntensity.spines['left'].set_visible(False)
-
+            #self.axDefaultIntensity.xaxis.set_visible(False) # disable x axis ticks
+            #self.axDefaultIntensity.set_xticklabels([])
+            #self.axDefaultIntensity.yaxis.grid(True) # enable or keep grid support
             #self.axDefaultIntensity.hlines(y=np.arange(0, self.dataCount), xmin=np.full(self.dataCount, 0), color="white")
             #self.axDefaultIntensity.vlines(x=np.arange(0, 10) + 0.5, ymin=np.full(10, 0) - 0.5, ymax=np.full(10, 10) - 0.5, color="black")
-
+            print("Enteringininigni")
             # Gridlines based on minor ticks
             minor_locator = AutoMinorLocator(2)
             self.axDefaultIntensity.xaxis.set_minor_locator(minor_locator)
@@ -993,7 +996,8 @@ class mainWindow(Qt.QMainWindow):
         print("Calling plot default graph")
         # clearing old figures
         #self.figureDefault.clear()
-        self.axDefault.clear()
+        self.axDefault.clear() #TODO: can remove this and implement setdata for performance?
+        print("clearing me")
         #self.figureDefault.tight_layout()
         plt.figure(3)
         # create an axis
