@@ -794,14 +794,19 @@ class mainWindow(Qt.QMainWindow):
         plt.rcParams['font.family'] = 'Open Sans'
 
         self.axGraph = self.figureGraph.add_subplot(111)
-        self.axGraph.set_title('Lesion Activity Graph', fontsize=10, fontweight='bold', color="#112840")
+        self.axGraph.set_title('Lesion Activity Graph', fontsize=12, fontweight='normal', color="#666666", loc='left')
         #plt.subplots_adjust(wspace=None, hspace=None)
         plt.subplots_adjust(left=0.09, bottom=0.09, right=0.95, top=0.95)
         G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
         edges = G.edges()
         weights = [3 for u,v in edges]
+
+        graphNodeColors = []
+        for i in range(1,10+1):
+            graphNodeColors.append(self.plotColors[self.graphLegendLabelList.index(str(i))])
+
         #plt.text(0.0, 1.0, 'Lesion Activity Graph', horizontalalignment='left')
-        nx.draw_planar(G, with_labels=True, node_size=700, node_color="#6ea8e3", node_shape="o", edge_color="#4c80b3", font_color="#112840", font_weight="normal", alpha=0.5, linewidths=2, width=weights, arrowsize=20)
+        nx.draw_planar(G, with_labels=True, node_size=700, node_color=graphNodeColors, node_shape="h", edge_color="#4c80b3", font_color="#112840", font_weight="normal", alpha=0.5, linewidths=2, width=weights, arrowsize=20)
         #self.axGraph.text(0.1, 0.1, 'Random Noise', style='italic', fontsize=12, bbox={'facecolor': 'grey', 'alpha': 0.5})
         #nx.draw_shell(G, with_labels=True, node_size=800, node_color="#c87b7b", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
         plt.tight_layout()
@@ -966,7 +971,7 @@ class mainWindow(Qt.QMainWindow):
             nodeID = 0
             # Z = np.random.rand(2, dataCount)
             Z = np.vstack((self.intensityArray[nodeID], self.intensityArrayT2[nodeID]))
-            self.intensityImage = self.axDefaultIntensity.imshow(Z, aspect='auto')
+            self.intensityImage = self.axDefaultIntensity.imshow(Z, aspect='auto', cmap='gray') #  , vmin=0, vmax=255)
             #self.intensityImage = self.axDefaultIntensity.pcolormesh(Z)
             self.axDefaultIntensity.set_yticks([0, 1])  # Set two values as ticks.
             modalities = ["T1", "T2"]
@@ -1187,7 +1192,6 @@ class mainWindow(Qt.QMainWindow):
         if updateColorIndex is not None:
             tempColors = list(self.plotColors)
             newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(updateColorIndex)], 0.6)
-
 
             for i in range(len(self.polyCollection)):
                 self.polyCollection[i].set_facecolor(tempColors[i])
