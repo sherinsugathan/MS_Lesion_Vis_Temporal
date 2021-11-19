@@ -70,7 +70,7 @@ class mainWindow(Qt.QMainWindow):
         font_dirs = [os.path.dirname(os.path.realpath(__file__))+"\\asset\\fonts"]
         font_files = font_manager.findSystemFonts(fontpaths=font_dirs)
         for font_file in font_files:
-            print(font_file)
+            #print(font_file)
             #font_manager.fontManager.addfont(font_file)
             QtGui.QFontDatabase.addApplicationFont(font_file)
 
@@ -162,9 +162,6 @@ class mainWindow(Qt.QMainWindow):
         self.vtkWidget = QVTKRenderWindowInteractor(self.frame)
         self.vl.addWidget(self.vtkWidget)
         self.ren = vtk.vtkRenderer()
-        #self.ren.SetBackground(0.9568627450980392,0.9647058823529412,0.992156862745098)
-        #self.ren.SetBackground(0.9411764705882353, 0.9411764705882353, 0.9411764705882353)
-        #self.ren.SetBackground(0.0705,0.0745,0.0941)
         self.ren.SetBackground(1.0,1.0,1.0)
         self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
         self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
@@ -183,9 +180,6 @@ class mainWindow(Qt.QMainWindow):
         self.vtkWidgetDual = QVTKRenderWindowInteractor(self.frameDual)
         self.vlDual.addWidget(self.vtkWidgetDual)
         self.renDual = vtk.vtkRenderer()
-        #self.renDual.SetBackground(0.9568627450980392,0.9647058823529412,0.992156862745098)
-        #self.renDual.SetBackground(0.9411764705882353, 0.9411764705882353, 0.9411764705882353)
-        #self.renDual.SetBackground(0.0705,0.0745,0.0941)
         self.renDual.SetBackground(1.0, 1.0, 1.0)
         self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.renDual)
         self.irenDual = self.vtkWidgetDual.GetRenderWindow().GetInteractor()
@@ -244,18 +238,6 @@ class mainWindow(Qt.QMainWindow):
         self.textActorLesionStatistics.GetTextProperty().SetFontSize(12)
         #self.textActorLesionStatistics.GetTextProperty().ShadowOn()
         self.textActorLesionStatistics.GetTextProperty().SetColor( 0.3411, 0.4824, 0.3608 )
-
-        self.buttonGroupGraphs = QButtonGroup()
-        self.buttonGroupGraphs.addButton(self.pushButton_DefaultGraph)
-        self.buttonGroupGraphs.addButton(self.pushButton_GraphView)
-        self.buttonGroupGraphs.setExclusive(True)
-        self.buttonGroupGraphs.buttonClicked.connect(self.on_buttonGroupGraphsChanged)
-
-        self.buttonGroupIntensityGraphs = QButtonGroup()
-        self.buttonGroupIntensityGraphs.addButton(self.pushButton_hinton)
-        self.buttonGroupIntensityGraphs.addButton(self.pushButton_Violin)
-        self.buttonGroupIntensityGraphs.setExclusive(True)
-        self.buttonGroupIntensityGraphs.buttonClicked.connect(self.on_buttonGroupIntensityGraphsChanged)
 
         self.buttonGroupSurfaces = QButtonGroup()
         self.buttonGroupSurfaces.addButton(self.radioButton_White)
@@ -333,25 +315,6 @@ class mainWindow(Qt.QMainWindow):
                 self.surfaceActors[4].GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
             self.irenDual.Render()
 
-    # Handler for mode change inside button group (intensity graphs)
-    @pyqtSlot(QAbstractButton)
-    def on_buttonGroupIntensityGraphsChanged(self, btn):
-        if(self.dataFolderInitialized == True and self.selectedNodeID != None):
-            if(self.buttonGroupIntensityGraphs.checkedId() == -2): # Hinton
-                self.stackedWidget_Graphs.setCurrentIndex(2)
-            if(self.buttonGroupIntensityGraphs.checkedId() == -3): # Violin plot
-                self.stackedWidget_Graphs.setCurrentIndex(3)
-
-    # Handler for mode change inside button group (node and stream graphs)
-    @pyqtSlot(QAbstractButton)
-    def on_buttonGroupGraphsChanged(self, btn):
-        if(self.dataFolderInitialized == True):
-            if(self.buttonGroupGraphs.checkedId() == -3): # Stream graph
-                self.stackedWidget_Graphs.setCurrentIndex(0)
-
-            if(self.buttonGroupGraphs.checkedId() == -2): # Graph vis
-                self.stackedWidget_Graphs.setCurrentIndex(1)
-
     # Handler for mode change inside button group (modality)
     @pyqtSlot(QAbstractButton)
     def on_buttonGroupModalityChanged(self, btn):
@@ -395,8 +358,6 @@ class mainWindow(Qt.QMainWindow):
         self.initializeDefaultGraph()  # Load graph data
         self.initializeGraphVis()  # Load graph visualization.
         self.readInitializestructuralData()
-        self.initializeIntensityGraph()  # Load intensity visualization.
-        self.initializeViolinGraph()  # Load violin graph.
         self.activateControls()  # Activate controls.
         self.ren.AddActor2D(self.textActorLesionStatistics)  # Add lesion statistics overlay.
         self.dataFolderInitialized = True
@@ -613,6 +574,7 @@ class mainWindow(Qt.QMainWindow):
         self.vl_default.addWidget(self.canvasDefault)
         self.frameDefaultGraph.setLayout(self.vl_default)
         self.plotDefaultGraph("PhysicalSize")
+        self.overlayGlyphActive = False
 
     def initializeGraphVis(self):
         print("initializing node graph...")
@@ -622,55 +584,6 @@ class mainWindow(Qt.QMainWindow):
         self.vl_graph.addWidget(self.canvasGraph)
         self.frame_NodeGraph.setLayout(self.vl_graph)
         self.plotGraphVis()
-
-    def initializeIntensityGraph(self):
-        self.vl_intensity = Qt.QVBoxLayout()
-        self.figureIntensity = plt.figure(figsize = [15,10], num = 5, frameon=False, clear=True, dpi=100)
-        self.canvasIntensity = FigureCanvas(self.figureIntensity)
-        self.canvasIntensity.setParent(self.frameIntensityPlot)
-        self.vl_intensity.addWidget(self.canvasIntensity)
-        self.vl_intensity.setStretchFactor(self.canvasIntensity, 1)
-        self.vl_intensity.setSpacing(0)
-        self.vl_intensity.setContentsMargins(0, 0, 0, 0)
-        self.frameIntensityPlot.setLayout(self.vl_intensity)
-        self.frameIntensityPlot.setStyleSheet('background-color: rgb(220,220,220);border-color: rgb(57,57,57);border-style: solid;border-width: 2px; border-radius: 10px;')
-        self.canvasIntensity.mpl_connect('button_press_event', self.onClickIntensityGraphCanvas)
-        self.selectedNodeID = 2
-        self.overlayGlyphActive = False
-
-    # def initializeIntensityGlyphGraph(self):
-    #     print("ënter here 2")
-    #     self.vl_intensityGlyph = Qt.QVBoxLayout()
-    #     self.figureIntensityGlyph = plt.figure(figsize = [15,10], num = 6, frameon=False, clear=True, dpi=100)
-    #     self.canvasIntensityGlyph = FigureCanvas(self.figureIntensityGlyph)
-    #     #self.frameIntensityGlyph.setFocusPolicy(QtCore.Qt.StrongFocus)
-    #     #self.frameIntensityGlyph.keyPressed.connect(self.on_press_intensityGlyph)
-    #     self.canvasIntensityGlyph.setParent(self.frameIntensityGlyph)
-    #     self.vl_intensityGlyph.addWidget(self.canvasIntensityGlyph)
-    #     self.vl_intensityGlyph.setStretchFactor(self.canvasIntensityGlyph, 1)
-    #     self.vl_intensityGlyph.setSpacing(0)
-    #     self.vl_intensityGlyph.setContentsMargins(0, 0, 0, 0)
-    #     self.frameIntensityGlyph.setLayout(self.vl_intensityGlyph)
-    #
-    #     self.canvasIntensityGlyph.mpl_connect('button_press_event', self.on_press_intensityGlyph)
-    #     self.verticalRead = False # flag to indicate whether to enable vertical or horizontal read.
-    #
-    #
-    #     #self.frameIntensityGlyph.setStyleSheet('background-color: rgb(220,220,220);border-color: rgb(57,57,57);border-style: solid;border-width: 2px; border-radius: 10px;')
-    #     #self.canvasIntensityGlyph.mpl_connect('button_press_event', self.onClickIntensityGraphCanvas)
-    #     #self.selectedNodeID = 2
-
-    def initializeViolinGraph(self):
-        self.vl_violin = Qt.QVBoxLayout()
-        #self.figureViolin = plt.figure(figsize = [15,10], num = 6, frameon=False, clear=True, dpi=100)
-        self.figureViolin = plt.figure(facecolor=(0.9411764705882353, 0.9411764705882353, 0.9411764705882353))
-        self.canvasViolin = FigureCanvas(self.figureViolin)
-        self.canvasViolin.setParent(self.frame_Violin)
-        self.vl_violin.addWidget(self.canvasViolin)
-        self.vl_violin.setStretchFactor(self.canvasViolin, 1)
-        self.vl_violin.setSpacing(0)
-        self.vl_violin.setContentsMargins(0, 0, 0, 0)
-        self.frame_Violin.setLayout(self.vl_violin)
 
     def on_press_intensityGlyph(self, event):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
@@ -788,7 +701,7 @@ class mainWindow(Qt.QMainWindow):
         self.mprB_Slice_Slider.setEnabled(True)
         self.mprC_Slice_Slider.setEnabled(True)
 
-    # Plot graph visual
+    # Plot node graph visual
     def plotGraphVis(self):
         self.figureGraph.clear()
         plt.figure(4)
@@ -812,21 +725,6 @@ class mainWindow(Qt.QMainWindow):
         #nx.draw_shell(G, with_labels=True, node_size=800, node_color="#c87b7b", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
         plt.tight_layout()
         self.canvasGraph.draw()
-
-    # # Plot intensity graph
-    # def plotIntensityGraph(self):
-    #     self.figureIntensity.clear()
-    #     plt.figure(5)
-    #     plt.tight_layout()
-    #     self.axIntensityGraph = self.figureIntensity.add_subplot(111)
-    #     #plt.subplots_adjust(wspace=None, hspace=None)
-    #     plt.subplots_adjust(left=0.05, bottom=0.05, right=0.98, top=0.98)
-    #     #G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
-    #     #edges = G.edges()
-    #     #weights = [3 for u,v in edges]
-    #     #nx.draw_planar(G, with_labels=True, node_size=800, node_color="#e54c66", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
-    #     #nx.draw_shell(G, with_labels=True, node_size=800, node_color="#c87b7b", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
-    #     #self.canvasGraph.draw()
 
     def computeNodeOrderForGraph(self, G): #TODO NEED TO UPDATE CODE to support multilevel activity (eg split and merge in one sequence)
         # color palette
@@ -900,36 +798,6 @@ class mainWindow(Qt.QMainWindow):
             self.updateDefaultGraph(None, None)
         return
 
-        # if(event.xdata != None and event.button == 1): # If left mouse button pressed
-        #     x_loc = int(round(event.xdata))
-        #     if event.dblclick:
-        #         #print("double click in stream graph")
-        #         #print("Graph Y span is ", self.computeIntensityGraphYSpan())
-        #         if(self.selectedNodeID != None):
-        #             self.plotIntensityGraph()
-        #             self.canvasIntensity.draw()
-        #             self.plotViolin()
-        #             self.canvasViolin.draw()
-        #             if(self.buttonGroupIntensityGraphs.checkedId() == -2): # hinton style selected.
-        #                 self.stackedWidget_Graphs.setCurrentIndex(2)
-        #             if(self.buttonGroupIntensityGraphs.checkedId() == -3): # violin plot selected.
-        #                 self.stackedWidget_Graphs.setCurrentIndex(3)
-        #
-        # elif(event.xdata != None and event.button == 3): # If right mouse button pressed.
-        #     print("Right mouse button is pressed")
-        #     x_loc = int(round(event.xdata))
-        #
-        #     #print("X location is ", x_loc)
-        #     #thisline = event.artist
-        #     #nodeID = thisline.get_label()
-        #     #self.selectedNodeID = nodeID
-        #
-        #     #self.updateDefaultGraph(x_loc, None)
-        # else:
-        #     print("click outside graph")
-        #     self.selectedNodeID = None
-        #     self.updateDefaultGraph(None, None)
-
     # Mouse button is released.
     def onReleaseDefaultStreamGraphCanvas(self, event):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
@@ -956,15 +824,6 @@ class mainWindow(Qt.QMainWindow):
         if event.inaxes:
             ax = event.inaxes  # the axes instance
             #print('data coords %f %f' % (event.xdata, event.ydata))
-           
-    # def computeIntensityGraphYSpan(self):
-    #     sub_graphs = list(nx.connected_components(self.UG))
-    #     for item in sub_graphs:
-    #         if str(self.selectedNodeID) in item:
-    #             H = self.G.subgraph(item)
-    #             leaf_nodes_split = [x for x in H.nodes() if H.out_degree(x)==0 and H.in_degree(x)==1]
-    #             leaf_nodes_merge = [x for x in H.nodes() if H.out_degree(x)==1 and H.in_degree(x)==0]
-    #             return max(len(leaf_nodes_merge), len(leaf_nodes_split))+1
 
     # plot intensity graph for main streamgraph
     def plotIntensityAnalysisPlot(self, nodeID=None):
@@ -1068,21 +927,6 @@ class mainWindow(Qt.QMainWindow):
         #print("Type of array is ", type(self.intensityArray[0]))
         #print(self.intensityArray[0].shape)
 
-        # # PLOTTING OVERLAY GLYPHS. (deprecated)
-        # intensityArray = self.getIntensityDataForStackplotArtist(self.nodeOrderForGraph)
-        # self.stackPlotArtistYcenters = Utils.computeArtistVerticalCenterLocationsForStackPlot(self.polyCollection)
-        # #print("length is ", len(self.stackPlotArtistYcenters))
-        # w1 = mpatches.Wedge([0,0], 80, theta1 = 0,theta2 = 180)
-        # w2 = mpatches.Wedge([0,0], 80, theta1 = 180,theta2 = 360)
-        # mod1glyph = w1.get_path()
-        # mod2glyph = w2.get_path()
-        # for yLocsIndex in range(len(self.stackPlotArtistYcenters)):
-        #     colors = plt.cm.seismic(intensityArray[yLocsIndex])
-        #     self.axDefault.scatter(x, self.stackPlotArtistYcenters[yLocsIndex], 90, c=colors, alpha=0.5, marker=mod1glyph)#, label="Luck")
-        #     self.axDefault.scatter(x, self.stackPlotArtistYcenters[yLocsIndex], 90, c=colors, alpha=0.5, marker=mod2glyph)#, label="Luck")
-
-        #self.axDefault.set_facecolor((0.0627, 0.0627, 0.0627))
-        #self.axDefault.set_facecolor((0.9411764705882353, 0.9411764705882353, 0.9411764705882353))
         self.axDefault.set_facecolor((1,1,1))
         self.axDefault.xaxis.label.set_color((0.2,0.2,0.2))
         self.axDefault.yaxis.label.set_color((0.2,0.2,0.2))
@@ -1126,54 +970,6 @@ class mainWindow(Qt.QMainWindow):
         figZoomDefault = zpDefault.zoom_factory(self.axDefault, base_scale = scale)
         figPanDefault = zpDefault.pan_factory(self.axDefault)
 
-    # Function to plot intensity glyphs in default graph.
-    def plotOverlayGlyphs(self, nodeID):
-        # PLOTTING OVERLAY GLYPHS.
-        x = np.array(list(range(self.dataCount)))
-        intensityArray = self.getIntensityDataForStackplotArtist(self.nodeOrderForGraph)
-        #print(len(intensityArray))
-        self.stackPlotArtistYcenters = Utils.computeArtistVerticalCenterLocationsForStackPlot(self.polyCollection)
-        #print(self.stackPlotArtistYcenters)
-        y_min, y_max = self.axDefault.get_ylim() # get range of y values
-
-        for elem in self.stackPlotArtistYcenters:
-            elem[elem >= -1] = 100
-            #elem[elem >= -1] = y_max
-        #self.stackPlotArtistYcenters = np.full(81,170)
-        #print("length is ", len(self.stackPlotArtistYcenters[0]))
-        w1 = mpatches.Wedge([0,0], 80, theta1 = 0,theta2 = 180)
-        w2 = mpatches.Wedge([0,0], 80, theta1 = 180,theta2 = 360)
-        mod1glyph = w1.get_path()
-        mod2glyph = w2.get_path()
-
-        yIndex = self.nodeOrderForGraph.index(nodeID)
-        #print(self.nodeOrderForGraph)
-
-        colors = plt.cm.seismic(intensityArray[yIndex])
-        print("active tetett")
-        if (self.overlayGlyphActive == False):
-            self.sc1 = self.axDefaultIntensity.scatter(x, self.stackPlotArtistYcenters[yIndex],90, c=colors, alpha=0.5, marker="s")  # , label="Luck")
-            self.sc2 = self.axDefaultIntensity.scatter(x, self.stackPlotArtistYcenters[yIndex]+40,90, c=colors, alpha=0.5, marker="s")  # , label="Luck")
-
-            #self.sc1 = self.axDefault.scatter(x, self.stackPlotArtistYcenters, 90, c=colors, alpha=0.5, marker=mod1glyph)  # , label="Luck")
-            #self.sc2 = self.axDefault.scatter(x, self.stackPlotArtistYcenters, 90, c=colors, alpha=0.5, marker=mod2glyph)  # , label="Luck")
-
-            #xValues= np.shape(x)
-            #print("Hi Sheirn2", np.shape(self.stackPlotArtistYcenters[yIndex]))
-        else:
-            offsetValues = np.transpose(np.vstack((x, self.stackPlotArtistYcenters[yIndex])))
-            offsetValues2 = np.transpose(np.vstack((x, self.stackPlotArtistYcenters[yIndex]+92)))
-            self.sc1.set_offsets(offsetValues)
-            self.sc2.set_offsets(offsetValues)
-            #self.sc1.set_data(x,self.stackPlotArtistYcenters[yIndex], 90, c=colors, alpha=0.5, marker=mod1glyph)
-            #self.sc2.set_data(x,self.stackPlotArtistYcenters[yIndex], 90, c=colors, alpha=0.5, marker=mod2glyph)
-            self.canvasDefault.draw()
-            self.canvasDefault.flush_events()
-
-        # for yLocsIndex in range(len(self.stackPlotArtistYcenters)):
-        #     colors = plt.cm.seismic(intensityArray[yLocsIndex])
-        #     self.axDefault.scatter(x, self.stackPlotArtistYcenters[yLocsIndex], 90, c=colors, alpha=0.5, marker=mod1glyph)#, label="Luck")
-        #     self.axDefault.scatter(x, self.stackPlotArtistYcenters[yLocsIndex], 90, c=colors, alpha=0.5, marker=mod2glyph)#, label="Luck")
 
     # update default graph
     def updateDefaultGraph(self, vlineXloc=None, updateColorIndex=None):
@@ -1358,141 +1154,6 @@ class mainWindow(Qt.QMainWindow):
         ax.autoscale_view()
         ax.invert_yaxis()
 
-    # # plot intensity graph
-    # def plotIntensityGraph(self):
-    #     # Clearing old figures.
-    #     self.figureIntensity.clear()
-    #     #self.figureIntensity.tight_layout()
-    #     plt.figure(5)
-    #     self.axIntensity = self.figureIntensity.add_subplot(111)#, autoscale_on=False)
-    #     self.axIntensity.axis("off")
-    #     np.random.seed(19680801)
-    #     self.hinton(self.getIntensityDataMatrix(self.selectedNodeID), self.axIntensity)
-    #     plt.subplots_adjust(left=-0, right=1, top=0.9, bottom=0.1)
-    #     plt.xlim(xmin=-1)
-    #     plt.xlim(xmax=self.dataCount+1)
-
-    # # plot intensity glyph graph
-    # def plotIntensityGlyphGraph(self):
-    #     # Clearing old figures.
-    #     self.figureIntensityGlyph.clear()
-    #     #self.figureIntensityGlyph.tight_layout()
-    #     plt.figure(6)
-    #     self.axIntensityGlyph = self.figureIntensityGlyph.add_subplot(111)#, autoscale_on=False)
-    #     self.axIntensityGlyph.axis("off")
-    #     np.random.seed(19680801)
-    #     self.plotCircularGlyphs()
-    #     #self.hinton(self.getIntensityDataMatrix(self.selectedNodeID), self.axIntensity)
-    #     plt.subplots_adjust(left=-0, right=1, top=0.9, bottom=0.1)
-    #     plt.xlim(xmin=-1)
-    #     plt.xlim(xmax=self.dataCount+1)
-    #     # Add support for zooming and panning
-    #     scale = 1.5
-    #     zpViolin = Utils.ZoomPan()
-    #     figZoom = zpViolin.zoom_factory(self.axIntensityGlyph, base_scale = scale)
-    #     figPan = zpViolin.pan_factory(self.axIntensityGlyph)
-
-    # # plot glyph data for lesion intensities.
-    # def plotCircularGlyphs(self):
-    #     x = list(range(self.dataCount))
-    #     #print("NODE ORDER", self.nodeOrderForGraph)
-    #     intensityArray = self.getIntensityDataForStackplotArtist(self.nodeOrderForGraph)
-    #     intensityArrayT2 = self.getIntensityDataForStackplotArtist(self.nodeOrderForGraph, "MeanT2")
-    #     self.stackPlotArtistYcenters = Utils.computeArtistVerticalCenterLocationsForStackPlot(self.polyCollection)
-    #     #print("length is ", len(self.stackPlotArtistYcenters))
-    #     if(self.verticalRead == False):
-    #         w1 = mpatches.Wedge([0,0], 80, theta1 = 0,theta2 = 180)
-    #         w2 = mpatches.Wedge([0,0], 80, theta1 = 180,theta2 = 360)
-    #         self.verticalRead = True
-    #     else:
-    #         w1 = mpatches.Wedge([0,0], 80, theta1 = 90,theta2 = 270)
-    #         w2 = mpatches.Wedge([0,0], 80, theta1 = 270,theta2 = 90)
-    #         self.verticalRead = False
-    #     mod1glyph = w1.get_path()
-    #     mod2glyph = w2.get_path()
-    #     numberOfTracks = len(self.stackPlotArtistYcenters)
-    #     yPadding =1
-    #     for yLocsIndex in range(len(self.stackPlotArtistYcenters)):
-    #         isnan = np.isnan(self.stackPlotArtistYcenters[yLocsIndex])
-    #         self.stackPlotArtistYcenters[yLocsIndex][isnan==False] = yLocsIndex * yPadding
-    #         #print(yLocsIndex)
-    #         #print(self.stackPlotArtistYcenters[yLocsIndex])
-    #
-    #     #print("EDGES are ", self.G.edges)
-    #     nodeIDList = list(self.G.nodes)
-    #     #print("NODES ARE", nodeIDList)
-    #     timeList = self.G.nodes[str(2)]["time"]
-    #
-    #     for edge in self.G.edges:
-    #          timeList1 = self.G.nodes[str(edge[0])]["time"]
-    #          timeList2 = self.G.nodes[str(edge[1])]["time"]
-    #          startIndex = self.nodeOrderForGraph.index(edge[0])
-    #          endIndex = self.nodeOrderForGraph.index(edge[1])
-    #          x1 = timeList1[-1]
-    #          y1 = startIndex
-    #          x2 = timeList2[0]
-    #          y2 = endIndex
-    #          self.axIntensityGlyph.plot([x1,x2],[y1,y2],':', color='purple') # Line for connecting lesion tracks.
-    #
-    #     #y = list(range(0,numberOfTracks*yPadding,yPadding))
-    #     #print(y)
-    #     for yLocsIndex in range(len(self.stackPlotArtistYcenters)):
-    #         #colors = plt.cm.seismic(intensityArray[yLocsIndex])
-    #         #colorsT2 = plt.cm.seismic(intensityArrayT2[yLocsIndex])
-    #         colors = plt.cm.Purples(intensityArray[yLocsIndex])
-    #         colorsT2 = plt.cm.Purples(intensityArrayT2[yLocsIndex])
-    #         self.axIntensityGlyph.scatter(x, self.stackPlotArtistYcenters[yLocsIndex], 90, c=colors, alpha=0.5, marker=mod1glyph)#, label="Luck")
-    #         self.axIntensityGlyph.scatter(x, self.stackPlotArtistYcenters[yLocsIndex], 90, c=colorsT2, alpha=0.5, marker=mod2glyph)#, label="Luck")
-    #     self.canvasIntensityGlyph.draw()
-
-    # # violin plot
-    # def plotViolin(self):
-    #     # Clearing old figures.
-    #     self.figureViolin.clear()
-    #     #self.figureViolin.tight_layout()
-    #     plt.figure(6)
-    #     self.axViolin = self.figureViolin.add_subplot(111, xlim=(0,81), ylim=(0,255),autoscale_on=True)
-    #     #self.axViolin.axis("off")
-    #     self.axViolin.set_facecolor((0.9411764705882353, 0.9411764705882353, 0.9411764705882353))
-    #     self.axViolin.xaxis.label.set_color((0.5,0.5,0.5))        #setting up X-axis label color
-    #     self.axViolin.yaxis.label.set_color((0.5,0.5,0.5))          #setting up Y-axis label color
-    #     self.axViolin.tick_params(axis='x', colors=(0.5,0.5,0.5))    #setting up X-axis tick color
-    #     self.axViolin.tick_params(axis='y', colors=(0.5,0.5,0.5))  #setting up Y-axis tick color
-    #     self.axViolin.spines['left'].set_color((0.5,0.5,0.5))        # setting up Y-axis tick color
-    #     self.axViolin.spines['top'].set_color((0.5,0.5,0.5))
-    #     self.axViolin.spines['right'].set_color((0.5,0.5,0.5))
-    #     self.axViolin.spines['bottom'].set_color((0.5,0.5,0.5))
-    #     nodeID = self.selectedNodeID
-    #     perLabelIntensityDataRoot = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\structural\\"
-    #     modalities = ["T1", "T2"]
-    #     T1file = perLabelIntensityDataRoot + "voxelIntensitiesT1.pkl"
-    #     # read intensity data from file.
-    #     a_file = open(T1file, "rb")
-    #     lesionLabelWiseVoxelData = pickle.load(a_file)
-    #     G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
-    #     nodeIDList = list(G.nodes)
-    #     timeList = G.nodes[str(nodeID)]["time"]
-    #     labelList = G.nodes[str(nodeID)]["lesionLabel"]
-    #     temporalData = list(zip(timeList, labelList))
-    #     data = []
-    #     timeIndex = 0
-    #     for item in temporalData:
-    #         data.append(lesionLabelWiseVoxelData[item[0]][item[1]-1])
-    #     # build a violin plot
-    #     self.axViolin.violinplot(data, showmeans=False, showmedians=True, showextrema=False)
-    #     # add title and axis labels
-    #     #self.axViolin.set_title('')
-    #     self.axViolin.set_xlabel('followup')
-    #     self.axViolin.set_ylabel('intensity')
-    #     self.axViolin.set_xticks(timeList)
-    #     # add horizontal grid lines
-    #     #self.axViolin.yaxis.grid(True)
-    #     # Add support for zooming and panning
-    #     scale = 1.5
-    #     zpViolin = Utils.ZoomPan()
-    #     figZoom = zpViolin.zoom_factory(self.axViolin, base_scale = scale)
-    #     figPan = zpViolin.pan_factory(self.axViolin)
-
     def readIntensityDataFromJSON(self, timeList, labelList, modality = "Mean"):
         intensityList = []
 
@@ -1547,38 +1208,6 @@ class mainWindow(Qt.QMainWindow):
         #print("LENGTH IS ", len(intensityArray))
         #print("ARRAY IS", intensityArray)
         return pairIntensityData
-
-
-
-    # Compute and return intensity matrix for the graph
-    def getIntensityDataMatrix(self, nodeID):
-        displayAllLesions = self.checkBox_AllLesions.isChecked()
-        intensityMatrix = []
-        G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
-        connectedComponents = nx.strongly_connected_components(G)
-        UG = G.to_undirected()
-        dataCount = 81
-        sub_graphs = list(nx.connected_components(UG))
-        selectedClusters = []
-        for item in sub_graphs:
-            if(str(nodeID) in item or displayAllLesions == True):
-                selectedClusters.append(item)
-
-        for cluster in selectedClusters:
-            nodeIDList = cluster
-            for id in nodeIDList:
-                intensityDiffArray = np.zeros(dataCount)
-                timeList = G.nodes[id]["time"]
-                labelList = G.nodes[id]["lesionLabel"]
-                diffList = self.readDiffListFromJSON(timeList, labelList)
-                #print("max is", max(diffList))
-                intensityDiffArray[timeList] = [elem for elem in diffList ]
-                intensityMatrix.append(intensityDiffArray)
-                #print(intensityDiffArray)
-        
-        old = np.random.rand(81, len(intensityMatrix))
-        new = np.array(intensityMatrix).transpose()
-        return new #-0.5
 
     def adjust_lightness(self, color, amount=0.5):
         try:
