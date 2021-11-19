@@ -114,7 +114,7 @@ QPushButton#pushButton_LoadFolder
 background-color: rgb(255,255,255);
 color: rgb(70,70,70);
 border-style: outset;
-border-width: 2px;
+border-width: 0px;
 border-color:rgb(220,220,220);
 border-radius: 4px;
 font: 10pt &quot;Open Sans&quot;;
@@ -142,7 +142,7 @@ QPushButton#pushButton_ResetView
 background-color: rgb(255,255,255);
 color: rgb(70,70,70);
 border-style: outset;
-border-width: 2px;
+border-width: 0px;
 border-color:rgb(220,220,220);
 border-radius: 4px;
 font: 10pt &quot;Open Sans&quot;;
@@ -180,7 +180,7 @@ QPushButton#pushButton_IntensityAnalysis
 background-color: rgb(255,255,255);
 color: rgb(70,70,70);
 border-style: outset;
-border-width: 2px;
+border-width:0px;
 border-color:rgb(220,220,220);
 border-radius: 4px;
 font: 10pt &quot;Open Sans&quot;;
@@ -522,7 +522,7 @@ border-color:rgb(150,150,150);
            <widget class="QGroupBox" name="groupBox_Lesions3DView">
             <property name="styleSheet">
              <string notr="true">border-style: solid;
-border-width: 1px;
+border-width: 0px;
 border-radius: 10px;
 border-color: rgb(211,211,211);
 background-color:rgb(247,247,247);</string>
@@ -1060,7 +1060,7 @@ border-width: 0px;</string>
             </property>
             <property name="styleSheet">
              <string notr="true">border-style: solid;
-border-width: 1px;
+border-width: 0px;
 border-radius: 10px;
 border-color: rgb(211,211,211);
 background-color:rgb(255,255,255);</string>
@@ -1089,7 +1089,7 @@ background-color:rgb(255,255,255);</string>
             </property>
             <property name="styleSheet">
              <string notr="true">border-style: solid;
-border-width: 1px;
+border-width: 0px;
 border-radius: 10px;
 border-color: rgb(211,211,211);
 background-color:rgb(255,255,255);</string>
@@ -1106,7 +1106,7 @@ background-color:rgb(255,255,255);</string>
            <widget class="QGroupBox" name="groupBox_SurfaceView">
             <property name="styleSheet">
              <string notr="true">border-style: solid;
-border-width: 1px;
+border-width: 0px;
 border-radius: 10px;
 border-color: rgb(211,211,211);
 background-color:rgb(247,247,247);</string>
@@ -1268,7 +1268,7 @@ border-radius: 10px;</string>
               <property name="styleSheet">
                <string notr="true">background-color: rgb(255,255,255);
 border-style: solid;
-border-width: 1px;
+border-width: 0px;
 border-radius: 10px;
 border-color: rgb(211,211,211);</string>
               </property>
@@ -1297,7 +1297,7 @@ border-color: rgb(211,211,211);</string>
               <property name="styleSheet">
                <string notr="true">background-color: rgb(255,255,255);
 border-style: solid;
-border-width: 1px;
+border-width: 0px;
 border-radius: 10px;
 border-color: rgb(211,211,211);</string>
               </property>
@@ -1491,7 +1491,7 @@ border-radius: 10px;</string>
             </layout>
            </item>
            <item row="2" column="7">
-            <layout class="QVBoxLayout" name="verticalLayout" stretch="">
+            <layout class="QVBoxLayout" name="verticalLayout">
              <property name="spacing">
               <number>0</number>
              </property>
