@@ -150,7 +150,6 @@ class mainWindow(Qt.QMainWindow):
         self.comboBox_LesionAttributes.currentTextChanged.connect(self.on_combobox_changed_LesionAttributes) # Attaching handler for lesion filter combobox selection change.
         self.comboBox_ProjectionMethods.currentTextChanged.connect(self.on_combobox_changed_ProjectionMethods) # Attaching handler for projection methods combobox selection change.
         self.checkBox_AllLesions.stateChanged.connect(self.displayAllLesions_changed) # Display all lesions in intensity graph
-        self.checkBox_LesionBorder.stateChanged.connect(self.displayLesionBorder_changed) # Display lesion border in intensity graph
         self.checkBox_ShowClasses.stateChanged.connect(self.checkBox_ShowClasses_changed) # Display lesion classes in the intensity graph.
         self.checkBox_RangeCompare.stateChanged.connect(self.checkBox_RangeCompare_changed) # Enables comparison view for lesions.
         self.spinBox_RangeMin.valueChanged.connect(self.spinBoxMinChanged)
@@ -1129,72 +1128,6 @@ class mainWindow(Qt.QMainWindow):
 
             #self.canvasDefault.draw()
             #self.canvasDefault.draw()
-
-    def hinton(self, matrix, max_weight=None, ax=None):
-        print("I am being executed")
-        """Draw Hinton diagram for visualizing a weight matrix."""
-        ax = ax if ax is not None else plt.gca()
-        #if not max_weight:
-        #    max_weight = 2 ** np.ceil(np.log(np.abs(matrix).max()) / np.log(2))
-
-        max_weight = 0.5
-        displayEdges = self.checkBox_LesionBorder.isChecked()
-        displayIntensityClasses = self.checkBox_ShowClasses.isChecked()
-
-        if(self.buttonGroupModalities.checkedButton().text() == "T1"): # T1 white matter intensity (NAWM)
-            self.frameIntensityPlot.setStyleSheet('background-color:rgb(' + str(self.NAWM_INTENSITY_T1) +','+ str(self.NAWM_INTENSITY_T1) + ',' + str(self.NAWM_INTENSITY_T1)+');border-color: rgb(57,57,57);border-style: solid;border-width: 2px; border-radius: 10px;')
-        if(self.buttonGroupModalities.checkedButton().text() == "T2"): # T2 white matter intensity (NAWM)
-            self.frameIntensityPlot.setStyleSheet('background-color:rgb(' + str(self.NAWM_INTENSITY_T2) +','+ str(self.NAWM_INTENSITY_T2) + ',' + str(self.NAWM_INTENSITY_T2)+');border-color: rgb(57,57,57);border-style: solid;border-width: 2px; border-radius: 10px;')
-
-        ax.set_aspect('equal', 'box')
-        #ax.xaxis.set_major_locator(plt.NullLocator())
-        #ax.yaxis.set_major_locator(plt.NullLocator())
-        #print(len(matrix))
-        intDifference = self.computeIntensityDifference(matrix)
-
-        for (x, y), w in np.ndenumerate(matrix):
-            
-            #color = 'white' if w > 0 else 'black'
-            color = (w, w, w)
-            if displayIntensityClasses: # show intensity classifications (hyper, hypo, iso)
-                if(self.buttonGroupModalities.checkedButton().text() == "T1"): # T1 white matter intensity (NAWM)
-                    intensityDifference = w - self.NAWM_INTENSITY_T1/255
-                if(self.buttonGroupModalities.checkedButton().text() == "T2"): # T2 white matter intensity (NAWM)
-                    intensityDifference = w - self.NAWM_INTENSITY_T2/255
-                if(intensityDifference > self.R_ISO): # hyper
-                    color = 'white'
-                elif(intensityDifference < self.R_ISO*-1): # hypo
-                    color = 'black'
-                else:
-                    if(self.buttonGroupModalities.checkedButton().text() == "T1"): # T1 white matter intensity (NAWM)
-                        color = (self.NAWM_INTENSITY_T1/255, self.NAWM_INTENSITY_T1/255, self.NAWM_INTENSITY_T1/255)
-                    if(self.buttonGroupModalities.checkedButton().text() == "T2"): # T2 white matter intensity (NAWM)
-                        color = (self.NAWM_INTENSITY_T2/255, self.NAWM_INTENSITY_T2/255, self.NAWM_INTENSITY_T2/255)
-            else: # intensity display as it is.
-                color = (w, w, w)
-            if displayEdges:
-                edgeColor = (0.6,0.6,0.6)
-            else:
-                edgeColor = color
-            if(w==0):
-                size = 0
-            else:
-                size = np.sqrt(np.abs(0.5) / max_weight)
-                if(x<80):
-                    if(intDifference[x][y] > 0):
-                        plt.plot(x+1, y, marker=r'$\wedge$', color = "red")
-                    if(intDifference[x][y] < 0):
-                        plt.plot(x+1, y, marker=r'$\vee$', color = "yellow")
-                    #if(intDifference[x][y] == 0):
-                    #    plt.plot(x+1, y, marker=r'$\leftarrow$', color = "green")
-                         
-            #size = np.sqrt(np.abs(w) / max_weight)
-            
-            rect = plt.Rectangle([x - size / 2, y - size / 2], size, size, facecolor=color, edgecolor=edgeColor)
-            ax.add_patch(rect)
-
-        ax.autoscale_view()
-        ax.invert_yaxis()
 
     def readIntensityDataFromJSON(self, timeList, labelList, modality = "Mean"):
         intensityList = []

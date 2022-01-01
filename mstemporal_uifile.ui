@@ -1257,6 +1257,18 @@ border-color: rgb(211,211,211);</string>
           <property name="verticalSpacing">
            <number>0</number>
           </property>
+          <item row="0" column="6">
+           <widget class="QLabel" name="label_6">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(70,70,70);
+font: 10pt &quot;Open Sans&quot;;
+font-weight:500;</string>
+            </property>
+            <property name="text">
+             <string>IsoRange</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="2">
            <layout class="QGridLayout" name="gridLayout_11">
             <property name="rightMargin">
@@ -1378,6 +1390,44 @@ QRadioButton::indicator:unchecked {
             </item>
            </layout>
           </item>
+          <item row="0" column="5">
+           <widget class="QCheckBox" name="checkBox_ShowClasses">
+            <property name="styleSheet">
+             <string notr="true">font: 10pt &quot;Open Sans&quot;;
+font-weight:500;
+color: rgb(33,33,33);
+color: rgb(70,70,70);</string>
+            </property>
+            <property name="text">
+             <string>Show Classes</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="9">
+           <widget class="Line" name="line_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="8">
+           <widget class="QLabel" name="label_Riso">
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(70,70,70);
+font: 10pt &quot;Open Sans&quot;;
+font-weight:500;</string>
+            </property>
+            <property name="text">
+             <string>5.0%</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QComboBox" name="comboBox_LesionAttributes">
             <property name="minimumSize">
@@ -1433,27 +1483,7 @@ border-radius:2px;
             </property>
            </widget>
           </item>
-          <item row="0" column="5">
-           <widget class="QCheckBox" name="checkBox_LesionBorder">
-            <property name="styleSheet">
-             <string notr="true">border-color: rgb(230,230,230);
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
-color: rgb(70,70,70);</string>
-            </property>
-            <property name="text">
-             <string>Lesion Border</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="10">
-           <widget class="Line" name="line_3">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="8">
+          <item row="0" column="7">
            <widget class="QSlider" name="horizontalSlider_Riso">
             <property name="styleSheet">
              <string notr="true">.QSlider::handle:horizontal {
@@ -1489,31 +1519,6 @@ border-color:rgb(150,150,150);
             </property>
            </widget>
           </item>
-          <item row="0" column="7">
-           <widget class="QLabel" name="label_6">
-            <property name="styleSheet">
-             <string notr="true">color: rgb(70,70,70);
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;</string>
-            </property>
-            <property name="text">
-             <string>IsoRange</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="6">
-           <widget class="QCheckBox" name="checkBox_ShowClasses">
-            <property name="styleSheet">
-             <string notr="true">font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
-color: rgb(33,33,33);
-color: rgb(70,70,70);</string>
-            </property>
-            <property name="text">
-             <string>Show Classes</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="4">
            <widget class="QCheckBox" name="checkBox_AllLesions">
             <property name="styleSheet">
@@ -1524,24 +1529,6 @@ color: rgb(70,70,70);</string>
             </property>
             <property name="text">
              <string>All Lesions</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="9">
-           <widget class="QLabel" name="label_Riso">
-            <property name="minimumSize">
-             <size>
-              <width>30</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: rgb(70,70,70);
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;</string>
-            </property>
-            <property name="text">
-             <string>5.0%</string>
             </property>
            </widget>
           </item>
