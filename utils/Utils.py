@@ -5,6 +5,9 @@ import os
 import glob
 import math
 import numpy as np
+import networkx as nx
+from vtkmodules.vtkCommonColor import vtkNamedColors
+import itertools
 
 class ReadThread(QObject): 
     progress = pyqtSignal(int)
@@ -179,9 +182,9 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
                     
                     nodeID = self.lesionvis.getNodeIDforPickedLesion(self.lesionvis.userPickedLesionID)
                     self.lesionvis.selectedNodeID = nodeID
-                    if(self.lesionvis.buttonGroupIntensityGraphs.checkedId() == -3): # Violin plot
-                        self.lesionvis.plotViolin()
-                        self.lesionvis.canvasViolin.draw()
+                    # if(self.lesionvis.buttonGroupIntensityGraphs.checkedId() == -3): # Violin plot
+                    #     self.lesionvis.plotViolin()
+                    #     self.lesionvis.canvasViolin.draw()
                     self.lesionvis.updateDefaultGraph(None, nodeID)
                     self.lesionvis.on_sliderChangedTimePoint()
                     self.lesionvis.updateLesionOverlayText()
@@ -520,3 +523,222 @@ class ZoomPan:
 
         #return the function
         return onMotion
+
+
+
+def testfun(p):
+    print(p)
+
+'''
+##########################################################################
+    Callback function for graph selection.
+##########################################################################
+'''
+def graphSelectionCallback(obj, event):
+    print(type(obj))
+    # arr = obj.GetCurrentSelection().GetNode(1).GetSelectionList()
+    # for elem in arr:
+    #     print(elem)
+    numberOfTuples = obj.GetCurrentSelection().GetNode(1).GetSelectionList().GetNumberOfTuples()
+    selectedNodes = [0] * numberOfTuples
+    for tupleIndex in range(numberOfTuples):
+        d = list(obj.GetCurrentSelection().GetNode(1).GetSelectionList().GetTuple(tupleIndex))
+        selectedNodes[tupleIndex] = d
+
+    flatListFloat = list(itertools.chain.from_iterable(selectedNodes))
+    flatListInt = [int(a)+1 for a in flatListFloat]  # Adding 1 to correct lesion numbering
+    print(flatListInt)
+
+'''
+##########################################################################
+    Function for plotting VTK based node-graph
+##########################################################################
+'''
+def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
+    print("entering here 1")
+    colors = vtk.vtkNamedColors()
+    # Read data
+    G = nx.read_gml(graphPath)
+    print(list(G.edges()))
+    print(G.nodes())
+    # For scaling vertices or nodes.
+    scales = vtk.vtkFloatArray()
+    scales.SetNumberOfComponents(1)
+    scales.SetName('Scales')
+
+    vertex_labels = vtk.vtkStringArray()
+    vertex_labels.SetName("VertexLabels")
+
+    nodes = G.nodes()
+    edges = list(G.edges())
+    vtkGraph = vtk.vtkMutableDirectedGraph()
+    vertices = [0] * len(nodes)
+
+    # Create the color array for the vertices
+    vertexColors = vtk.vtkIntArray()
+    vertexColors.SetNumberOfComponents(1)
+    vertexColors.SetName('VertexColors')
+
+    # Create the color array for the edges.
+    edgeColors = vtk.vtkIntArray()
+    edgeColors.SetNumberOfComponents(1)
+    edgeColors.SetName('EdgeColors')
+
+    lookupTableVertices = vtk.vtkLookupTable()
+    lookupTableVertices.SetNumberOfTableValues(len(nodes))
+    for i in range(len(nodes)):
+        clr = list(graphNodeColors[i])
+        clr.append(1.0)  # A 4 element list is expected. last element is alpha
+        lookupTableVertices.SetTableValue(i, clr)
+    # lookupTableVertices.SetTableValue(1, colors.GetColor4d('Red'))
+    # lookupTableVertices.SetTableValue(2, colors.GetColor4d('Green'))
+    # lookupTableVertices.SetTableValue(3, colors.GetColor4d('Green'))
+    # lookupTableVertices.SetTableValue(4, colors.GetColor4d('Green'))
+    # lookupTableVertices.SetTableValue(5, colors.GetColor4d('Red'))
+    # lookupTableVertices.SetTableValue(6, colors.GetColor4d('Green'))
+    # lookupTableVertices.SetTableValue(7, colors.GetColor4d('Green'))
+    # lookupTableVertices.SetTableValue(8, colors.GetColor4d('Green'))
+    # lookupTableVertices.SetTableValue(9, colors.GetColor4d('Green'))
+    lookupTableVertices.Build()
+
+    lookupTableEdges = vtk.vtkLookupTable()
+    lookupTableEdges.SetNumberOfTableValues(len(edges))
+
+    for i in range(len(nodes)):
+        vertices[i] = vtkGraph.AddVertex()  # Add vertex to the graph
+        scales.InsertNextValue(3)
+        vertex_labels.InsertValue(vertices[i], str(int(vertices[i]) + 1))  # Add label.
+        vertexColors.InsertNextValue(i)
+
+    for i in range(len(edges)):
+        edgeColors.InsertNextValue(i)
+        lookupTableEdges.SetTableValue(i, colors.GetColor4d('Gray'))
+
+    lookupTableEdges.Build()
+
+    # colorsArray = vtk.vtkUnsignedCharArray()
+    # colorsArray.SetNumberOfComponents(3)
+    # colorsArray.SetNumberOfTuples(len(edges))
+    # colorsArray.SetName('EdgeColors')
+    # for c in range(len(edges)):
+    #     colorsArray.SetTuple(c, [255, 0, 0])
+
+    for item in edges:
+        vtkGraph.AddEdge(int(item[0]) - 1, int(item[1]) - 1)
+
+    # Add the scale array to the graph
+    vtkGraph.GetVertexData().AddArray(scales)
+
+    # Add vertex labels to the graph
+    vtkGraph.GetVertexData().AddArray(vertex_labels)
+
+    # Add color data to vertices
+    vtkGraph.GetVertexData().AddArray(vertexColors)
+
+    # Add color array to edges
+    vtkGraph.GetEdgeData().AddArray(edgeColors)
+
+    #graph_layout_view = vtk.vtkGraphLayoutView()
+    #graph_layout_view.SetRenderWindow(selfObject.vtkWidgetNodeGraph.GetRenderWindow())
+
+    layout = vtk.vtkGraphLayout()
+    strategy = vtk.vtkSimple2DLayoutStrategy()
+    strategy.SetRestDistance(100.0)
+    layout.SetInputData(vtkGraph)
+    layout.SetLayoutStrategy(strategy)
+    graph_layout_view.SetLayoutStrategyToPassThrough()
+    graph_layout_view.SetEdgeLayoutStrategyToPassThrough()
+    graph_layout_view.SetVertexLabelArrayName('VertexLabels')
+    graph_layout_view.SetVertexColorArrayName("VertexColors")
+    graph_layout_view.SetEdgeColorArrayName('EdgeColors')
+    graph_layout_view.ColorVerticesOn()
+    graph_layout_view.ColorEdgesOn()
+
+    #graph_layout_view.SetVertexLabelVisibility(True)
+    graphToPoly = vtk.vtkGraphToPolyData()
+    graphToPoly.SetInputConnection(layout.GetOutputPort())
+    graphToPoly.EdgeGlyphOutputOn()
+    graphToPoly.SetEdgeGlyphPosition(0.94)
+
+    arrowSource = vtk.vtkGlyphSource2D()
+    arrowSource.SetGlyphTypeToEdgeArrow()
+    arrowSource.FilledOn()
+    arrowSource.SetColor(255, 255.0, 0)
+    print(arrowSource.GetColor())
+    arrowSource.SetScale(2)
+    arrowSource.Update()
+
+    # vertexCircleSource = vtk.vtkGlyphSource2D()
+    # vertexCircleSource.SetGlyphTypeToCircle()
+    # vertexCircleSource.FilledOn()
+    # vertexCircleSource.SetScale(3)
+    # vertexCircleSource.SetResolution(20)
+    # vertexCircleSource.Update()
+
+    arrowGlyph = vtk.vtkGlyph3D()
+    arrowGlyph.SetColorModeToColorByScalar()
+    arrowGlyph.SetScaleFactor(1)
+    arrowGlyph.SetInputConnection(0, graphToPoly.GetOutputPort(1))
+    arrowGlyph.SetInputConnection(1, arrowSource.GetOutputPort())
+
+    arrowMapper = vtk.vtkPolyDataMapper()
+    arrowMapper.SetInputConnection(arrowGlyph.GetOutputPort())
+    arrowActor = vtk.vtkActor()
+    arrowActor.SetMapper(arrowMapper)
+    arrowActor.GetProperty().SetColor(0.5, 0.5, 0.5)
+
+    # vertexGlyph = vtk.vtkGlyph3D()
+    # vertexGlyph.SetColorModeToColorByScalar()
+    # vertexGlyph.SetScaleFactor(4)
+    #
+    # vertexGlyph.SetInputConnection(0, graphToPoly.GetOutputPort(0))
+    # vertexGlyph.SetInputConnection(1, vertexCircleSource.GetOutputPort())
+
+    #vertexMapper = vtk.vtkPolyDataMapper()
+    #vertexMapper.SetInputConnection(vertexGlyph.GetOutputPort())
+    #vertexActor = vtk.vtkActor()
+    #vertexActor.SetMapper(vertexMapper)
+    #vertexActor.GetProperty().SetColor(0.0, 0.0, 0.0)
+
+    graph_layout_view.AddRepresentationFromInputConnection(layout.GetOutputPort())
+    #graph_layout_view.ScaledGlyphsOn()
+    #graph_layout_view.SetScalingArrayName('Scales')
+
+    textActorTitle = vtk.vtkTextActor()
+    textActorTitle.UseBorderAlignOff()
+    textActorTitle.SetDisplayPosition(10, 10)
+    textActorTitle.GetTextProperty().SetFontFamily(4)
+    textActorTitle.GetTextProperty().SetFontFile("asset\\GoogleSans-Medium.ttf")
+    textActorTitle.GetTextProperty().SetFontSize(16)
+    textActorTitle.GetTextProperty().SetColor(0.3411, 0.4824, 0.3608)
+    textActorTitle.SetInput("Lesion Activity Graph")
+
+    rGraph = vtk.vtkRenderedGraphRepresentation()
+    gGlyph = vtk.vtkGraphToGlyphs()
+    rGraph.SafeDownCast(graph_layout_view.GetRepresentation()).SetGlyphType(gGlyph.CIRCLE)
+    graph_layout_view.GetRenderer().AddActor(arrowActor)
+    #graph_layout_view.GetRenderer().AddActor(vertexActor)
+    graph_layout_view.GetRenderer().AddActor(textActorTitle)
+
+    viewTheme = vtk.vtkViewTheme()
+    viewTheme.SetLineWidth(3.0)
+    viewTheme.SetOutlineColor(0.0, 0.0, 0.0)
+    viewTheme.SetVertexLabelColor(0.0, 0.0, 0.0)
+    viewTheme.SetPointLookupTable(lookupTableVertices)
+    viewTheme.SetCellLookupTable(lookupTableEdges)
+
+    graph_layout_view.GetRepresentation().ApplyViewTheme(viewTheme)
+    graph_layout_view.GetRepresentation().ScalingOn()
+    graph_layout_view.GetRepresentation().SetScalingArrayName('Scales')
+
+    # graph_layout_view.GetRenderer().AddActor(edgeActor)
+    graph_layout_view.GetRenderer().SetBackground(colors.GetColor3d('White'))
+    graph_layout_view.GetRenderer().SetBackground2(colors.GetColor3d('White'))
+    graph_layout_view.SetEdgeColorArrayName("EdgeColors")
+
+    graph_layout_view.GetRepresentation().GetAnnotationLink().AddObserver("AnnotationChangedEvent", graphSelectionCallback)
+
+    graph_layout_view.ResetCamera()
+    selfObject.renNodeGraph.ResetCamera()
+    #graph_layout_view.Render()
+    #graph_layout_view.GetInteractor().Start()

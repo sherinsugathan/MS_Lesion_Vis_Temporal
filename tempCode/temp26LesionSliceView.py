@@ -99,6 +99,7 @@ for i in range(4):
     renWin.AddRenderer(ren)
     ren.SetViewport(viewports[i][0], viewports[i][1], viewports[i][2], viewports[i][3])
     ren.SetBackground(colors.GetColor3d(ren_bkg[i]))
+    print(id(ren))
 
 #ren.AddVolume(volume)
 
@@ -113,6 +114,7 @@ for i in range(4):
 #ren.AddActor(lesionActor)
 #ren.AddActor(sphereActor)
 ren.SetBackground(0, 0, 1.0)
+print(id(ren))
 renWin.SetSize(1000, 900)
 
 # This allows the interactor to initalize itself. It has to be

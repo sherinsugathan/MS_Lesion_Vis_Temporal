@@ -12,7 +12,7 @@
 # from PyQt5 import QtCore, QtGui
 # from PyQt5 import Qt
 # from PyQt5.QtCore import QTimer
-from networkx.algorithms.components.connected import connected_components
+
 import vtk
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QFileDialog, QCheckBox, QButtonGroup, QAbstractButton
@@ -37,6 +37,7 @@ import numpy as np
 import numpy.ma as ma
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import networkx as nx
+from networkx.algorithms.components.connected import connected_components
 from matplotlib import colors
 import matplotlib.pyplot as plt
 import matplotlib
@@ -60,6 +61,7 @@ from matplotlib import font_manager # Add custom font without installing it.
 from matplotlib.ticker import AutoMinorLocator
 from numpy import diff
 import math
+from vtk.numpy_interface import dataset_adapter as dsa
 
 # Main window class.
 class mainWindow(Qt.QMainWindow):
@@ -578,12 +580,48 @@ class mainWindow(Qt.QMainWindow):
 
     def initializeGraphVis(self):
         print("initializing node graph...")
-        self.vl_graph = Qt.QVBoxLayout()
-        self.figureGraph = plt.figure(num = 4, frameon=False, clear=True)
-        self.canvasGraph = FigureCanvas(self.figureGraph)
-        self.vl_graph.addWidget(self.canvasGraph)
-        self.frame_NodeGraph.setLayout(self.vl_graph)
-        self.plotGraphVis()
+
+        # Colors for actors
+        graphNodeColors = []
+        for i in range(1, 10 + 1):
+            graphNodeColors.append(self.plotColors[self.graphLegendLabelList.index(str(i))])
+
+        self.vlNodeGraph = Qt.QVBoxLayout()
+        self.vtkWidgetNodeGraph = QVTKRenderWindowInteractor(self.frame_NodeGraph)
+        self.vlNodeGraph.addWidget(self.vtkWidgetNodeGraph)
+
+        self.graph_layout_view = vtk.vtkGraphLayoutView()
+        self.graph_layout_view.SetRenderWindow(self.vtkWidgetNodeGraph.GetRenderWindow())
+        #self.renNodeGraph = vtk.vtkRenderer()
+        self.renNodeGraph = self.graph_layout_view.GetRenderer()
+        print("Renderer ID1 is ", id(self.renNodeGraph))
+        self.renNodeGraph.SetBackground(255.0, 0.0, 0.0)
+        self.vtkWidgetNodeGraph.GetRenderWindow().AddRenderer(self.renNodeGraph)
+
+        self.irenNodeGraph = self.vtkWidgetNodeGraph.GetRenderWindow().GetInteractor()
+        self.irenNodeGraph.SetRenderWindow(self.vtkWidgetNodeGraph.GetRenderWindow())
+        self.irenNodeGraph.SetInteractorStyle(self.graph_layout_view.GetInteractorStyle())
+
+        #self.irenNodeGraph = self.graph_layout_view.GetInteractor()
+        #self.irenNodeGraph.SetRenderWindow(self.vtkWidgetNodeGraph.GetRenderWindow())
+
+
+        self.renNodeGraph.ResetCamera()
+        self.frame_NodeGraph.setLayout(self.vlNodeGraph)
+        self.irenNodeGraph.Initialize()
+        print(graphNodeColors)
+        Utils.drawNodeGraph(self, "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml", self.graph_layout_view, graphNodeColors)
+
+
+        #self.vl_graph = Qt.QVBoxLayout()
+        #self.figureGraph = plt.figure(num = 4, frameon=False, clear=True)
+        #self.canvasGraph = FigureCanvas(self.figureGraph)
+        #self.vl_graph.addWidget(self.canvasGraph)
+        #self.frame_NodeGraph.setLayout(self.vl_graph)
+        #self.canvasGraph.mpl_connect('pick_event', self.nodeGraphPickEventHandler)
+
+    def nodeGraphPickEventHandler(self):
+        print("pick evenet trigerred")
 
     def on_press_intensityGlyph(self, event):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
@@ -703,28 +741,23 @@ class mainWindow(Qt.QMainWindow):
 
     # Plot node graph visual
     def plotGraphVis(self):
-        self.figureGraph.clear()
-        plt.figure(4)
-        plt.rcParams['font.family'] = 'Open Sans'
-
-        self.axGraph = self.figureGraph.add_subplot(111)
-        self.axGraph.set_title('Lesion Activity Graph', fontsize=12, fontweight='normal', color="#666666", loc='left')
-        #plt.subplots_adjust(wspace=None, hspace=None)
-        plt.subplots_adjust(left=0.09, bottom=0.09, right=0.95, top=0.95)
-        G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
-        edges = G.edges()
-        weights = [3 for u,v in edges]
-
-        graphNodeColors = []
-        for i in range(1,10+1):
-            graphNodeColors.append(self.plotColors[self.graphLegendLabelList.index(str(i))])
-
-        #plt.text(0.0, 1.0, 'Lesion Activity Graph', horizontalalignment='left')
-        nx.draw_planar(G, with_labels=True, node_size=700, node_color=graphNodeColors, node_shape="h", edge_color="#4c80b3", font_color="#112840", font_weight="normal", alpha=0.5, linewidths=2, width=weights, arrowsize=20)
-        #self.axGraph.text(0.1, 0.1, 'Random Noise', style='italic', fontsize=12, bbox={'facecolor': 'grey', 'alpha': 0.5})
-        #nx.draw_shell(G, with_labels=True, node_size=800, node_color="#c87b7b", node_shape="h", edge_color="#f39eac", font_color="#f39eac", font_weight="bold", alpha=0.5, linewidths=5, width=weights, arrowsize=20)
-        plt.tight_layout()
-        self.canvasGraph.draw()
+        print("sfsdfsdf")
+        # self.figureGraph.clear()
+        # plt.figure(4)
+        # plt.rcParams['font.family'] = 'Open Sans'
+        # self.axGraph = self.figureGraph.add_subplot(111)
+        # self.axGraph.set_title('Lesion Activity Graph', fontsize=12, fontweight='normal', color="#666666", loc='left')
+        # plt.subplots_adjust(left=0.09, bottom=0.09, right=0.95, top=0.95)
+        # G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+        # edges = G.edges()
+        # weights = [3 for u, v in edges]
+        #
+        # graphNodeColors = []
+        # for i in range(1, 10+1):
+        #     graphNodeColors.append(self.plotColors[self.graphLegendLabelList.index(str(i))])
+        #
+        # nx.draw_planar(G, with_labels=True, node_size=700, node_color=graphNodeColors, node_shape="h", edge_color="#4c80b3", font_color="#112840", font_weight="normal", alpha=0.5, linewidths=2, width=weights, arrowsize=20)
+        # self.canvasGraph.draw()
 
     def computeNodeOrderForGraph(self, G): #TODO NEED TO UPDATE CODE to support multilevel activity (eg split and merge in one sequence)
         # color palette
@@ -834,7 +867,7 @@ class mainWindow(Qt.QMainWindow):
             self.intensityImage = self.axDefaultIntensity.imshow(Z, aspect='auto', cmap='gray') #  , vmin=0, vmax=255)
             #self.intensityImage = self.axDefaultIntensity.pcolormesh(Z)
             self.axDefaultIntensity.set_yticks([0, 1])  # Set two values as ticks.
-            modalities = ["T1", "T2"]
+            modalities = ["T2", "T1"]
             self.axDefaultIntensity.set_yticklabels(modalities)
             self.axDefaultIntensity.spines['right'].set_visible(False)
             self.axDefaultIntensity.spines['top'].set_visible(False)
@@ -938,8 +971,8 @@ class mainWindow(Qt.QMainWindow):
         self.axDefault.spines['top'].set_visible(False)
         self.axDefault.tick_params(axis='x', colors=(0.2,0.2,0.2))
         self.axDefault.tick_params(axis='y', colors=(0.2,0.2,0.2))
-        self.axDefault.set_xticks(list(range(self.dataCount)))
-        self.axDefault.tick_params(axis='x', which='minor', length=1)
+        #self.axDefault.set_xticks(list(range(self.dataCount)))
+        #self.axDefault.tick_params(axis='x', which='minor', length=1)
         self.axDefault.set_xlabel("followup instance", fontname="Arial")#, fontsize=12)
         self.axDefault.set_ylabel(lesionAttributeString, fontname="Arial")#, fontsize=12)
         self.axDefault.xaxis.set_ticks_position('top')  # set x axis labels and ticks on the top of graph
@@ -950,8 +983,10 @@ class mainWindow(Qt.QMainWindow):
         plt.xlim(xmax=self.dataCount-1)
         #self.axDefault.xaxis.set_ticks(np.arange(0, self.dataCount-1, 1))
         #plt.minorticks_on()
-        minor_locator = AutoMinorLocator(2)
-        self.axDefault.xaxis.set_minor_locator(minor_locator)
+
+        #minor_locator = AutoMinorLocator(2)
+        #self.axDefault.xaxis.set_minor_locator(minor_locator)
+
         # Enable to add vertical grid lines in streamgraph.
         #self.axDefault.xaxis.grid(True, which='both', color='#f4f6fd', linestyle='-', alpha=0.2) # add vertical grid lines.
         #self.axDefault.grid()
@@ -962,7 +997,8 @@ class mainWindow(Qt.QMainWindow):
         self.canvasDefault.mpl_connect('button_press_event', self.onClickDefaultStreamGraphCanvas)
         #self.canvasDefault.mpl_connect('button_release_event', self.onReleaseDefaultStreamGraphCanvas)
         #self.canvasDefault.mpl_connect('motion_notify_event', self.onMouseMoveDefaultStreamGraphCanvas)
-        self.defaultGraphBackup = self.canvasDefault.copy_from_bbox(self.axDefault.bbox)
+        #self.defaultGraphBackup = self.canvasDefault.copy_from_bbox(self.axDefault.bbox)
+        #print("running here")
 
         self.vLine = None
         scale = 1.1
@@ -1070,10 +1106,16 @@ class mainWindow(Qt.QMainWindow):
                     continue
 
         if (self.overlayGlyphActive == False):
-            self.scatterTrendUp = self.axDefaultIntensity.scatter(xTrendUp, yTrendUp, marker=r'$\wedge$', color = "red") # increase trend
-            self.scatterTrendDown = self.axDefaultIntensity.scatter(xTrendDown, yTrendDown, marker=r'$\vee$', color = "yellow")  # decrease trend
-            self.scatterSpikeUp = self.axDefaultIntensity.scatter(xSpikeUp, ySpikeUp, marker='^', color = "red")  # significant increase
-            self.scatterSpikeDown =self.axDefaultIntensity.scatter(xSpikeDown, ySpikeDown, marker='v', color="yellow")  # significant decrease
+            markerSize = 50
+            # Colors based on color brewer https://colorbrewer2.org/#type=qualitative&scheme=Paired&n=4
+            self.scatterTrendUp = self.axDefaultIntensity.scatter(xTrendUp, yTrendUp, s=markerSize, marker=r'$\wedge$', color="#33a02c", linewidth=0.2, edgecolor='#404040')  # increase trend
+            self.scatterTrendDown = self.axDefaultIntensity.scatter(xTrendDown, yTrendDown, s=markerSize, marker=r'$\vee$', color="#a6cee3", linewidth=0.2, edgecolor='#404040')  # decrease trend
+            self.scatterSpikeUp = self.axDefaultIntensity.scatter(xSpikeUp, ySpikeUp, s=markerSize, marker='^', color = "#b2df8a", linewidth=0.2, edgecolor='#404040')  # significant increase
+            self.scatterSpikeDown = self.axDefaultIntensity.scatter(xSpikeDown, ySpikeDown, s=markerSize, marker='v',color="#1f78b4", linewidth=0.2, edgecolor='#404040')  # significant decrease
+            #self.scatterTrendUp = self.axDefaultIntensity.plot(xTrendUp, yTrendUp, linestyle='None', markersize=glyphSize, marker=r'$\wedge$', color = "#33a02c", markeredgewidth=0.2, markeredgecolor=(0,0,0,1)) # increase trend
+            #self.scatterTrendDown = self.axDefaultIntensity.plot(xTrendDown, yTrendDown, linestyle='None', markersize=glyphSize, marker=r'$\vee$', color="#a6cee3", markeredgewidth=0.2, markeredgecolor=(0,0,0,1))  # decrease trend
+            #self.scatterSpikeUp = self.axDefaultIntensity.plot(xSpikeUp, ySpikeUp, linestyle='None', markersize=glyphSize, marker='^', markerfacecolor='g', markeredgewidth=0.2, markeredgecolor=(0,0,0,1))  # significant increase
+            #self.scatterSpikeDown = self.axDefaultIntensity.plot(xSpikeDown, ySpikeDown, linestyle='None', markersize=glyphSize, marker='v', color="#1f78b4", markeredgewidth=0.2, markeredgecolor=(0,0,0,1))  # significant decrease
             self.overlayGlyphActive = True  # Glyphs are drawn now
         else:  # Glyphs are already drawn. Just need to refresh.
             offsetValuesTrendUp = np.transpose(np.vstack((xTrendUp, yTrendUp)))
@@ -1339,6 +1381,9 @@ class mainWindow(Qt.QMainWindow):
         surfaceLh.GetMapper().GetInput().GetPointData().SetScalars(self.vtk_colorsLh)
         surfaceRh.GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
         surfaceRh.GetMapper().GetInput().GetPointData().SetScalars(self.vtk_colorsRh)
+
+        print(affectedLh)
+
         self.irenDual.Render()
 
     def clearLesionHighlights(self, timeStep = None):
