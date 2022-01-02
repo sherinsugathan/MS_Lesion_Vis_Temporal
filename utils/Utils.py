@@ -654,7 +654,7 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     graph_layout_view.ColorVerticesOn()
     graph_layout_view.ColorEdgesOn()
 
-    #graph_layout_view.SetVertexLabelVisibility(True)
+    graph_layout_view.SetVertexLabelVisibility(True)
     graphToPoly = vtk.vtkGraphToPolyData()
     graphToPoly.SetInputConnection(layout.GetOutputPort())
     graphToPoly.EdgeGlyphOutputOn()
