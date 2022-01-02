@@ -2,6 +2,7 @@ from PyQt5.QtCore import QThread, pyqtSignal, QObject
 from PyQt5 import QtCore, QtGui
 import vtk
 import os
+import sys
 import glob
 import math
 import numpy as np
@@ -9,6 +10,8 @@ import networkx as nx
 from vtkmodules.vtkCommonColor import vtkNamedColors
 import itertools
 import keyboard as kb
+from datetime import datetime
+import matplotlib.pyplot as plt
 
 class ReadThread(QObject): 
     progress = pyqtSignal(int)
@@ -76,6 +79,7 @@ class ReadThread(QObject):
 
             actor = vtk.vtkActor()
             actor.SetMapper(mapper)
+            actor.GetProperty().SetInterpolationToGouraud()
             if(fileName == "ventricleMesh"):
                 actor.GetProperty().SetColor(0.5607843137254902, 0.7058823529411765, 0.5725490196078431) # green
             else:
@@ -185,8 +189,8 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
                     # if(self.lesionvis.buttonGroupIntensityGraphs.checkedId() == -3): # Violin plot
                     #     self.lesionvis.plotViolin()
                     #     self.lesionvis.canvasViolin.draw()
-                    if kb.is_pressed("shift"):
-                        self.lesionvis.updateDefaultGraph(None, nodeID)
+                    if kb.is_pressed("ctrl"):
+                        self.lesionvis.updateDefaultGraph(None, [nodeID])
                     #self.lesionvis.on_sliderChangedTimePoint() # DO NOT ENABLE. BUG
                     self.lesionvis.updateLesionOverlayText()
                 else:
@@ -526,24 +530,6 @@ class ZoomPan:
         return onMotion
 
 
-'''
-##########################################################################
-    Callback function for graph selection.
-##########################################################################
-'''
-def graphSelectionCallback(obj, event):
-    # arr = obj.GetCurrentSelection().GetNode(1).GetSelectionList()
-    # for elem in arr:
-    #     print(elem)
-    numberOfTuples = obj.GetCurrentSelection().GetNode(1).GetSelectionList().GetNumberOfTuples()
-    selectedNodes = [0] * numberOfTuples
-    for tupleIndex in range(numberOfTuples):
-        d = list(obj.GetCurrentSelection().GetNode(1).GetSelectionList().GetTuple(tupleIndex))
-        selectedNodes[tupleIndex] = d
-
-    flatListFloat = list(itertools.chain.from_iterable(selectedNodes))
-    flatListInt = [int(a)+1 for a in flatListFloat]  # Adding 1 to correct lesion numbering
-    #print(flatListInt)
 
 '''
 ##########################################################################
@@ -720,6 +706,15 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     viewTheme.SetVertexLabelColor(0.0, 0.0, 0.0)
     viewTheme.SetPointLookupTable(lookupTableVertices)
     viewTheme.SetCellLookupTable(lookupTableEdges)
+    viewTheme.SetVertexLabelColor(0, 0, 0)
+
+    labelTextProperty = vtk.vtkTextProperty()
+    labelTextProperty.SetColor(0, 0, 0)
+    labelTextProperty.SetFontSize(18)
+    labelTextProperty.ShadowOn()
+    labelTextProperty.BoldOn()
+
+    viewTheme.SetPointTextProperty(labelTextProperty)
 
     graph_layout_view.GetRepresentation().ApplyViewTheme(viewTheme)
     graph_layout_view.GetRepresentation().ScalingOn()
@@ -730,9 +725,53 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     graph_layout_view.GetRenderer().SetBackground2(colors.GetColor3d('White'))
     graph_layout_view.SetEdgeColorArrayName("EdgeColors")
 
-    graph_layout_view.GetRepresentation().GetAnnotationLink().AddObserver("AnnotationChangedEvent", graphSelectionCallback)
+    graph_layout_view.GetRepresentation().GetAnnotationLink().AddObserver("AnnotationChangedEvent", selfObject.graphSelectionCallback)
 
     graph_layout_view.ResetCamera()
     selfObject.renNodeGraph.ResetCamera()
     #graph_layout_view.Render()
     #graph_layout_view.GetInteractor().Start()
+
+
+'''
+##########################################################################
+    Capture a screenshot from renderers. File gets written with timestamp name.
+    Returns: Nothing
+##########################################################################
+'''
+def captureScreenshot(renderWindow):
+    windowToImageFilter = vtk.vtkWindowToImageFilter()
+    windowToImageFilter.SetInput(renderWindow)
+    windowToImageFilter.SetScale(3,3)
+    # windowToImageFilter.SetMagnification(3) #set the resolution of the output image (3 times the current resolution of vtk render window)
+    windowToImageFilter.SetInputBufferTypeToRGBA()  # also record the alpha (transparency) channel
+    windowToImageFilter.ReadFrontBufferOff()  # read from the back buffer
+    windowToImageFilter.Update()
+
+    if getattr(sys, 'frozen', False):
+        dir_path = os.path.dirname(sys.executable)
+    elif __file__:
+        dir_path = os.path.dirname(__file__)
+
+    # plt.figure(0)
+    # curr_time = datetime.now()
+    # timestr = curr_time.strftime('%H.%M.%S.%f')
+    # fileName = dir_path + "\\captures\\MPR" + timestr + ".jpg"
+    # plt.savefig(fileName)
+
+    curr_time = datetime.now()
+    timestr = curr_time.strftime('%H.%M.%S.%f')
+
+    # fileName = dir_path + "\\captures\\" + timestr + ".png"
+    # writer = vtk.vtkPNGWriter()
+    # writer.SetFileName(fileName)
+    # writer.SetInputConnection(windowToImageFilter.GetOutputPort())
+    # writer.Write()
+
+    timestr = "MS-LONG" + timestr
+    fileName = dir_path + "\\captures\\" + timestr + ".jpg"
+    print("filepath is", fileName)
+    writer = vtk.vtkJPEGWriter()
+    writer.SetFileName(fileName)
+    writer.SetInputConnection(windowToImageFilter.GetOutputPort())
+    writer.Write()

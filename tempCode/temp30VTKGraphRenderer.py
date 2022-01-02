@@ -112,6 +112,7 @@ def selectionCallback(obj, event):
     flatListInt = [int(a)+1 for a in flatListFloat]  # Adding 1 to correct lesion numbering
     print(flatListInt)
 
+
     #print(obj.GetCurrentSelection().GetNode(1).GetSelectionList().GetNumberOfTuples())
     #print(obj.GetCurrentSelection().Dump())
 
@@ -224,6 +225,7 @@ textActorTitle.SetInput("Lesion Activity Graph")
 rGraph = vtk.vtkRenderedGraphRepresentation()
 gGlyph = vtk.vtkGraphToGlyphs()
 rGraph.SafeDownCast(graph_layout_view.GetRepresentation()).SetGlyphType(gGlyph.CIRCLE)
+graph_layout_view.GetRepresentation().ScalingOn()
 
 graph_layout_view.GetRenderer().AddActor(arrowActor)
 #graph_layout_view.GetRenderer().AddActor(vertexActor)
@@ -232,9 +234,19 @@ graph_layout_view.GetRenderer().AddActor(textActorTitle)
 viewTheme = vtk.vtkViewTheme()
 viewTheme.SetLineWidth(3.0)
 viewTheme.SetOutlineColor(0.0, 0.0, 0.0)
+viewTheme.SetPointSize(5)
 viewTheme.SetVertexLabelColor(0.0, 0.0, 0.0)
 viewTheme.SetPointLookupTable(lookupTableVertices)
 viewTheme.SetCellLookupTable(lookupTableEdges)
+viewTheme.SetVertexLabelColor(0,0,0)
+
+labelTextProperty = vtk.vtkTextProperty()
+labelTextProperty.SetColor(0,0,0)
+labelTextProperty.SetFontSize(18)
+labelTextProperty.ShadowOn()
+labelTextProperty.BoldOn()
+
+viewTheme.SetPointTextProperty(labelTextProperty)
 
 graph_layout_view.GetRepresentation().ApplyViewTheme(viewTheme)
 graph_layout_view.GetRepresentation().ScalingOn()

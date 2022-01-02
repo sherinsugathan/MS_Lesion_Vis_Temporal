@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MuScLeVis Temporal v3.0 - Not For Clinical Use</string>
+   <string>MuScLeVis Longitudinal  v3.0 - Not For Clinical Use</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -70,64 +70,6 @@ border-style: solid;</string>
        <property name="rightMargin">
         <number>0</number>
        </property>
-       <item row="26" column="1">
-        <widget class="QTextEdit" name="textEdit_Information">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">border-width: 1px;
-border-radius:6px;
-border-color: rgb(230,230,230);
-font: 8pt &quot;Courier New&quot;;
-color:rgb(0,0,0);</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QPushButton" name="pushButton_LoadFolder">
-         <property name="font">
-          <font>
-           <family>Arial</family>
-           <pointsize>9</pointsize>
-           <weight>25</weight>
-           <italic>false</italic>
-           <bold>false</bold>
-           <stylestrategy>PreferAntialias</stylestrategy>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton:hover#pushButton_LoadFolder
-{
-background-color: rgb(185,216,197);
-border-color:rgb(150,150,150);
-}
-QPushButton:pressed#pushButton_LoadFolder {background-color:rgb(255,255,255);}
-QPushButton#pushButton_LoadFolder
-{
-background-color: rgb(255,255,255);
-color: rgb(70,70,70);
-border-style: outset;
-border-width: 0px;
-border-color:rgb(220,220,220);
-border-radius: 4px;
-font: 9pt &quot;Arial&quot;;
-font-weight:200;
-padding:6px;
-border-style: solid;
-}</string>
-         </property>
-         <property name="text">
-          <string>Load Datasets</string>
-         </property>
-        </widget>
-       </item>
        <item row="23" column="1">
         <widget class="QPushButton" name="pushButton_ResetView">
          <property name="styleSheet">
@@ -156,67 +98,7 @@ border-style: solid;
          </property>
         </widget>
        </item>
-       <item row="19" column="1">
-        <widget class="QPushButton" name="pushButton_IntensityAnalysis">
-         <property name="font">
-          <font>
-           <family>Arial</family>
-           <pointsize>9</pointsize>
-           <weight>25</weight>
-           <italic>false</italic>
-           <bold>false</bold>
-           <stylestrategy>PreferAntialias</stylestrategy>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton:hover#pushButton_IntensityAnalysis
-{
-background-color: rgb(185,216,197);
-border-color:rgb(150,150,150);
-}
-QPushButton:pressed#pushButton_IntensityAnalysis {background-color:rgb(255,255,255);}
-QPushButton#pushButton_IntensityAnalysis
-{
-background-color: rgb(255,255,255);
-color: rgb(70,70,70);
-border-style: outset;
-border-width: 0px;
-border-color:rgb(220,220,220);
-border-radius: 4px;
-font: 9pt &quot;Arial&quot;;
-font-weight:200;
-padding:6px;
-border-style: solid;
-}</string>
-         </property>
-         <property name="text">
-          <string>Intensity Analysis</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="lineEdit_DatasetFolder">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">color: rgb(70,70,70);
-border-color: rgb(230,230,230);
-background-color: rgb(255,255,255);
-border-style: solid;
-border-width: 1px;
-border-radius: 2px;
-font:8pt &quot;Arial&quot;;</string>
-         </property>
-         <property name="text">
-          <string>D:\OneDrive - University of Bergen\Datasets\MS_Longitudinal\Subject1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="28" column="1">
+       <item row="29" column="1">
         <widget class="QProgressBar" name="progressBar">
          <property name="styleSheet">
           <string notr="true">QProgressBar:horizontal {
@@ -251,7 +133,58 @@ font-weight:200;;
          </property>
         </widget>
        </item>
-       <item row="25" column="1">
+       <item row="27" column="1">
+        <widget class="QTextEdit" name="textEdit_Information">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>9</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border-width: 1px;
+border-radius:6px;
+border-color: rgb(230,230,230);
+font: 9pt &quot;Arial&quot;;
+color:rgb(0,0,0);</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineEdit_DatasetFolder">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(70,70,70);
+border-color: rgb(230,230,230);
+background-color: rgb(255,255,255);
+border-style: solid;
+border-width: 1px;
+border-radius: 2px;
+font:8pt &quot;Arial&quot;;</string>
+         </property>
+         <property name="text">
+          <string>D:\OneDrive - University of Bergen\Datasets\MS_Longitudinal\Subject1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="26" column="1">
         <layout class="QGridLayout" name="gridLayout_2">
          <property name="horizontalSpacing">
           <number>0</number>
@@ -466,7 +399,83 @@ border-color:rgb(150,150,150);
          </item>
         </layout>
        </item>
-       <item row="24" column="1">
+       <item row="2" column="1">
+        <widget class="QPushButton" name="pushButton_LoadFolder">
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>9</pointsize>
+           <weight>25</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+           <stylestrategy>PreferAntialias</stylestrategy>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton:hover#pushButton_LoadFolder
+{
+background-color: rgb(185,216,197);
+border-color:rgb(150,150,150);
+}
+QPushButton:pressed#pushButton_LoadFolder {background-color:rgb(255,255,255);}
+QPushButton#pushButton_LoadFolder
+{
+background-color: rgb(255,255,255);
+color: rgb(70,70,70);
+border-style: outset;
+border-width: 0px;
+border-color:rgb(220,220,220);
+border-radius: 4px;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
+padding:6px;
+border-style: solid;
+}</string>
+         </property>
+         <property name="text">
+          <string>Load Datasets</string>
+         </property>
+        </widget>
+       </item>
+       <item row="19" column="1">
+        <widget class="QPushButton" name="pushButton_IntensityAnalysis">
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>9</pointsize>
+           <weight>25</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+           <stylestrategy>PreferAntialias</stylestrategy>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton:hover#pushButton_IntensityAnalysis
+{
+background-color: rgb(185,216,197);
+border-color:rgb(150,150,150);
+}
+QPushButton:pressed#pushButton_IntensityAnalysis {background-color:rgb(255,255,255);}
+QPushButton#pushButton_IntensityAnalysis
+{
+background-color: rgb(255,255,255);
+color: rgb(70,70,70);
+border-style: outset;
+border-width: 0px;
+border-color:rgb(220,220,220);
+border-radius: 4px;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
+padding:6px;
+border-style: solid;
+}</string>
+         </property>
+         <property name="text">
+          <string>Intensity Analysis</string>
+         </property>
+        </widget>
+       </item>
+       <item row="25" column="1">
         <widget class="Line" name="line">
          <property name="autoFillBackground">
           <bool>false</bool>
@@ -476,6 +485,33 @@ border-color:rgb(150,150,150);
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="24" column="1">
+        <widget class="QPushButton" name="pushButton_Capture">
+         <property name="styleSheet">
+          <string notr="true">QPushButton:hover#pushButton_Capture{
+background-color: rgb(185,216,197);
+border-color:rgb(150,150,150);
+}
+QPushButton:pressed#pushButton_Capture {background-color:rgb(255,255,255);}
+QPushButton#pushButton_Capture
+{
+background-color: rgb(255,255,255);
+color: rgb(70,70,70);
+border-style: outset;
+border-width: 0px;
+border-color:rgb(220,220,220);
+border-radius: 4px;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
+padding:6px;
+border-style: solid;
+}</string>
+         </property>
+         <property name="text">
+          <string>Capture</string>
          </property>
         </widget>
        </item>

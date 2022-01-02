@@ -62,6 +62,7 @@ from matplotlib.ticker import AutoMinorLocator
 from numpy import diff
 import math
 import keyboard as kb
+import itertools
 
 # Main window class.
 class mainWindow(Qt.QMainWindow):
@@ -153,6 +154,7 @@ class mainWindow(Qt.QMainWindow):
         self.checkBox_AllLesions.stateChanged.connect(self.displayAllLesions_changed) # Display all lesions in intensity graph
         self.checkBox_ShowClasses.stateChanged.connect(self.checkBox_ShowClasses_changed) # Display lesion classes in the intensity graph.
         self.checkBox_RangeCompare.stateChanged.connect(self.checkBox_RangeCompare_changed) # Enables comparison view for lesions.
+        self.pushButton_Capture.clicked.connect(self.on_click_CaptureScreeshot)  # Attaching button click Handlers
         self.spinBox_RangeMin.valueChanged.connect(self.spinBoxMinChanged)
         self.spinBox_RangeMax.valueChanged.connect(self.spinBoxMaxChanged)
 
@@ -849,19 +851,19 @@ class mainWindow(Qt.QMainWindow):
             nodeID = thisline.get_label()
             self.selectedNodeID = nodeID
             xLoc, yLoc= int(round(event.mouseevent.xdata)), event.mouseevent.ydata
-            self.updateDefaultGraph(xLoc, nodeID)
+            self.updateDefaultGraph(xLoc, [nodeID])
 
             # HIGHLIGHT A LESION IN LESION RENDERER
-            #if kb.is_pressed("shift"):
-            self.clearLesionHighlights()
-            self.horizontalSlider_TimePoint.setValue(self.vLineXvalue)
-            for lesion in self.LesionActorList[self.currentTimeStep]:
-                #print("Sherin check", self.vLine, self.currentTimeStep)
-                lesion.GetProperty().SetColor(0.6196078431372549, 0.7372549019607843, 0.8549019607843137)  # default lesion color
-                lesionid = int(lesion.GetProperty().GetInformation().Get(self.keyID))
-                if lesionid == nodeID:
-                        lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish color
-            self.iren.Render()
+            if kb.is_pressed("ctrl"):
+                self.clearLesionHighlights()
+                self.horizontalSlider_TimePoint.setValue(self.vLineXvalue)
+                for lesion in self.LesionActorList[self.currentTimeStep]:
+                    lesion.GetProperty().SetColor(0.6196078431372549, 0.7372549019607843, 0.8549019607843137)  # default lesion color
+                    lesionid = int(lesion.GetProperty().GetInformation().Get(self.keyID)) + 1
+                    nodeIDForLesion = self.getNodeIDforPickedLesion(lesionid)
+                    if str(nodeIDForLesion) == nodeID:
+                            lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish color
+                self.iren.Render()
 
             #self.plotOverlayGlyphs(nodeID) # deprecated
             self.plotIntensityAnalysisPlot(int(nodeID))
@@ -1040,20 +1042,33 @@ class mainWindow(Qt.QMainWindow):
                 self.vLine.remove()
                 self.vLine = None
 
+        tempColors = list(self.plotColors)
         if updateColorIndex is not None:
-            tempColors = list(self.plotColors)
-            newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(updateColorIndex)], 0.6)
+            if len(updateColorIndex) > 0:
+                # reset original colors
+                for i in range(len(self.polyCollection)):
+                    self.polyCollection[i].set_facecolor(tempColors[i])
 
-            for i in range(len(self.polyCollection)):
-                self.polyCollection[i].set_facecolor(tempColors[i])
+                for colorIndex in updateColorIndex:
+                    newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(str(colorIndex))], 0.6)
+                    self.polyCollection[self.graphLegendLabelList.index(str(colorIndex))].set_facecolor(newColor)
 
-            # Enable this to color the whole tracked lesion polyCollection. DEPRECATED NOW.
-            # for item in self.sub_graphs:
-            #     if updateColorIndex in item:
-            #         for nodeIndex in item:
-            #             self.polyCollection[self.graphLegendLabelList.index(nodeIndex)].set_facecolor(newColor)
 
-            self.polyCollection[self.graphLegendLabelList.index(updateColorIndex)].set_facecolor(newColor)
+
+        # if updateColorIndex is not None:
+        #     tempColors = list(self.plotColors)
+        #     newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(updateColorIndex)], 0.6)
+        #
+        #     for i in range(len(self.polyCollection)):
+        #         self.polyCollection[i].set_facecolor(tempColors[i])
+        #
+        #     # Enable this to color the whole tracked lesion polyCollection. DEPRECATED NOW.
+        #     # for item in self.sub_graphs:
+        #     #     if updateColorIndex in item:
+        #     #         for nodeIndex in item:
+        #     #             self.polyCollection[self.graphLegendLabelList.index(nodeIndex)].set_facecolor(newColor)
+        #
+        #     self.polyCollection[self.graphLegendLabelList.index(updateColorIndex)].set_facecolor(newColor)
 
         if (vlineXloc != None and updateColorIndex == None):
             self.canvasDefault.draw()
@@ -1298,6 +1313,13 @@ class mainWindow(Qt.QMainWindow):
 
         #self.ren.ResetCamera()
         self.iren.Render()
+
+    # Handler for capturing the screenshot.
+    @pyqtSlot()
+    def on_click_CaptureScreeshot(self):
+        Utils.captureScreenshot(self.ren.GetRenderWindow())
+        #Utils.captureScreenshot(self.renDualLeft.GetRenderWindow())
+        Utils.captureScreenshot(self.renNodeGraph.GetRenderWindow())
 
     # Handler for Riso slider change
     @pyqtSlot()
@@ -1564,6 +1586,40 @@ class mainWindow(Qt.QMainWindow):
         self.initializeIntensityGlyphGraph()
         self.plotIntensityGlyphGraph()
         self.stackedWidget_Graphs.setCurrentIndex(4)
+
+    '''
+    ##########################################################################
+        Callback function for graph selection.
+    ##########################################################################
+    '''
+
+    def graphSelectionCallback(self, obj, event):
+        # arr = obj.GetCurrentSelection().GetNode(1).GetSelectionList()
+        # for elem in arr:
+        #     print(elem)
+        numberOfTuples = obj.GetCurrentSelection().GetNode(1).GetSelectionList().GetNumberOfTuples()
+        selectedNodes = [0] * numberOfTuples
+        for tupleIndex in range(numberOfTuples):
+            d = list(obj.GetCurrentSelection().GetNode(1).GetSelectionList().GetTuple(tupleIndex))
+            selectedNodes[tupleIndex] = d
+
+        flatListFloat = list(itertools.chain.from_iterable(selectedNodes))
+        flatListInt = [int(a) + 1 for a in flatListFloat]  # Adding 1 to correct lesion numbering
+        #print(flatListInt)
+
+        # Clear all lesions
+        for lesion in self.LesionActorList[self.currentTimeStep]:
+            lesion.GetProperty().SetColor(0.6196078431372549, 0.7372549019607843, 0.8549019607843137)  # default lesion color
+        for nodeIndex in range(len(flatListInt)):
+            for lesion in self.LesionActorList[self.currentTimeStep]:
+                lesionid = int(lesion.GetProperty().GetInformation().Get(self.keyID)) + 1
+                nodeIDForLesion = self.getNodeIDforPickedLesion(lesionid)
+                if str(nodeIDForLesion) == str(flatListInt[nodeIndex]):
+                    lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish color
+        self.iren.Render()
+
+        # Update and highlight elements in stackplot
+        self.updateDefaultGraph(None, flatListInt)
 
     # Handler for browse folder button click.
     @pyqtSlot()
