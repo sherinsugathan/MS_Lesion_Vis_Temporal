@@ -68,12 +68,12 @@ class mainWindow(Qt.QMainWindow):
     def __init__(self):
         super(mainWindow, self).__init__()
         self.intensityImage = None
-        font_dirs = [os.path.dirname(os.path.realpath(__file__))+"\\asset\\fonts"]
-        font_files = font_manager.findSystemFonts(fontpaths=font_dirs)
-        for font_file in font_files:
-            #print(font_file)
-            #font_manager.fontManager.addfont(font_file)
-            QtGui.QFontDatabase.addApplicationFont(font_file)
+        # font_dirs = [os.path.dirname(os.path.realpath(__file__))+"\\asset\\fonts"]
+        # font_files = font_manager.findSystemFonts(fontpaths=font_dirs)
+        # for font_file in font_files:
+        #     #print(font_file)
+        #     #font_manager.fontManager.addfont(font_file)
+        #     QtGui.QFontDatabase.addApplicationFont(font_file)
 
         #self.setFont(QtGui.QFont("Roboto Black", 20))
         #self.fontFamily = 'Roboto Black'
@@ -235,10 +235,13 @@ class mainWindow(Qt.QMainWindow):
         self.textActorLesionStatistics.UseBorderAlignOff()
         self.textActorLesionStatistics.SetPosition(1,0)
         self.textActorLesionStatistics.GetTextProperty().SetFontFamily(4)
-        self.textActorLesionStatistics.GetTextProperty().SetFontFile("asset\\GoogleSans-Medium.ttf")
+        #self.textActorLesionStatistics.GetTextProperty().SetFontFile("asset\\GoogleSans-Medium.ttf")
+        self.textActorLesionStatistics.GetTextProperty().SetFontFamilyAsString("Arial")
         self.textActorLesionStatistics.GetTextProperty().SetFontSize(12)
-        #self.textActorLesionStatistics.GetTextProperty().ShadowOn()
-        self.textActorLesionStatistics.GetTextProperty().SetColor( 0.3411, 0.4824, 0.3608 )
+        self.textActorLesionStatistics.GetTextProperty().ShadowOn()
+        #self.textActorLesionStatistics.GetTextProperty().SetColor( 0.3411, 0.4824, 0.3608 )
+        self.textActorLesionStatistics.GetTextProperty().SetColor(0.1,0.1,0.1)
+
 
         self.buttonGroupSurfaces = QButtonGroup()
         self.buttonGroupSurfaces.addButton(self.radioButton_White)
@@ -345,7 +348,7 @@ class mainWindow(Qt.QMainWindow):
         self.ren.GetActiveCamera().Zoom(1.3)
         self.iren.Render()
         openglRendererInUse = self.ren.GetRenderWindow().ReportCapabilities().splitlines()[1].split(":")[1].strip()
-        self.textEdit_Information.append("Resource: " + str(openglRendererInUse))
+        self.textEdit_Information.append("GPU: " + str(openglRendererInUse))
 
         self.renDual.AddActor(self.surfaceActors[1])
         self.renDual.AddActor(self.surfaceActors[2])
@@ -541,7 +544,8 @@ class mainWindow(Qt.QMainWindow):
         self.axesActor.SetZPlusFaceText('S')
         self.axesActor.GetTextEdgesProperty().SetColor(1.0,1.0,1.0)
         self.axesActor.GetTextEdgesProperty().SetLineWidth(1)
-        self.axesActor.GetCubeProperty().SetColor(0.7255, 0.8470, 0.7725)
+        #self.axesActor.GetCubeProperty().SetColor(0.7255, 0.8470, 0.7725)
+        self.axesActor.GetCubeProperty().SetColor(0.4, 0.4, 0.4)
         self.axes = vtk.vtkOrientationMarkerWidget()
         self.axes.SetOrientationMarker(self.axesActor)
         self.axes.SetViewport( 0.93, 0.9, 1.0, 1.0 )
@@ -558,7 +562,8 @@ class mainWindow(Qt.QMainWindow):
         self.axesActorDual.SetZPlusFaceText('S')
         self.axesActorDual.GetTextEdgesProperty().SetColor(1,1,1)
         self.axesActorDual.GetTextEdgesProperty().SetLineWidth(1)
-        self.axesActorDual.GetCubeProperty().SetColor(0.7255, 0.8470, 0.7725)
+        #self.axesActorDual.GetCubeProperty().SetColor(0.7255, 0.8470, 0.7725)
+        self.axesActorDual.GetCubeProperty().SetColor(0.4, 0.4, 0.4)
         self.axesDual = vtk.vtkOrientationMarkerWidget()
         self.axesDual.SetOrientationMarker(self.axesActorDual)
         self.axesDual.SetViewport( 0.93, 0.9, 1.0, 1.0 )
@@ -593,7 +598,6 @@ class mainWindow(Qt.QMainWindow):
         self.graph_layout_view.SetRenderWindow(self.vtkWidgetNodeGraph.GetRenderWindow())
         #self.renNodeGraph = vtk.vtkRenderer()
         self.renNodeGraph = self.graph_layout_view.GetRenderer()
-        print("Renderer ID1 is ", id(self.renNodeGraph))
         self.renNodeGraph.SetBackground(255.0, 0.0, 0.0)
         self.vtkWidgetNodeGraph.GetRenderWindow().AddRenderer(self.renNodeGraph)
 
@@ -608,7 +612,6 @@ class mainWindow(Qt.QMainWindow):
         self.renNodeGraph.ResetCamera()
         self.frame_NodeGraph.setLayout(self.vlNodeGraph)
         self.irenNodeGraph.Initialize()
-        print(graphNodeColors)
         Utils.drawNodeGraph(self, "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml", self.graph_layout_view, graphNodeColors)
 
 

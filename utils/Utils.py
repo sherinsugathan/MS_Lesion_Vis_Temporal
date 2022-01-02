@@ -283,7 +283,7 @@ class CustomMouseInteractorSurface(vtk.vtkInteractorStyleTrackballCamera):
 
                 itemType = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyType)
                 lesionID = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyID)
-                print(itemType, lesionID)
+                #print(itemType, lesionID)
 
                 if(itemType == 'OtherSurfaces'): # lesion picked.
                     print("picked other surfaces")
@@ -535,7 +535,6 @@ def testfun(p):
 ##########################################################################
 '''
 def graphSelectionCallback(obj, event):
-    print(type(obj))
     # arr = obj.GetCurrentSelection().GetNode(1).GetSelectionList()
     # for elem in arr:
     #     print(elem)
@@ -547,7 +546,7 @@ def graphSelectionCallback(obj, event):
 
     flatListFloat = list(itertools.chain.from_iterable(selectedNodes))
     flatListInt = [int(a)+1 for a in flatListFloat]  # Adding 1 to correct lesion numbering
-    print(flatListInt)
+    #print(flatListInt)
 
 '''
 ##########################################################################
@@ -555,12 +554,11 @@ def graphSelectionCallback(obj, event):
 ##########################################################################
 '''
 def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
-    print("entering here 1")
     colors = vtk.vtkNamedColors()
     # Read data
     G = nx.read_gml(graphPath)
-    print(list(G.edges()))
-    print(G.nodes())
+    #print(list(G.edges()))
+    #print(G.nodes())
     # For scaling vertices or nodes.
     scales = vtk.vtkFloatArray()
     scales.SetNumberOfComponents(1)
@@ -664,7 +662,6 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     arrowSource.SetGlyphTypeToEdgeArrow()
     arrowSource.FilledOn()
     arrowSource.SetColor(255, 255.0, 0)
-    print(arrowSource.GetColor())
     arrowSource.SetScale(2)
     arrowSource.Update()
 
