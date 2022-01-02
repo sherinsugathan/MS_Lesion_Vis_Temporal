@@ -186,7 +186,7 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
                     #     self.lesionvis.plotViolin()
                     #     self.lesionvis.canvasViolin.draw()
                     if kb.is_pressed("shift"):
-                        self.lesionvis.updateDefaultGraph(None, str(int(lesionID)+1))
+                        self.lesionvis.updateDefaultGraph(None, nodeID)
                     #self.lesionvis.on_sliderChangedTimePoint() # DO NOT ENABLE. BUG
                     self.lesionvis.updateLesionOverlayText()
                 else:

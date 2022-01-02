@@ -295,8 +295,7 @@ class mainWindow(Qt.QMainWindow):
     # Handler for projection method selection changed.
     @pyqtSlot()
     def on_combobox_changed_ProjectionMethods(self): 
-        #self.on_sliderChangedTimePoint()
-        pass
+        self.on_sliderChangedTimePoint()
 
     def enableControls(self):
         self.checkBox_RangeCompare.setEnabled(True)
@@ -851,8 +850,18 @@ class mainWindow(Qt.QMainWindow):
             self.selectedNodeID = nodeID
             xLoc, yLoc= int(round(event.mouseevent.xdata)), event.mouseevent.ydata
             self.updateDefaultGraph(xLoc, nodeID)
-            #if kb.is_pressed("shift"):
 
+            # HIGHLIGHT A LESION IN LESION RENDERER
+            #if kb.is_pressed("shift"):
+            self.clearLesionHighlights()
+            self.horizontalSlider_TimePoint.setValue(self.vLineXvalue)
+            for lesion in self.LesionActorList[self.currentTimeStep]:
+                #print("Sherin check", self.vLine, self.currentTimeStep)
+                lesion.GetProperty().SetColor(0.6196078431372549, 0.7372549019607843, 0.8549019607843137)  # default lesion color
+                lesionid = int(lesion.GetProperty().GetInformation().Get(self.keyID))
+                if lesionid == nodeID:
+                        lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish color
+            self.iren.Render()
 
             #self.plotOverlayGlyphs(nodeID) # deprecated
             self.plotIntensityAnalysisPlot(int(nodeID))
@@ -1008,6 +1017,7 @@ class mainWindow(Qt.QMainWindow):
         #print("running here")
 
         self.vLine = None
+        self.vLineXvalue = None
         scale = 1.1
         zpDefault = Utils.ZoomPan()
         figZoomDefault = zpDefault.zoom_factory(self.axDefault, base_scale = scale)
@@ -1021,8 +1031,10 @@ class mainWindow(Qt.QMainWindow):
         if(vlineXloc != None):
             if(self.vLine == None):
                 self.vLine = plt.axvline(x=vlineXloc, linewidth=2, color='r', linestyle=':', alpha=0.5)
+                self.vLineXvalue = vlineXloc
             else:
                 self.vLine.set_xdata([vlineXloc])
+                self.vLineXvalue = vlineXloc
         else:
             if self.vLine is not None:
                 self.vLine.remove()
@@ -1043,6 +1055,9 @@ class mainWindow(Qt.QMainWindow):
 
             self.polyCollection[self.graphLegendLabelList.index(updateColorIndex)].set_facecolor(newColor)
 
+        if (vlineXloc != None and updateColorIndex == None):
+            self.canvasDefault.draw()
+            return
         #print("Enter here", vlineXloc, updateColorIndex)
         if(updateColorIndex==None): # Reset graph to default colors.
             tempColors = list(self.plotColors)
