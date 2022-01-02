@@ -61,7 +61,6 @@ from matplotlib import font_manager # Add custom font without installing it.
 from matplotlib.ticker import AutoMinorLocator
 from numpy import diff
 import math
-from vtk.numpy_interface import dataset_adapter as dsa
 
 # Main window class.
 class mainWindow(Qt.QMainWindow):
@@ -81,8 +80,9 @@ class mainWindow(Qt.QMainWindow):
         #self.fontColor = 'black'
         #self.fontSize = '12'
 
-        ui = os.path.join(os.path.dirname(__file__), 'mstemporal_uifile.ui')
-        uic.loadUi(ui, self)
+        # Load UI file.
+        uic.loadUi("asset\\mstemporal_uifile.ui", self)
+
         self.initUI()
         self.initVTK()
         self.showMaximized()

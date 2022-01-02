@@ -94,11 +94,11 @@ color:rgb(0,0,0);</string>
         <widget class="QPushButton" name="pushButton_LoadFolder">
          <property name="font">
           <font>
-           <family>Open Sans</family>
-           <pointsize>10</pointsize>
-           <weight>62</weight>
+           <family>Arial</family>
+           <pointsize>9</pointsize>
+           <weight>25</weight>
            <italic>false</italic>
-           <bold>true</bold>
+           <bold>false</bold>
            <stylestrategy>PreferAntialias</stylestrategy>
           </font>
          </property>
@@ -117,8 +117,8 @@ border-style: outset;
 border-width: 0px;
 border-color:rgb(220,220,220);
 border-radius: 4px;
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 padding:6px;
 border-style: solid;
 }</string>
@@ -145,8 +145,8 @@ border-style: outset;
 border-width: 0px;
 border-color:rgb(220,220,220);
 border-radius: 4px;
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 padding:6px;
 border-style: solid;
 }</string>
@@ -160,11 +160,11 @@ border-style: solid;
         <widget class="QPushButton" name="pushButton_IntensityAnalysis">
          <property name="font">
           <font>
-           <family>Open Sans</family>
-           <pointsize>10</pointsize>
-           <weight>62</weight>
+           <family>Arial</family>
+           <pointsize>9</pointsize>
+           <weight>25</weight>
            <italic>false</italic>
-           <bold>true</bold>
+           <bold>false</bold>
            <stylestrategy>PreferAntialias</stylestrategy>
           </font>
          </property>
@@ -180,11 +180,11 @@ QPushButton#pushButton_IntensityAnalysis
 background-color: rgb(255,255,255);
 color: rgb(70,70,70);
 border-style: outset;
-border-width:0px;
+border-width: 0px;
 border-color:rgb(220,220,220);
 border-radius: 4px;
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 padding:6px;
 border-style: solid;
 }</string>
@@ -209,7 +209,7 @@ background-color: rgb(255,255,255);
 border-style: solid;
 border-width: 1px;
 border-radius: 2px;
-font: 10pt &quot;Open Sans&quot;;</string>
+font:8pt &quot;Arial&quot;;</string>
          </property>
          <property name="text">
           <string>D:\OneDrive - University of Bergen\Datasets\MS_Longitudinal\Subject1</string>
@@ -233,8 +233,8 @@ border-radius: 10px;
 }
 QProgressBar{
 color: rgb(70,70,70);
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;;
 }</string>
          </property>
          <property name="value">
@@ -550,8 +550,8 @@ background-color:rgb(247,247,247);</string>
               <widget class="QLabel" name="label_4">
                <property name="styleSheet">
                 <string notr="true">color:rgb(70,70,70);
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 border-width: 0px;</string>
                </property>
                <property name="text">
@@ -629,8 +629,8 @@ border-radius:2px;
                 <bool>false</bool>
                </property>
                <property name="styleSheet">
-                <string notr="true">font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+                <string notr="true">font: 9pt &quot;Arial&quot;;
+font-weight:200;
 color:rgb(70,70,70);
 border-width: 0px;</string>
                </property>
@@ -687,8 +687,8 @@ border-width: 0px;</string>
                    <property name="styleSheet">
                     <string notr="true">border-width: 1px;
 color:rgb(70,70,70);
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 border-radius: 2px;
 background-color:rgb(255,255,255);</string>
                    </property>
@@ -710,8 +710,8 @@ background-color:rgb(255,255,255);</string>
                    </property>
                    <property name="styleSheet">
                     <string notr="true">border-width: 1px;
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 color:rgb(70,70,70);
 border-radius: 2px;
 background-color:rgb(255,255,255);</string>
@@ -756,11 +756,11 @@ QPushButton#pushButton_Compare
 background-color: rgb(255,255,255);
 color: rgb(70,70,70);
 border-style: outset;
-border-width: 2px;
+border-width: 0px;
 border-color:rgb(220,220,220);
 border-radius: 4px;
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 padding:6px;
 border-style: solid;
 }</string>
@@ -794,8 +794,8 @@ border-style: solid;
                 <widget class="QLabel" name="label">
                  <property name="styleSheet">
                   <string notr="true">border-width: 0px;
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;</string>
+font: 9pt &quot;Arial&quot;;
+font-weight:200;</string>
                  </property>
                  <property name="text">
                   <string>Followup</string>
@@ -815,8 +815,8 @@ font-weight:500;</string>
                  </property>
                  <property name="styleSheet">
                   <string notr="true">color:rgb(70,70,70);
-font: 12pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 12pt &quot;Arial&quot;;
+font-weight:200;
 border-width: 0px;</string>
                  </property>
                  <property name="text">
@@ -905,6 +905,10 @@ background-color:rgb(247,247,247);</string>
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
               <widget class="QGroupBox" name="groupBox_3">
+               <property name="styleSheet">
+                <string notr="true">font: 9pt &quot;Arial&quot;;
+font-weight:200;</string>
+               </property>
                <property name="title">
                 <string>Surface</string>
                </property>
@@ -916,8 +920,8 @@ background-color:rgb(247,247,247);</string>
                  <widget class="QRadioButton" name="radioButton_White">
                   <property name="styleSheet">
                    <string notr="true">QRadioButton {
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 color:rgb(70,70,70);
 border-width: 0px;
 }
@@ -955,8 +959,8 @@ QRadioButton::indicator:unchecked {
                  <widget class="QRadioButton" name="radioButton_Inflated">
                   <property name="styleSheet">
                    <string notr="true">QRadioButton {
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 color:rgb(70,70,70);
 border-width: 0px;
 }
@@ -1261,8 +1265,8 @@ border-color: rgb(211,211,211);</string>
            <widget class="QLabel" name="label_6">
             <property name="styleSheet">
              <string notr="true">color: rgb(70,70,70);
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;</string>
+font: 9pt &quot;Arial&quot;;
+font-weight:200;</string>
             </property>
             <property name="text">
              <string>IsoRange</string>
@@ -1281,8 +1285,8 @@ font-weight:500;</string>
              <widget class="QRadioButton" name="radioButton_T1">
               <property name="styleSheet">
                <string notr="true">QRadioButton {
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 color:rgb(70,70,70);
 }
 
@@ -1319,8 +1323,8 @@ QRadioButton::indicator:unchecked {
              <widget class="QRadioButton" name="radioButton_T2">
               <property name="styleSheet">
                <string notr="true">QRadioButton {
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 color:rgb(70,70,70);
 }
 
@@ -1357,8 +1361,8 @@ QRadioButton::indicator:unchecked {
               </property>
               <property name="styleSheet">
                <string notr="true">QRadioButton {
-font: 10pt &quot;Google Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 color:rgb(70,70,70);
 }
 
@@ -1393,8 +1397,8 @@ QRadioButton::indicator:unchecked {
           <item row="0" column="5">
            <widget class="QCheckBox" name="checkBox_ShowClasses">
             <property name="styleSheet">
-             <string notr="true">font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+             <string notr="true">font: 9pt &quot;Arial&quot;;
+font-weight:200;
 color: rgb(33,33,33);
 color: rgb(70,70,70);</string>
             </property>
@@ -1420,8 +1424,8 @@ color: rgb(70,70,70);</string>
             </property>
             <property name="styleSheet">
              <string notr="true">color: rgb(70,70,70);
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;</string>
+font: 9pt &quot;Arial&quot;;
+font-weight:200;</string>
             </property>
             <property name="text">
              <string>5.0%</string>
@@ -1473,7 +1477,7 @@ background-color:rgb(255,255,255);
 border-style: solid;
 border-width: 1px;
 color: rgb(33,69,105);
-font: 10pt &quot;Open Sans&quot;;
+font: 9pt &quot;Arial&quot;;
 border-radius:2px;
 }
 </string>
@@ -1523,8 +1527,8 @@ border-color:rgb(150,150,150);
            <widget class="QCheckBox" name="checkBox_AllLesions">
             <property name="styleSheet">
              <string notr="true">border-color: rgb(230,230,230);
-font: 10pt &quot;Open Sans&quot;;
-font-weight:500;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
 color: rgb(70,70,70);</string>
             </property>
             <property name="text">
