@@ -141,7 +141,7 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
         lesionID = int(lesionID)
         self.overlayData = self.lesionvis.getLesionData(lesionID)
 
-    def leftButtonReleaseEvent(self,obj,event):
+    def leftButtonReleaseEvent(self, obj, event):
         if(self.MouseMotion == 0):
             clickPos = self.GetInteractor().GetEventPosition()
             picker = vtk.vtkPropPicker()
@@ -174,12 +174,7 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
                 itemType = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyType)
                 lesionID = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyID)
 
-
-                #print("Hey you have pressed shift key")
-                #self.lesionvis.updateDefaultGraph(10, str(int(lesionID)+1))
-                print("done")
-
-                if(itemType == 'lesion'): # lesion picked.
+                if itemType == 'lesion':  # lesion picked.
                     self.lesionvis.userPickedLesionID = int(lesionID) + 1
                     self.lesionvis.clearLesionHighlights()
                     self.mapLesionToText(lesionID, self.NewPickedActor)

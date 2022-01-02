@@ -61,6 +61,7 @@ from matplotlib import font_manager # Add custom font without installing it.
 from matplotlib.ticker import AutoMinorLocator
 from numpy import diff
 import math
+import keyboard as kb
 
 # Main window class.
 class mainWindow(Qt.QMainWindow):
@@ -848,10 +849,12 @@ class mainWindow(Qt.QMainWindow):
             thisline = event.artist
             nodeID = thisline.get_label()
             self.selectedNodeID = nodeID
-            print("orig type is", type(nodeID))
             xLoc, yLoc= int(round(event.mouseevent.xdata)), event.mouseevent.ydata
             self.updateDefaultGraph(xLoc, nodeID)
-            #self.plotOverlayGlyphs(nodeID)
+            #if kb.is_pressed("shift"):
+
+
+            #self.plotOverlayGlyphs(nodeID) # deprecated
             self.plotIntensityAnalysisPlot(int(nodeID))
             self.plotIntensityChangeIndicatorGlyphs(int(nodeID))
 
@@ -1013,7 +1016,6 @@ class mainWindow(Qt.QMainWindow):
 
     # update default graph
     def updateDefaultGraph(self, vlineXloc=None, updateColorIndex=None):
-        print("calling me for", vlineXloc, updateColorIndex)
         plt.figure(3)
         #self.canvasDefault.restore_region(self.defaultGraphBackup)
         if(vlineXloc != None):
@@ -1027,7 +1029,6 @@ class mainWindow(Qt.QMainWindow):
                 self.vLine = None
 
         if updateColorIndex is not None:
-            print("Calling with", updateColorIndex)
             tempColors = list(self.plotColors)
             newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(updateColorIndex)], 0.6)
 
