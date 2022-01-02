@@ -8,6 +8,7 @@ import numpy as np
 import networkx as nx
 from vtkmodules.vtkCommonColor import vtkNamedColors
 import itertools
+import keyboard as kb
 
 class ReadThread(QObject): 
     progress = pyqtSignal(int)
@@ -174,6 +175,10 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
                 lesionID = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyID)
 
 
+                #print("Hey you have pressed shift key")
+                #self.lesionvis.updateDefaultGraph(10, str(int(lesionID)+1))
+                print("done")
+
                 if(itemType == 'lesion'): # lesion picked.
                     self.lesionvis.userPickedLesionID = int(lesionID) + 1
                     self.lesionvis.clearLesionHighlights()
@@ -185,8 +190,9 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
                     # if(self.lesionvis.buttonGroupIntensityGraphs.checkedId() == -3): # Violin plot
                     #     self.lesionvis.plotViolin()
                     #     self.lesionvis.canvasViolin.draw()
-                    self.lesionvis.updateDefaultGraph(None, nodeID)
-                    self.lesionvis.on_sliderChangedTimePoint()
+                    if kb.is_pressed("shift"):
+                        self.lesionvis.updateDefaultGraph(None, str(int(lesionID)+1))
+                    #self.lesionvis.on_sliderChangedTimePoint() # DO NOT ENABLE. BUG
                     self.lesionvis.updateLesionOverlayText()
                 else:
                     self.resetToDefaultViewLesions()
@@ -450,7 +456,7 @@ class ZoomPan:
             else:
                 # deal with something that should never happen
                 scale_factor = 1
-                print(event.button)
+                #print(event.button)
 
             new_width = (cur_xlim[1] - cur_xlim[0]) * scale_factor
             new_height = (cur_ylim[1] - cur_ylim[0]) * scale_factor
@@ -524,10 +530,6 @@ class ZoomPan:
         #return the function
         return onMotion
 
-
-
-def testfun(p):
-    print(p)
 
 '''
 ##########################################################################
@@ -707,7 +709,7 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     textActorTitle.GetTextProperty().SetFontFamily(4)
     textActorTitle.GetTextProperty().SetFontFile("asset\\GoogleSans-Medium.ttf")
     textActorTitle.GetTextProperty().SetFontSize(16)
-    textActorTitle.GetTextProperty().SetColor(0.3411, 0.4824, 0.3608)
+    textActorTitle.GetTextProperty().SetColor(0.4, 0.4, 0.4)
     textActorTitle.SetInput("Lesion Activity Graph")
 
     rGraph = vtk.vtkRenderedGraphRepresentation()

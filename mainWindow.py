@@ -294,7 +294,8 @@ class mainWindow(Qt.QMainWindow):
     # Handler for projection method selection changed.
     @pyqtSlot()
     def on_combobox_changed_ProjectionMethods(self): 
-        self.on_sliderChangedTimePoint()
+        #self.on_sliderChangedTimePoint()
+        pass
 
     def enableControls(self):
         self.checkBox_RangeCompare.setEnabled(True)
@@ -822,7 +823,7 @@ class mainWindow(Qt.QMainWindow):
             #self.updateDefaultGraph(None, None)
 
     # Mouse button is pressed.
-    def onClickDefaultStreamGraphCanvas(self, event):
+    #def onClickDefaultStreamGraphCanvas(self, event):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
         #     ('double' if event.dblclick else 'single', event.button,
         #     event.x, event.y, event.xdata, event.ydata))
@@ -847,6 +848,7 @@ class mainWindow(Qt.QMainWindow):
             thisline = event.artist
             nodeID = thisline.get_label()
             self.selectedNodeID = nodeID
+            print("orig type is", type(nodeID))
             xLoc, yLoc= int(round(event.mouseevent.xdata)), event.mouseevent.ydata
             self.updateDefaultGraph(xLoc, nodeID)
             #self.plotOverlayGlyphs(nodeID)
@@ -996,7 +998,7 @@ class mainWindow(Qt.QMainWindow):
         #plt.show()
         self.canvasDefault.draw()
         self.canvasDefault.mpl_connect('pick_event', self.onPickDefaultStreamGraphCanvas)
-        self.canvasDefault.mpl_connect('button_press_event', self.onClickDefaultStreamGraphCanvas)
+        #self.canvasDefault.mpl_connect('button_press_event', self.onClickDefaultStreamGraphCanvas)
         #self.canvasDefault.mpl_connect('button_release_event', self.onReleaseDefaultStreamGraphCanvas)
         #self.canvasDefault.mpl_connect('motion_notify_event', self.onMouseMoveDefaultStreamGraphCanvas)
         #self.defaultGraphBackup = self.canvasDefault.copy_from_bbox(self.axDefault.bbox)
@@ -1011,6 +1013,7 @@ class mainWindow(Qt.QMainWindow):
 
     # update default graph
     def updateDefaultGraph(self, vlineXloc=None, updateColorIndex=None):
+        print("calling me for", vlineXloc, updateColorIndex)
         plt.figure(3)
         #self.canvasDefault.restore_region(self.defaultGraphBackup)
         if(vlineXloc != None):
@@ -1024,6 +1027,7 @@ class mainWindow(Qt.QMainWindow):
                 self.vLine = None
 
         if updateColorIndex is not None:
+            print("Calling with", updateColorIndex)
             tempColors = list(self.plotColors)
             newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(updateColorIndex)], 0.6)
 
@@ -1317,8 +1321,6 @@ class mainWindow(Qt.QMainWindow):
         surfaceLh.GetMapper().GetInput().GetPointData().SetScalars(self.vtk_colorsLh)
         surfaceRh.GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
         surfaceRh.GetMapper().GetInput().GetPointData().SetScalars(self.vtk_colorsRh)
-
-        print(affectedLh)
 
         self.irenDual.Render()
 
