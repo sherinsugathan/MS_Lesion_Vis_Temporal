@@ -125,11 +125,8 @@ class mainWindow(Qt.QMainWindow):
         for i in range(rendererCollection.GetNumberOfItems()):
             renderer = rendererCollection.GetItemAsObject(i)
             renderer.RemoveAllViewProps()
-            if linkedLesionIds[i] is None:
-                renderer.RemoveAllViewProps()
-            else: # Add valid lesion to renderer.
-                renderer.AddActor(self.lesionActorList[currentTimeIndex][linkedLesionIds[i]])
-                renderer.ResetCamera()
+            renderer.AddActor(self.lesionActorList[currentTimeIndex][linkedLesionIds[i]])
+            renderer.ResetCamera()
             if i > 0:
                 renderer.SetActiveCamera(firstRenderer.GetActiveCamera())
 
@@ -160,29 +157,20 @@ class mainWindow(Qt.QMainWindow):
     # Given lesion ID and current time step, extract n number of lesion IDs from left and right
     def getLinkedLesionIDFromLeftAndRight(self, currentLesionID, currentTimeIndex):
         nodeIDList = list(self.G.nodes)
-        linkedLesionIds = [None] * 5
+        linkedLesionIds = []
         for id in nodeIDList:
+            print("entere here 1")
             timeList = self.G.nodes[id]["time"]
             labelList = self.G.nodes[id]["lesionLabel"]
             temporalData = list(zip(timeList, labelList))
-            temporalDataListLength = len(temporalData)
             if ((currentTimeIndex, currentLesionID) in list(temporalData)):
                 itemIndex = temporalData.index((currentTimeIndex, currentLesionID))
             else:
                 continue
-            # for i in range(-2, 3):
-            #     print("entere here 2")
-            #     linkedLesionIds.append(temporalData[itemIndex - i][1]-1) # minus one to adjust lesion number
-            if (itemIndex + 2) < temporalDataListLength:  # Check overflow towards right
-                linkedLesionIds[2] = temporalData[itemIndex][1]-1
-                linkedLesionIds[3] = temporalData[itemIndex+1][1]-1
-                linkedLesionIds[4] = temporalData[itemIndex+2][1]-1
-            if (itemIndex - 2) >= 0:
-                linkedLesionIds[0] = temporalData[itemIndex-1][1]-1
-                linkedLesionIds[1] = temporalData[itemIndex-2][1]-1
-
-
-            return linkedLesionIds   # Success
+            for i in range(-2, 3):
+                print("entere here 2")
+                linkedLesionIds.append(temporalData[itemIndex - i][1]-1) # minus one to adjust lesion number
+            return linkedLesionIds  # Success
         return None  # Failure
 
     # Initialize lesion viewports

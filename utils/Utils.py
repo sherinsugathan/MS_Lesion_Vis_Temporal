@@ -63,7 +63,7 @@ class ReadThread(QObject):
 
     def loadSurfaces(self):
         #surfaceFileNames = ["ventricleMesh", "lh.white", "rh.white", "lh.pial", "rh.pial", "lh.inflated", "rh.inflated"]
-        surfaceFileNames = ["ventricleMesh", "lh.white", "rh.white", "lh.inflated", "rh.inflated"]
+        surfaceFileNames = ["ventricleMesh", "lh.white", "rh.white", "lh.pial", "rh.pial"]
         for fileName in surfaceFileNames:
             loadPath = self.read_folder_name + "..\\" + fileName + ".obj"
             reader = vtk.vtkOBJReader()
@@ -182,8 +182,7 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
                     self.lesionvis.userPickedLesionID = int(lesionID) + 1
                     self.lesionvis.clearLesionHighlights()
                     self.mapLesionToText(lesionID, self.NewPickedActor)
-                    
-                    
+
                     nodeID = self.lesionvis.getNodeIDforPickedLesion(self.lesionvis.userPickedLesionID)
                     self.lesionvis.selectedNodeID = nodeID
                     # if(self.lesionvis.buttonGroupIntensityGraphs.checkedId() == -3): # Violin plot
@@ -688,8 +687,8 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     textActorTitle.UseBorderAlignOff()
     textActorTitle.SetDisplayPosition(10, 10)
     textActorTitle.GetTextProperty().SetFontFamily(4)
-    textActorTitle.GetTextProperty().SetFontFile("asset\\GoogleSans-Medium.ttf")
-    textActorTitle.GetTextProperty().SetFontSize(16)
+    textActorTitle.GetTextProperty().SetFontFile("asset\\arial.ttf")
+    textActorTitle.GetTextProperty().SetFontSize(14)
     textActorTitle.GetTextProperty().SetColor(0.4, 0.4, 0.4)
     textActorTitle.SetInput("Lesion Activity Graph")
 
@@ -709,8 +708,8 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     viewTheme.SetVertexLabelColor(0, 0, 0)
 
     labelTextProperty = vtk.vtkTextProperty()
-    labelTextProperty.SetColor(0, 0, 0)
-    labelTextProperty.SetFontSize(18)
+    labelTextProperty.SetColor(0.1, 0.1, 0.1)
+    labelTextProperty.SetFontSize(14)
     labelTextProperty.ShadowOn()
     labelTextProperty.BoldOn()
 

@@ -236,15 +236,13 @@ class mainWindow(Qt.QMainWindow):
 
         self.textActorLesionStatistics = vtk.vtkTextActor()
         self.textActorLesionStatistics.UseBorderAlignOff()
-        self.textActorLesionStatistics.SetPosition(1,0)
+        self.textActorLesionStatistics.SetPosition(1, 0)
         self.textActorLesionStatistics.GetTextProperty().SetFontFamily(4)
-        #self.textActorLesionStatistics.GetTextProperty().SetFontFile("asset\\GoogleSans-Medium.ttf")
-        self.textActorLesionStatistics.GetTextProperty().SetFontFamilyAsString("Arial")
+        self.textActorLesionStatistics.GetTextProperty().SetFontFile("asset\\arial.ttf")
         self.textActorLesionStatistics.GetTextProperty().SetFontSize(12)
         self.textActorLesionStatistics.GetTextProperty().ShadowOn()
-        #self.textActorLesionStatistics.GetTextProperty().SetColor( 0.3411, 0.4824, 0.3608 )
+        self.textActorLesionStatistics.GetTextProperty().SetLineSpacing(1.6)
         self.textActorLesionStatistics.GetTextProperty().SetColor(0.1,0.1,0.1)
-
 
         self.buttonGroupSurfaces = QButtonGroup()
         self.buttonGroupSurfaces.addButton(self.radioButton_White)
@@ -386,7 +384,7 @@ class mainWindow(Qt.QMainWindow):
         self.intMax = 255
         return
         #structuralDataPath = self.folder + "structural\\T1_0.nii"
-        structuralDataPath = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\structural\\T1.nii"
+        structuralDataPath = "asset\\dataset\\Subject1\\structural\\T1.nii"
         img = sitk.ReadImage(structuralDataPath)
         stats = sitk.StatisticsImageFilter()
         stats.Execute(img)
@@ -611,12 +609,10 @@ class mainWindow(Qt.QMainWindow):
         #self.irenNodeGraph = self.graph_layout_view.GetInteractor()
         #self.irenNodeGraph.SetRenderWindow(self.vtkWidgetNodeGraph.GetRenderWindow())
 
-
         self.renNodeGraph.ResetCamera()
         self.frame_NodeGraph.setLayout(self.vlNodeGraph)
         self.irenNodeGraph.Initialize()
-        Utils.drawNodeGraph(self, "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml", self.graph_layout_view, graphNodeColors)
-
+        Utils.drawNodeGraph(self, "asset\\dataset\\Subject1\\preProcess\\lesionGraph.gml", self.graph_layout_view, graphNodeColors)
 
         #self.vl_graph = Qt.QVBoxLayout()
         #self.figureGraph = plt.figure(num = 4, frameon=False, clear=True)
@@ -753,7 +749,7 @@ class mainWindow(Qt.QMainWindow):
         # self.axGraph = self.figureGraph.add_subplot(111)
         # self.axGraph.set_title('Lesion Activity Graph', fontsize=12, fontweight='normal', color="#666666", loc='left')
         # plt.subplots_adjust(left=0.09, bottom=0.09, right=0.95, top=0.95)
-        # G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+        # G = nx.read_gml("asset\\dataset\\Subject1\\preProcess\\lesionGraph.gml")
         # edges = G.edges()
         # weights = [3 for u, v in edges]
         #
@@ -926,7 +922,7 @@ class mainWindow(Qt.QMainWindow):
         plt.subplots_adjust(wspace=None, hspace=None)
 
         # Data for plotting
-        self.G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+        self.G = nx.read_gml("asset\\dataset\\Subject1\\preProcess\\lesionGraph.gml")
         self.UG = self.G.to_undirected()
         self.sub_graphs = list(nx.connected_components(self.UG))
         self.nodeOrderForGraph, self.plotColors = self.computeNodeOrderForGraph(self.G)
@@ -1052,8 +1048,6 @@ class mainWindow(Qt.QMainWindow):
                 for colorIndex in updateColorIndex:
                     newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(str(colorIndex))], 0.6)
                     self.polyCollection[self.graphLegendLabelList.index(str(colorIndex))].set_facecolor(newColor)
-
-
 
         # if updateColorIndex is not None:
         #     tempColors = list(self.plotColors)
@@ -1191,7 +1185,7 @@ class mainWindow(Qt.QMainWindow):
     # Return intensity data for all stackplot artists.
     def getIntensityDataForStackplotArtist(self, nodeOrderForGraph, modalityString = "Mean"):
         intensityMatrix = []
-        G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+        G = nx.read_gml("asset\\dataset\\Subject1\\preProcess\\lesionGraph.gml")
         #nodeIDList = list(G.nodes)
         dataCount = 81
         for id in nodeOrderForGraph:
@@ -1208,7 +1202,7 @@ class mainWindow(Qt.QMainWindow):
     def getIntensityDataArray(self, id):
         intensityArrayT1 = np.empty(self.dataCount)*np.nan
         intensityArrayT2 = np.empty(self.dataCount) * np.nan
-        G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
+        G = nx.read_gml("asset\\dataset\\Subject1\\preProcess\\lesionGraph.gml")
         #connectedComponents = nx.strongly_connected_components(G)
         timeList = G.nodes[str(id)]["time"]
         labelList = G.nodes[str(id)]["lesionLabel"]
@@ -1401,7 +1395,7 @@ class mainWindow(Qt.QMainWindow):
         self.renDual.RemoveAllViewProps()
         self.iren.Render()
         self.irenDual.Render()
-        self.folder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
+        self.folder = "asset\\dataset\\Subject1\\"
         if self.folder:
             self.lineEdit_DatasetFolder.setText(self.folder)
             self.LesionActorList = [[] for i in range(81)]
@@ -1433,7 +1427,7 @@ class mainWindow(Qt.QMainWindow):
         baselineIndex = self.spinBox_RangeMin.value()
         followupIndex = self.spinBox_RangeMax.value()
         #print(baselineIndex, followupIndex)
-        rootFolder = "D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\"
+        rootFolder = "asset\\dataset\\Subject1\\"
         connectedComponentOutputFileName = rootFolder + "lesionMask\\ConnectedComponentsTemp.nii"
         
         # Creating uinion image

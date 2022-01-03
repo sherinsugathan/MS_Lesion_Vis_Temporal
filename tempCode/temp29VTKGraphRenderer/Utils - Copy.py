@@ -146,11 +146,10 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
 
                 itemType = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyType)
                 lesionID = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyID)
-                print("Raw lesion id is: ", lesionID)
-                userPickedLesionID = int(lesionID)+1
+                userPickedLesionID = int(lesionID) + 1
                 self.lesionvis.updateContourComparisonView(userPickedLesionID)
 
-                #print(itemType, lesionID)
+                print(itemType, lesionID)
 
 
         self.OnLeftButtonUp()

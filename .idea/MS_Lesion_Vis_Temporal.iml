@@ -5,6 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$/envsTemporal/DLLs" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/envsTemporal/Lib" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/envsTemporal/Lib/site-packages" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/asset/dataset" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.8 (MS_Lesion_Vis_Temporal)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

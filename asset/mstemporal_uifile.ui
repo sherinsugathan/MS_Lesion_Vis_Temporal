@@ -1020,7 +1020,7 @@ QRadioButton::indicator:unchecked {
 }</string>
                   </property>
                   <property name="text">
-                   <string>Inflated</string>
+                   <string>Pial</string>
                   </property>
                   <property name="checked">
                    <bool>false</bool>
