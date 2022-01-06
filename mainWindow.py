@@ -81,6 +81,11 @@ class mainWindow(Qt.QMainWindow):
         #self.fontFamily = 'Roboto Black'
         #self.fontColor = 'black'
         #self.fontSize = '12'
+        self.ren1 = vtk.vtkRenderer()
+        self.ren2 = vtk.vtkRenderer()
+        self.ren3 = vtk.vtkRenderer()
+        self.ren4 = vtk.vtkRenderer()
+        self.ren5 = vtk.vtkRenderer()
 
         # Load UI file.
         uic.loadUi("asset\\mstemporal_uifile.ui", self)
@@ -180,12 +185,42 @@ class mainWindow(Qt.QMainWindow):
         self.show()
         self.iren.Initialize()
 
+        # Brain surface 3D
+        # Viewport definition
+        xmins = [0, 0, 0.2, 0.4, 0.6, 0.8]
+        xmaxs = [1, 0.2, 0.4, 0.6, 0.8, 1]
+        ymins = [0.3, 0, 0, 0, 0, 0]
+        ymaxs = [1, 0.3, 0.3, 0.3, 0.3, 0.3]
+
+        colorsLesionRenderers = vtk.vtkNamedColors()
+        # colors for renderers
+        ren_bkg = ['WhiteSmoke', 'WhiteSmoke', 'GhostWhite', 'Seashell', 'GhostWhite', 'WhiteSmoke']
+
         self.vlDual = Qt.QVBoxLayout()
         self.vtkWidgetDual = QVTKRenderWindowInteractor(self.frameDual)
         self.vlDual.addWidget(self.vtkWidgetDual)
         self.renDual = vtk.vtkRenderer()
         self.renDual.SetBackground(1.0, 1.0, 1.0)
+        self.ren1.SetBackground(colorsLesionRenderers.GetColor3d(ren_bkg[1]))
+        self.ren2.SetBackground(colorsLesionRenderers.GetColor3d(ren_bkg[2]))
+        self.ren3.SetBackground(colorsLesionRenderers.GetColor3d(ren_bkg[3]))
+        self.ren4.SetBackground(colorsLesionRenderers.GetColor3d(ren_bkg[4]))
+        self.ren5.SetBackground(colorsLesionRenderers.GetColor3d(ren_bkg[5]))
+
         self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.renDual)
+        self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.ren1)
+        self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.ren2)
+        self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.ren3)
+        self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.ren4)
+        self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.ren5)
+
+        self.renDual.SetViewport(xmins[0], ymins[0], xmaxs[0], ymaxs[0])
+        self.ren1.SetViewport(xmins[1], ymins[1], xmaxs[1], ymaxs[1])
+        self.ren2.SetViewport(xmins[2], ymins[2], xmaxs[2], ymaxs[2])
+        self.ren3.SetViewport(xmins[3], ymins[3], xmaxs[3], ymaxs[3])
+        self.ren4.SetViewport(xmins[4], ymins[4], xmaxs[4], ymaxs[4])
+        self.ren5.SetViewport(xmins[5], ymins[5], xmaxs[5], ymaxs[5])
+
         self.irenDual = self.vtkWidgetDual.GetRenderWindow().GetInteractor()
         self.irenDual.SetRenderWindow(self.vtkWidgetDual.GetRenderWindow())
         self.renDual.ResetCamera()
@@ -256,6 +291,68 @@ class mainWindow(Qt.QMainWindow):
         self.buttonGroupModalities.addButton(self.radioButton_FLAIR)
         self.buttonGroupModalities.setExclusive(True)
         self.buttonGroupModalities.buttonClicked.connect(self.on_buttonGroupModalityChanged)
+
+    def updateContourComparisonView(self, pickedLesionID):
+        #print("i am called", pickedLesionID)
+        currentTimeIndex = self.horizontalSlider_TimePoint.value()
+        linkedLesionIds = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex)
+
+        lesionSurfaceArray = []
+        rendererArray = []
+
+        rendererCollection = self.irenDual.GetRenderWindow().GetRenderers()
+        currentTimeRenderer = rendererCollection.GetItemAsObject(2)
+        #print(rendererCollection.GetNumberOfItems())  # TODO: Check why this is giving 7!!
+
+        for i in range(rendererCollection.GetNumberOfItems()-1):
+            if i == 0:  # ignore brain surface renderer
+                continue
+            renderer = rendererCollection.GetItemAsObject(i)
+            renderer.RemoveAllViewProps()
+            if linkedLesionIds[i-1] is None:
+                renderer.RemoveAllViewProps()
+                continue
+            else:  # Add valid lesion to renderer.
+                for lesion in self.LesionActorList[currentTimeIndex - 2 + (i-1)]:
+                    lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
+                    if lesionID == linkedLesionIds[i-1] - 1:
+                        renderer.AddActor(lesion)
+                renderer.ResetCamera()
+            if i > 0:
+                renderer.SetActiveCamera(currentTimeRenderer.GetActiveCamera())
+
+        self.irenDual.Render()
+
+
+    # Given lesion ID and current time step, extract n number of lesion IDs from left and right
+    def getLinkedLesionIDFromLeftAndRight(self, currentLesionID, currentTimeIndex):
+        nodeIDList = list(self.G.nodes)
+        linkedLesionIds = [None] * 5
+        for id in nodeIDList:
+            timeList = self.G.nodes[id]["time"]
+            labelList = self.G.nodes[id]["lesionLabel"]
+            temporalData = list(zip(timeList, labelList))
+            temporalDataListLength = len(temporalData)
+            if ((currentTimeIndex, currentLesionID) in list(temporalData)):
+                itemIndex = temporalData.index((currentTimeIndex, currentLesionID))
+            else:
+                continue
+            # for i in range(-2, 3):
+            #     print("entere here 2")
+            #     linkedLesionIds.append(temporalData[itemIndex - i][1]-1) # minus one to adjust lesion number
+            if itemIndex == temporalDataListLength-1:
+                linkedLesionIds[2] = temporalData[itemIndex][1]
+            if (itemIndex + 2) < temporalDataListLength:  # Check overflow towards right
+                linkedLesionIds[2] = temporalData[itemIndex][1]
+                linkedLesionIds[3] = temporalData[itemIndex+1][1]
+                linkedLesionIds[4] = temporalData[itemIndex+2][1]
+            if (itemIndex - 2) >= 0:
+                linkedLesionIds[0] = temporalData[itemIndex-1][1]
+                linkedLesionIds[1] = temporalData[itemIndex-2][1]
+
+
+            return linkedLesionIds   # Success
+        return None  # Failure
 
     def spinBoxMinChanged(self, val):
         if(val>=self.spinBox_RangeMax.value()):
@@ -1281,6 +1378,7 @@ class mainWindow(Qt.QMainWindow):
         self.updateDefaultGraph(sliderValue, None) # update graph
         if(self.userPickedLesionID!=None):
             highlightLesionID = self.getLinkedLesionIDFromTimeStep(self.userPickedLesionID, sliderValue)
+            print("highlight id is", highlightLesionID)
             if(highlightLesionID!=None):
                 self.userPickedLesionID = highlightLesionID
                 self.overlayData = self.getLesionData(highlightLesionID-1)

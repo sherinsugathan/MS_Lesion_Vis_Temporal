@@ -192,6 +192,7 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
                         self.lesionvis.updateDefaultGraph(None, [nodeID])
                     #self.lesionvis.on_sliderChangedTimePoint() # DO NOT ENABLE. BUG
                     self.lesionvis.updateLesionOverlayText()
+                    self.lesionvis.updateContourComparisonView(self.lesionvis.userPickedLesionID)
                 else:
                     self.resetToDefaultViewLesions()
                     self.lesionvis.userPickedLesionID = None
@@ -258,6 +259,7 @@ class CustomMouseInteractorSurface(vtk.vtkInteractorStyleTrackballCamera):
     def leftButtonReleaseEvent(self,obj,event):
         if(self.MouseMotion == 0):
             clickPos = self.GetInteractor().GetEventPosition()
+            print("SherinL calling picker")
             picker = vtk.vtkPropPicker()
             picker.Pick(clickPos[0], clickPos[1], 0, self.GetDefaultRenderer())
             # pointPicker = vtk.vtkPointPicker()

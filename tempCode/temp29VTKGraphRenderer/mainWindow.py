@@ -90,17 +90,19 @@ class mainWindow(Qt.QMainWindow):
         self.G = nx.read_gml("D:\\OneDrive - University of Bergen\\Datasets\\MS_Longitudinal\\Subject1\\preProcess\\lesionGraph.gml")
 
     def updateContourComparisonView(self, pickedLesionID):
+        print("picked lesion id is ", pickedLesionID)
         currentTimeIndex = self.horizontalSliderTime.value()
-        lesionIDs = []
-        if currentTimeIndex + 2 > self.dataCount or currentTimeIndex - 2 < 0:  # Ignore rendering some cells because full data not available for left and right time points.
-            pass
-            print("ignore cells")
-        else:  # Full data available for left and right time points.
-            linkedLesionIds = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex)
+        #if currentTimeIndex + 2 > self.dataCount or currentTimeIndex - 2 < 0:  # Ignore rendering some cells because full data not available for left and right time points.
+        #    pass
+        #    print("ignore cells")
+        #else:  # Full data available for left and right time points.
+        linkedLesionIds = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex)
 
             # for i in range(-2, 3):
             #     lesionID = self.getLinkedLesionIDFromTimeStep(pickedLesionID, currentTimeIndex-i)
             #     lesionIDs.append(lesionID-1)
+
+        #print("New lesion ids are", lesionIDs)
 
         print("Lesion IDs are", linkedLesionIds)
         # sphereSource = vtk.vtkSphereSource()
@@ -120,18 +122,23 @@ class mainWindow(Qt.QMainWindow):
         rendererArray = []
 
         rendererCollection = self.renWinLesions.GetRenderers()
-        firstRenderer = rendererCollection.GetItemAsObject(0)
+        currentTimeRenderer = rendererCollection.GetItemAsObject(2) # The middle renderer. the present one.
 
-        for i in range(rendererCollection.GetNumberOfItems()):
-            renderer = rendererCollection.GetItemAsObject(i)
+        print("Renderer count is", rendererCollection.GetNumberOfItems())
+        for idIndex in range(rendererCollection.GetNumberOfItems()):
+            renderer = rendererCollection.GetItemAsObject(idIndex)
             renderer.RemoveAllViewProps()
-            if linkedLesionIds[i] is None:
+            if linkedLesionIds[idIndex] is None:
                 renderer.RemoveAllViewProps()
-            else: # Add valid lesion to renderer.
-                renderer.AddActor(self.lesionActorList[currentTimeIndex][linkedLesionIds[i]])
+                continue
+            else:  # Add valid lesion to renderer.
+                for lesion in self.lesionActorList[currentTimeIndex-2+idIndex]:
+                    lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
+                    if lesionID == linkedLesionIds[idIndex]-1:
+                        renderer.AddActor(lesion)
                 renderer.ResetCamera()
-            if i > 0:
-                renderer.SetActiveCamera(firstRenderer.GetActiveCamera())
+            #if idIndex > 0:
+            renderer.SetActiveCamera(currentTimeRenderer.GetActiveCamera())
 
         self.irenLesions.Render()
 
@@ -146,6 +153,7 @@ class mainWindow(Qt.QMainWindow):
         for id in nodeIDList:
             timeList = self.G.nodes[id]["time"]
             labelList = self.G.nodes[id]["lesionLabel"]
+            print(labelList)
             #print("Entering here", id)
             #print(timeList)
             #print(labelList)
@@ -168,19 +176,21 @@ class mainWindow(Qt.QMainWindow):
             temporalDataListLength = len(temporalData)
             if ((currentTimeIndex, currentLesionID) in list(temporalData)):
                 itemIndex = temporalData.index((currentTimeIndex, currentLesionID))
+                print("printing temporal data", temporalData)
             else:
                 continue
             # for i in range(-2, 3):
             #     print("entere here 2")
             #     linkedLesionIds.append(temporalData[itemIndex - i][1]-1) # minus one to adjust lesion number
+            if itemIndex == temporalDataListLength-1:
+                linkedLesionIds[2] = temporalData[itemIndex][1]
             if (itemIndex + 2) < temporalDataListLength:  # Check overflow towards right
-                linkedLesionIds[2] = temporalData[itemIndex][1]-1
-                linkedLesionIds[3] = temporalData[itemIndex+1][1]-1
-                linkedLesionIds[4] = temporalData[itemIndex+2][1]-1
+                linkedLesionIds[2] = temporalData[itemIndex][1]
+                linkedLesionIds[3] = temporalData[itemIndex+1][1]
+                linkedLesionIds[4] = temporalData[itemIndex+2][1]
             if (itemIndex - 2) >= 0:
-                linkedLesionIds[0] = temporalData[itemIndex-1][1]-1
-                linkedLesionIds[1] = temporalData[itemIndex-2][1]-1
-
+                linkedLesionIds[0] = temporalData[itemIndex-2][1]
+                linkedLesionIds[1] = temporalData[itemIndex-1][1]
 
             return linkedLesionIds   # Success
         return None  # Failure
@@ -256,7 +266,7 @@ class mainWindow(Qt.QMainWindow):
 
     def load_data(self):
         self.keyType = vtk.vtkInformationStringKey.MakeKey("type", "root")
-        self.keyID = vtk.vtkInformationStringKey.MakeKey("ID", "root")
+        self.keyID = vtk.vtkInformationStringKey.MakeKey("ID", "vtkActor")
         file_count = len(glob.glob1(self.lesionsFolder, "*.vtm"))  # number of time points.
         for i in range(file_count):
             print("Loading ", i)
