@@ -337,9 +337,7 @@ class mainWindow(Qt.QMainWindow):
                 itemIndex = temporalData.index((currentTimeIndex, currentLesionID))
             else:
                 continue
-            # for i in range(-2, 3):
-            #     print("entere here 2")
-            #     linkedLesionIds.append(temporalData[itemIndex - i][1]-1) # minus one to adjust lesion number
+
             if itemIndex == temporalDataListLength-1:
                 linkedLesionIds[2] = temporalData[itemIndex][1]
             if (itemIndex + 2) < temporalDataListLength:  # Check overflow towards right
@@ -1161,6 +1159,11 @@ class mainWindow(Qt.QMainWindow):
         #
         #     self.polyCollection[self.graphLegendLabelList.index(updateColorIndex)].set_facecolor(newColor)
 
+        if len(updateColorIndex) == 0:
+            tempColors = list(self.plotColors)
+            for i in range(len(self.polyCollection)):
+                self.polyCollection[i].set_facecolor(tempColors[i])
+
         if (vlineXloc != None and updateColorIndex == None):
             self.canvasDefault.draw()
             return
@@ -1702,6 +1705,7 @@ class mainWindow(Qt.QMainWindow):
         # Clear all lesions
         for lesion in self.LesionActorList[self.currentTimeStep]:
             lesion.GetProperty().SetColor(0.6196078431372549, 0.7372549019607843, 0.8549019607843137)  # default lesion color
+
         for nodeIndex in range(len(flatListInt)):
             for lesion in self.LesionActorList[self.currentTimeStep]:
                 lesionid = int(lesion.GetProperty().GetInformation().Get(self.keyID)) + 1
