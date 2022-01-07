@@ -1144,6 +1144,11 @@ class mainWindow(Qt.QMainWindow):
                     newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(str(colorIndex))], 0.6)
                     self.polyCollection[self.graphLegendLabelList.index(str(colorIndex))].set_facecolor(newColor)
 
+            # Clear stackplot colors if there is nothing picked from graph interaction. Checking for empty [] list.
+            if len(updateColorIndex) == 0:
+                tempColors = list(self.plotColors)
+                for i in range(len(self.polyCollection)):
+                    self.polyCollection[i].set_facecolor(tempColors[i])
         # if updateColorIndex is not None:
         #     tempColors = list(self.plotColors)
         #     newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(updateColorIndex)], 0.6)
@@ -1159,10 +1164,7 @@ class mainWindow(Qt.QMainWindow):
         #
         #     self.polyCollection[self.graphLegendLabelList.index(updateColorIndex)].set_facecolor(newColor)
 
-        if len(updateColorIndex) == 0:
-            tempColors = list(self.plotColors)
-            for i in range(len(self.polyCollection)):
-                self.polyCollection[i].set_facecolor(tempColors[i])
+
 
         if (vlineXloc != None and updateColorIndex == None):
             self.canvasDefault.draw()
@@ -1381,7 +1383,7 @@ class mainWindow(Qt.QMainWindow):
         self.updateDefaultGraph(sliderValue, None) # update graph
         if(self.userPickedLesionID!=None):
             highlightLesionID = self.getLinkedLesionIDFromTimeStep(self.userPickedLesionID, sliderValue)
-            print("highlight id is", highlightLesionID)
+            #print("highlight id is", highlightLesionID)
             if(highlightLesionID!=None):
                 self.userPickedLesionID = highlightLesionID
                 self.overlayData = self.getLesionData(highlightLesionID-1)
