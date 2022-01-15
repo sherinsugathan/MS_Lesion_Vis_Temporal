@@ -234,8 +234,8 @@ class CustomMouseInteractorSurface(vtk.vtkInteractorStyleTrackballCamera):
     
     def __init__(self,lesionvis,parent=None,iren=None):
         self.AddObserver("LeftButtonPressEvent",self.leftButtonPressEvent)
-        self.AddObserver("LeftButtonReleaseEvent",self.leftButtonReleaseEvent)
-        self.AddObserver("MouseMoveEvent", self.mouseMoveEvent)
+        #self.AddObserver("LeftButtonReleaseEvent",self.leftButtonReleaseEvent)
+        #self.AddObserver("MouseMoveEvent", self.mouseMoveEvent)
         self.lesionvis = lesionvis
         self.LastPickedActor = None
         self.NewPickedActor = None
@@ -246,78 +246,80 @@ class CustomMouseInteractorSurface(vtk.vtkInteractorStyleTrackballCamera):
         self.informationKeyType = vtk.vtkInformationStringKey.MakeKey("type", "vtkActor")
         self.informationKeyID = vtk.vtkInformationStringKey.MakeKey("ID", "vtkActor")
 
-    # Set lesion data to overlay text and display overlay.
-    def mapLesionToText(self, lesionID, NewPickedActor):
-        # if(self.vtkWidget.GetRenderWindow().HasRenderer(self.renMapOutcome) == True):
-        #     self.vtkWidget.GetRenderWindow().RemoveRenderer(self.renMapOutcome)
-        # Highlight the picked actor by changing its properties
-        self.NewPickedActor.GetMapper().ScalarVisibilityOff()
-        self.NewPickedActor.GetProperty().SetColor(0.4627, 0.4627, 0.9568) # A blueish color.
-        self.NewPickedActor.GetProperty().SetDiffuse(1.0)
-        self.NewPickedActor.GetProperty().SetSpecular(0.0)
+    # # Set lesion data to overlay text and display overlay.
+    # def mapLesionToText(self, lesionID, NewPickedActor):
+    #     # if(self.vtkWidget.GetRenderWindow().HasRenderer(self.renMapOutcome) == True):
+    #     #     self.vtkWidget.GetRenderWindow().RemoveRenderer(self.renMapOutcome)
+    #     # Highlight the picked actor by changing its properties
+    #     self.NewPickedActor.GetMapper().ScalarVisibilityOff()
+    #     self.NewPickedActor.GetProperty().SetColor(0.4627, 0.4627, 0.9568) # A blueish color.
+    #     self.NewPickedActor.GetProperty().SetDiffuse(1.0)
+    #     self.NewPickedActor.GetProperty().SetSpecular(0.0)
 
-    def leftButtonReleaseEvent(self,obj,event):
-        if(self.MouseMotion == 0):
-            clickPos = self.GetInteractor().GetEventPosition()
-            print("SherinL calling picker")
-            picker = vtk.vtkPropPicker()
-            picker.Pick(clickPos[0], clickPos[1], 0, self.GetDefaultRenderer())
-            # pointPicker = vtk.vtkPointPicker()
-            # pointPicker.SetTolerance(0.0005)
-            # pointPicker.Pick(clickPos[0], clickPos[1], 0, self.GetDefaultRenderer())
-            # worldPosition = pointPicker.GetPickPosition()
-            # print(pointPicker.GetPointId())
-            self.clickedLesionActor = None
-            cellPicker = vtk.vtkCellPicker()
-            cellPicker.SetTolerance(0.0005)
-            cellPicker.Pick(clickPos[0], clickPos[1], 0, self.GetDefaultRenderer())
-            #worldPosition = cellPicker.GetPickPosition()
-            #print(cellPicker.GetPointId())
-            
-            # get the new
-            self.NewPickedActor = picker.GetActor()
-            # If something was selected
-            if self.NewPickedActor:
-                # If we picked something before, reset its property
-                if self.LastPickedActor:
-                    #self.LastPickedActor.GetMapper().ScalarVisibilityOn()
-                    self.LastPickedActor.GetProperty().DeepCopy(self.LastPickedProperty)
-                
-                # Save the property of the picked actor so that we can
-                # restore it next time
-                self.LastPickedProperty.DeepCopy(self.NewPickedActor.GetProperty())
+    def leftButtonPressEvent(self, obj, event):
+        #print("left button press event called")
+        clickPos = self.GetInteractor().GetEventPosition()
+        #print("SherinL calling picker")
+        picker = vtk.vtkPropPicker()
+        picker.Pick(clickPos[0], clickPos[1], 0, self.GetDefaultRenderer())
+        # pointPicker = vtk.vtkPointPicker()
+        # pointPicker.SetTolerance(0.0005)
+        # pointPicker.Pick(clickPos[0], clickPos[1], 0, self.GetDefaultRenderer())
+        # worldPosition = pointPicker.GetPickPosition()
+        # print(pointPicker.GetPointId())
+        self.clickedLesionActor = None
+        cellPicker = vtk.vtkCellPicker()
+        cellPicker.SetTolerance(0.0005)
+        cellPicker.Pick(clickPos[0], clickPos[1], 0, self.GetDefaultRenderer())
+        #worldPosition = cellPicker.GetPickPosition()
+        #print(cellPicker.GetPointId())
 
-                itemType = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyType)
-                lesionID = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyID)
-                #print(itemType, lesionID)
+        # get the new
+        self.NewPickedActor = picker.GetActor()
+        # If something was selected
+        if self.NewPickedActor:
+            # If we picked something before, reset its property
+            if self.LastPickedActor:
+                #self.LastPickedActor.GetMapper().ScalarVisibilityOn()
+                self.LastPickedActor.GetProperty().DeepCopy(self.LastPickedProperty)
 
-                if(itemType == 'OtherSurfaces'): # lesion picked.
-                    print("picked other surfaces")
-                else:
-                    self.resetToDefaultViewSurface()
-                    self.lesionvis.userPickedLesionID = None
+            # Save the property of the picked actor so that we can
+            # restore it next time
+            self.LastPickedProperty.DeepCopy(self.NewPickedActor.GetProperty())
 
-                #self.iren.Render()
-                # save the last picked actor
-                self.LastPickedActor = self.NewPickedActor
-            else: # no actor picked. Clicked on background.
+            itemType = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyType)
+            lesionID = self.NewPickedActor.GetProperty().GetInformation().Get(self.lesionvis.keyID)
+            #print(itemType, lesionID)
+
+            if(itemType == 'OtherSurfaces'): # lesion picked.
+                print("picked other surfaces")
+            else:
                 self.resetToDefaultViewSurface()
+                self.lesionvis.userPickedLesionID = None
 
-        self.OnLeftButtonUp()
+            #self.iren.Render()
+            # save the last picked actor
+            self.LastPickedActor = self.NewPickedActor
+        else: # no actor picked. Clicked on background.
+            self.resetToDefaultViewSurface()
+
+        self.OnLeftButtonDown()
+        #print("left button up through")
         return
 
     def resetToDefaultViewSurface(self):
         if(self.LastPickedActor!=None):
             pass
 
-    def mouseMoveEvent(self,obj,event):
-        self.MouseMotion = 1
-        self.OnMouseMove()
-        return
+    # def mouseMoveEvent(self,obj,event):
+    #     self.MouseMotion = 1
+    #     self.OnMouseMove()
+    #     return
 
-    def leftButtonPressEvent(self,obj,event):
-        self.MouseMotion = 0
-        self.OnLeftButtonDown()
+    # def leftButtonPressEvent(self, obj, event):
+    #     self.MouseMotion = 0
+    #     print("entering heresssssssssss")
+    #     self.OnLeftButtonDown()
 
 '''
 ##########################################################################
@@ -743,7 +745,7 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
 def captureScreenshot(renderWindow):
     windowToImageFilter = vtk.vtkWindowToImageFilter()
     windowToImageFilter.SetInput(renderWindow)
-    windowToImageFilter.SetScale(3,3)
+    windowToImageFilter.SetScale(1,1)
     # windowToImageFilter.SetMagnification(3) #set the resolution of the output image (3 times the current resolution of vtk render window)
     windowToImageFilter.SetInputBufferTypeToRGBA()  # also record the alpha (transparency) channel
     windowToImageFilter.ReadFrontBufferOff()  # read from the back buffer

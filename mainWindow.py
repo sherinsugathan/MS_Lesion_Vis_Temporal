@@ -63,6 +63,7 @@ from numpy import diff
 import math
 import keyboard as kb
 import itertools
+import msvcrt
 
 # Main window class.
 class mainWindow(Qt.QMainWindow):
@@ -151,7 +152,7 @@ class mainWindow(Qt.QMainWindow):
         #self.pushButton_LoadFolder.clicked.connect(self.on_click_browseFolder) # Attaching button click handler.
         self.pushButton_LoadFolder.clicked.connect(self.autoLoadData) # Attaching button click handler.
         self.pushButton_Compare.clicked.connect(self.compareDataAndUpdateSurface) # Attaching button click handler.
-        self.pushButton_IntensityAnalysis.clicked.connect(self.loadIntensityAnalysisPage) # Attaching button click handler for intensity analysis page.
+        #self.pushButton_IntensityAnalysis.clicked.connect(self.loadIntensityAnalysisPage) # Attaching button click handler for intensity analysis page.
         self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
         self.horizontalSlider_Riso.valueChanged.connect(self.on_sliderChangedRiso) # Attaching slider value (Riso) changed handler.
         self.comboBox_LesionAttributes.currentTextChanged.connect(self.on_combobox_changed_LesionAttributes) # Attaching handler for lesion filter combobox selection change.
@@ -263,6 +264,8 @@ class mainWindow(Qt.QMainWindow):
         self.overlayDataMain = {"Lesion ID":"--", "Voxel Count":"--", "Physical Size":"--", "Centroid":"--", "Elongation":"--", "Lesion Perimeter":"--", "Lesion Spherical Radius":"--", "Lesion Spherical Perimeter":"--", "Lesion Flatness":"--", "Lesion Roundness":"--"}
         self.structureInfo = None
         self.userPickedLesionID = None
+        self.isBasePlottingNeeded = False
+        self.overlayLesionStripActivated = False
         self.dataCount = 0
         self.vtk_colorsLh = vtk.vtkUnsignedCharArray()
         self.vtk_colorsRh = vtk.vtkUnsignedCharArray()
@@ -292,6 +295,16 @@ class mainWindow(Qt.QMainWindow):
         self.buttonGroupModalities.setExclusive(True)
         self.buttonGroupModalities.buttonClicked.connect(self.on_buttonGroupModalityChanged)
 
+        # Hide some buttons (things here soon going to get removed/replaced.)
+        self.horizontalSlider_Riso.hide()
+        self.radioButton_T1.hide()
+        self.radioButton_T2.hide()
+        self.radioButton_FLAIR.hide()
+        self.checkBox_AllLesions.hide()
+        self.checkBox_ShowClasses.hide()
+        self.label_Riso.hide()
+        self.label_6.hide()
+
     def updateContourComparisonView(self, pickedLesionID):
         #print("i am called", pickedLesionID)
         currentTimeIndex = self.horizontalSlider_TimePoint.value()
@@ -317,9 +330,9 @@ class mainWindow(Qt.QMainWindow):
                     lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
                     if lesionID == linkedLesionIds[i-1] - 1:
                         renderer.AddActor(lesion)
+                        #print("adding actor")
                 renderer.ResetCamera()
-            if i > 0:
-                renderer.SetActiveCamera(currentTimeRenderer.GetActiveCamera())
+                renderer.Render()
 
         self.irenDual.Render()
 
@@ -937,11 +950,16 @@ class mainWindow(Qt.QMainWindow):
 
     # Stream Graph pick artist.
     def onPickDefaultStreamGraphCanvas(self, event):
-        if event.mouseevent.button == 1:  #  Return if user is pressing middle or right mouse button.
+        if event.mouseevent.button == 1 or (event.mouseevent.button == 3):  #  Return if user is pressing right mouse button.
             thisline = event.artist
             nodeID = thisline.get_label()
             self.selectedNodeID = nodeID
             xLoc, yLoc= int(round(event.mouseevent.xdata)), event.mouseevent.ydata
+
+            # Check if this is a ctrl + right click
+            if event.mouseevent.button == 3:
+                self.isBasePlottingNeeded = True
+
             self.updateDefaultGraph(xLoc, [nodeID])
 
             # HIGHLIGHT A LESION IN LESION RENDERER
@@ -1023,8 +1041,9 @@ class mainWindow(Qt.QMainWindow):
         self.nodeOrderForGraph, self.plotColors = self.computeNodeOrderForGraph(self.G)
 
         ys = []
-        dataArray = []
+        self.dataArray = []
         self.graphLegendLabelList = []
+        print("node order", self.nodeOrderForGraph)
         for id in self.nodeOrderForGraph:
             #print("Node order", id)
             self.graphLegendLabelList.append(str(id))
@@ -1040,14 +1059,15 @@ class mainWindow(Qt.QMainWindow):
             buckets[timeList[0]:timeList[-1]+1] = data
             #buckets = gaussian_filter1d(buckets, sigma = 2)
             arr = np.asarray(buckets, dtype=np.float64)
-            dataArray.append(arr)
+            self.dataArray.append(arr)
     
         #x = np.linspace(0, self.dataCount, self.dataCount)
         x = list(range(self.dataCount))
         #random.shuffle(dataArray)
-        ys = dataArray
+        ys = self.dataArray
+
         self.polyCollection = self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList,  colors = self.plotColors, alpha = 0.7,linewidth=0.5, linestyle='solid', edgecolor=(0.6,0.6,0.6,1.0))
-        
+
         #print(self.polyCollection)
         # dArray = self.polyCollection[0].get_array()
         # print(dArray)
@@ -1103,7 +1123,8 @@ class mainWindow(Qt.QMainWindow):
         #plt.show()
         self.canvasDefault.draw()
         self.canvasDefault.mpl_connect('pick_event', self.onPickDefaultStreamGraphCanvas)
-        #self.canvasDefault.mpl_connect('button_press_event', self.onClickDefaultStreamGraphCanvas)
+        #self.canvasDefault.mpl_connect('button_press_event', self.onButtonPressDefaultStreamGraphCanvas)
+
         #self.canvasDefault.mpl_connect('button_release_event', self.onReleaseDefaultStreamGraphCanvas)
         #self.canvasDefault.mpl_connect('motion_notify_event', self.onMouseMoveDefaultStreamGraphCanvas)
         #self.defaultGraphBackup = self.canvasDefault.copy_from_bbox(self.axDefault.bbox)
@@ -1120,6 +1141,9 @@ class mainWindow(Qt.QMainWindow):
     # update default graph
     def updateDefaultGraph(self, vlineXloc=None, updateColorIndex=None):
         plt.figure(3)
+        tempColors = list(self.plotColors)
+
+
         #self.canvasDefault.restore_region(self.defaultGraphBackup)
         if(vlineXloc != None):
             if(self.vLine == None):
@@ -1133,12 +1157,36 @@ class mainWindow(Qt.QMainWindow):
                 self.vLine.remove()
                 self.vLine = None
 
-        tempColors = list(self.plotColors)
+
+        if self.isBasePlottingNeeded:
+            x = list(range(self.dataCount))
+            arrayIndex = self.nodeOrderForGraph.index(updateColorIndex[0])
+            ysOverlay = self.dataArray[self.nodeOrderForGraph.index(updateColorIndex[0])]
+            # Clear all existing overlays
+            if self.overlayLesionStripActivated == True:
+                for i in range(len(self.polyCollectionOverlayStackPlot)):
+                    self.polyCollectionOverlayStackPlot[i].set_visible(False)
+            self.polyCollectionOverlayStackPlot = self.axDefault.stackplot(x, ysOverlay, baseline='zero', picker=False, pickradius=1, alpha=1, linewidth=0.5, linestyle='solid', edgecolor=(0.6, 0.6, 0.6, 1.0))
+            self.isBasePlottingNeeded = False
+            self.overlayLesionStripActivated = True
+
+            for i in range(len(self.polyCollection)):
+                self.polyCollection[i].set_alpha(0.1)  # lighten the background
+            self.canvasDefault.draw()
+            return
+        else:
+            if self.overlayLesionStripActivated:  # If overlay already activated once, hide them
+                for i in range(len(self.polyCollectionOverlayStackPlot)):
+                    self.polyCollectionOverlayStackPlot[i].set_visible(False)
+                self.canvasDefault.draw()
+
+
         if updateColorIndex is not None:
             if len(updateColorIndex) > 0:
                 # reset original colors
                 for i in range(len(self.polyCollection)):
                     self.polyCollection[i].set_facecolor(tempColors[i])
+                    self.polyCollection[i].set_alpha(0.7)
 
                 for colorIndex in updateColorIndex:
                     newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(str(colorIndex))], 0.6)
@@ -1149,31 +1197,18 @@ class mainWindow(Qt.QMainWindow):
                 tempColors = list(self.plotColors)
                 for i in range(len(self.polyCollection)):
                     self.polyCollection[i].set_facecolor(tempColors[i])
-        # if updateColorIndex is not None:
-        #     tempColors = list(self.plotColors)
-        #     newColor = self.adjust_lightness(tempColors[self.graphLegendLabelList.index(updateColorIndex)], 0.6)
-        #
-        #     for i in range(len(self.polyCollection)):
-        #         self.polyCollection[i].set_facecolor(tempColors[i])
-        #
-        #     # Enable this to color the whole tracked lesion polyCollection. DEPRECATED NOW.
-        #     # for item in self.sub_graphs:
-        #     #     if updateColorIndex in item:
-        #     #         for nodeIndex in item:
-        #     #             self.polyCollection[self.graphLegendLabelList.index(nodeIndex)].set_facecolor(newColor)
-        #
-        #     self.polyCollection[self.graphLegendLabelList.index(updateColorIndex)].set_facecolor(newColor)
+                    self.polyCollection[i].set_alpha(0.7)
 
-
-
+        # draw vertical line only without highlighting artists.
         if (vlineXloc != None and updateColorIndex == None):
             self.canvasDefault.draw()
             return
         #print("Enter here", vlineXloc, updateColorIndex)
-        if(updateColorIndex==None): # Reset graph to default colors.
+        if updateColorIndex == None: # Reset graph to default colors.
             tempColors = list(self.plotColors)
             for i in range(len(self.polyCollection)):
                 self.polyCollection[i].set_facecolor(tempColors[i])
+                self.polyCollection[i].set_alpha(0.7)
 
         self.canvasDefault.draw()
 
@@ -1678,11 +1713,11 @@ class mainWindow(Qt.QMainWindow):
         self.ren.AddActor(self.surfaceActors[0]) # ventricle
         self.iren.Render()
 
-    # Load intensity analysis page.
-    def loadIntensityAnalysisPage(self):
-        self.initializeIntensityGlyphGraph()
-        self.plotIntensityGlyphGraph()
-        self.stackedWidget_Graphs.setCurrentIndex(4)
+    # # Load intensity analysis page.
+    # def loadIntensityAnalysisPage(self):
+    #     self.initializeIntensityGlyphGraph()
+    #     self.plotIntensityGlyphGraph()
+    #     self.stackedWidget_Graphs.setCurrentIndex(4)
 
     '''
     ##########################################################################
