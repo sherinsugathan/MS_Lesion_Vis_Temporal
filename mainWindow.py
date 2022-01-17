@@ -157,7 +157,6 @@ class mainWindow(Qt.QMainWindow):
         self.horizontalSlider_Riso.valueChanged.connect(self.on_sliderChangedRiso) # Attaching slider value (Riso) changed handler.
         self.comboBox_LesionAttributes.currentTextChanged.connect(self.on_combobox_changed_LesionAttributes) # Attaching handler for lesion filter combobox selection change.
         self.comboBox_ProjectionMethods.currentTextChanged.connect(self.on_combobox_changed_ProjectionMethods) # Attaching handler for projection methods combobox selection change.
-        self.checkBox_AllLesions.stateChanged.connect(self.displayAllLesions_changed) # Display all lesions in intensity graph
         self.checkBox_ShowClasses.stateChanged.connect(self.checkBox_ShowClasses_changed) # Display lesion classes in the intensity graph.
         self.checkBox_RangeCompare.stateChanged.connect(self.checkBox_RangeCompare_changed) # Enables comparison view for lesions.
         self.pushButton_Capture.clicked.connect(self.on_click_CaptureScreeshot)  # Attaching button click Handlers
@@ -226,10 +225,12 @@ class mainWindow(Qt.QMainWindow):
         self.irenDual.SetRenderWindow(self.vtkWidgetDual.GetRenderWindow())
         self.renDual.ResetCamera()
         self.frameDual.setLayout(self.vlDual)
-        self.styleSurface = Utils.CustomMouseInteractorSurface(self)
-        self.styleSurface.SetDefaultRenderer(self.renDual)
-        self.styleSurface.main = self
-        self.irenDual.SetInteractorStyle(self.styleSurface)
+        #self.styleSurface = Utils.CustomMouseInteractorSurface(self)
+        self.actor_style = vtk.vtkInteractorStyleTrackballCamera()
+        #self.styleSurface.SetDefaultRenderer(self.renDual)
+        #self.styleSurface.main = self
+        #self.irenDual.SetInteractorStyle(self.styleSurface)
+        self.irenDual.SetInteractorStyle(self.actor_style)
         self.irenDual.Initialize()
 
         self.vl_MPRA = Qt.QVBoxLayout()
@@ -300,12 +301,41 @@ class mainWindow(Qt.QMainWindow):
         self.radioButton_T1.hide()
         self.radioButton_T2.hide()
         self.radioButton_FLAIR.hide()
-        self.checkBox_AllLesions.hide()
         self.checkBox_ShowClasses.hide()
         self.label_Riso.hide()
         self.label_6.hide()
 
     def updateContourComparisonView(self, pickedLesionID):
+        vert = """
+            //VTK::System::Dec
+            attribute vec4 vertexMC;
+            attribute vec3 normalMC;
+            uniform mat3 normalMatrix;
+            uniform mat4 MCDCMatrix;
+            uniform mat4 MCVCMatrix;  // Combined model to view transform.
+            varying vec3 normalVCVSOutput2;
+            varying vec4 vertexVCVSOutput2;
+            attribute vec2 tcoordMC;
+            out vec3 color;
+            varying vec2 tcoordVCVSOutput;
+            void main () {
+              normalVCVSOutput2 = normalMatrix * normalMC;
+              tcoordVCVSOutput = tcoordMC;
+              vertexVCVSOutput2 = MCVCMatrix * vertexMC;
+              gl_Position = MCDCMatrix * vertexMC;
+            }
+        """
+        frag = """
+           //VTK::System::Dec
+           varying vec4 vColor;
+           in vec3 color;
+           void main()
+           {
+               gl_FragColor = vec4(1.0,0.0,0.0,0.5);
+               //gl_FragColor = vColor;
+            }
+        """
+
         #print("i am called", pickedLesionID)
         currentTimeIndex = self.horizontalSlider_TimePoint.value()
         linkedLesionIds = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex)
@@ -328,8 +358,24 @@ class mainWindow(Qt.QMainWindow):
             else:  # Add valid lesion to renderer.
                 for lesion in self.LesionActorList[currentTimeIndex - 2 + (i-1)]:
                     lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
+                    #lesion.GetMapper().SetVertexShaderCode(vert)
+                    #lesion.GetMapper().SetFragmentShaderCode(frag)
+
+                    silhouette = vtk.vtkPolyDataSilhouette()
+                    silhouette.SetInputData(lesion.GetMapper().GetInput())
+                    silhouette.SetCamera(renderer.GetActiveCamera())
+                    silhouette.SetEnableFeatureAngle(0)
+
+                    silhouetteMapper = vtk.vtkPolyDataMapper()
+                    silhouetteMapper.SetInputConnection(silhouette.GetOutputPort())
+                    silhouetteActor = vtk.vtkActor()
+                    silhouetteActor.SetMapper(silhouetteMapper)
+                    silhouetteActor.GetProperty().SetColor(0.1, 0.1, 0.1)
+                    silhouetteActor.GetProperty().SetLineWidth(2)
+
                     if lesionID == linkedLesionIds[i-1] - 1:
-                        renderer.AddActor(lesion)
+                        #renderer.AddActor(lesion)
+                        renderer.AddActor(silhouetteActor)
                         #print("adding actor")
                 renderer.ResetCamera()
                 renderer.Render()
@@ -1378,12 +1424,6 @@ class mainWindow(Qt.QMainWindow):
             self.overlayDataMain["Lesion Flatness"] = "{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['Flatness'])
             self.overlayDataMain["Lesion Roundness"] = "{0:.2f}".format(self.structureInfo[str(time)][0][str(label+1)][0]['Roundness'])
             return self.overlayDataMain
-
-    # Handler for time point slider change
-    @pyqtSlot()
-    def displayAllLesions_changed(self):
-        self.plotIntensityGraph()
-        self.canvasIntensity.draw()
 
     # Handler for time point slider change
     @pyqtSlot()
