@@ -16,10 +16,11 @@ import matplotlib.pyplot as plt
 class ReadThread(QObject): 
     progress = pyqtSignal(int)
     finished = pyqtSignal()
-    def __init__(self, folder_name, actorList, SurfacesList, keyType, keyID, parent=None): 
+    def __init__(self, folder_name, actorList, actorListForLesionView, SurfacesList, keyType, keyID, parent=None):
         super(ReadThread, self).__init__(parent) 
         self.read_folder_name = folder_name + "\\surfaces\\lesions\\"
         self.surfaceList = actorList
+        self.surfaceListForLesionView = actorListForLesionView
         self.surfaceActor = SurfacesList
         self.keyType = keyType
         self.keyID = keyID
@@ -42,9 +43,18 @@ class ReadThread(QObject):
                     mapper.SetScalarModeToUseCellData()
                     mapper.Update()
 
+                    mapper2 = vtk.vtkOpenGLPolyDataMapper()
+                    mapper2.SetInputData(polyData)
+                    mapper2.SetScalarModeToUseCellData()
+                    mapper2.Update()
+
                     info = vtk.vtkInformation()
                     info.Set(self.keyType, "lesion")
                     info.Set(self.keyID, str(blockIndex))
+
+                    info2 = vtk.vtkInformation()
+                    info2.Set(self.keyType, "lesion")
+                    info2.Set(self.keyID, str(blockIndex))
 
                     actor = vtk.vtkActor()
                     actor.SetMapper(mapper)
@@ -55,7 +65,17 @@ class ReadThread(QObject):
                     actor.GetMapper().ScalarVisibilityOff()
                     mapper.Update()
 
+                    actor2 = vtk.vtkActor()
+                    actor2.SetMapper(mapper2)
+                    actor2.GetProperty().SetColor(0.6196078431372549, 0.7372549019607843, 0.8549019607843137)
+                    #actor2.GetProperty().SetColor(0.9411764705882353, 0.2313725490196078, 0.1254901960784314)
+                    actor2.GetProperty().SetInformation(info2)
+                    smoothSurface(actor2)
+                    actor2.GetMapper().ScalarVisibilityOff()
+                    mapper2.Update()
+
                     self.surfaceList[i].append(actor)
+                    self.surfaceListForLesionView[i].append(actor2)
             self.progress.emit(int((i/80)*100))
         #self.surfaceActor.append(self.loadSurfaces()) # Load ventricle mesh
         self.loadSurfaces()

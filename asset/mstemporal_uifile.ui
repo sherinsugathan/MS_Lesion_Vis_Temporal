@@ -70,36 +70,27 @@ border-style: solid;</string>
        <property name="rightMargin">
         <number>0</number>
        </property>
-       <item row="22" column="1">
-        <widget class="QPushButton" name="pushButton_ResetView">
-         <property name="styleSheet">
-          <string notr="true">QPushButton:hover#pushButton_ResetView
-{
-background-color: rgb(185,216,197);
-border-color:rgb(150,150,150);
-}
-QPushButton:pressed#pushButton_ResetView {background-color:rgb(255,255,255);}
-QPushButton#pushButton_ResetView
-{
-background-color: rgb(255,255,255);
-color: rgb(70,70,70);
-border-style: outset;
-border-width: 0px;
-border-color:rgb(220,220,220);
-border-radius: 4px;
-font: 9pt &quot;Arial&quot;;
-font-weight:200;
-padding:6px;
-border-style: solid;
-}</string>
+       <item row="24" column="1">
+        <widget class="Line" name="line">
+         <property name="autoFillBackground">
+          <bool>false</bool>
          </property>
-         <property name="text">
-          <string>Reset Views</string>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
        <item row="28" column="1">
         <widget class="QProgressBar" name="progressBar">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>20</height>
+          </size>
+         </property>
          <property name="styleSheet">
           <string notr="true">QProgressBar:horizontal {
 border-color: rgb(230,230,230);
@@ -130,84 +121,6 @@ font-weight:200;;
          </property>
          <property name="textDirection">
           <enum>QProgressBar::TopToBottom</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="24" column="1">
-        <widget class="Line" name="line">
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Plain</enum>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="23" column="1">
-        <widget class="QPushButton" name="pushButton_Capture">
-         <property name="styleSheet">
-          <string notr="true">QPushButton:hover#pushButton_Capture{
-background-color: rgb(185,216,197);
-border-color:rgb(150,150,150);
-}
-QPushButton:pressed#pushButton_Capture {background-color:rgb(255,255,255);}
-QPushButton#pushButton_Capture
-{
-background-color: rgb(255,255,255);
-color: rgb(70,70,70);
-border-style: outset;
-border-width: 0px;
-border-color:rgb(220,220,220);
-border-radius: 4px;
-font: 9pt &quot;Arial&quot;;
-font-weight:200;
-padding:6px;
-border-style: solid;
-}</string>
-         </property>
-         <property name="text">
-          <string>Captures</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QPushButton" name="pushButton_LoadFolder">
-         <property name="font">
-          <font>
-           <family>Arial</family>
-           <pointsize>9</pointsize>
-           <weight>25</weight>
-           <italic>false</italic>
-           <bold>false</bold>
-           <stylestrategy>PreferAntialias</stylestrategy>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton:hover#pushButton_LoadFolder
-{
-background-color: rgb(185,216,197);
-border-color:rgb(150,150,150);
-}
-QPushButton:pressed#pushButton_LoadFolder {background-color:rgb(255,255,255);}
-QPushButton#pushButton_LoadFolder
-{
-background-color: rgb(255,255,255);
-color: rgb(70,70,70);
-border-style: outset;
-border-width: 0px;
-border-color:rgb(220,220,220);
-border-radius: 4px;
-font: 9pt &quot;Arial&quot;;
-font-weight:200;
-padding:6px;
-border-style: solid;
-}</string>
-         </property>
-         <property name="text">
-          <string>Load Datasets</string>
          </property>
         </widget>
        </item>
@@ -455,27 +368,191 @@ border-color:rgb(150,150,150);
          </item>
         </layout>
        </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="lineEdit_DatasetFolder">
+       <item row="4" column="1" alignment="Qt::AlignHCenter">
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>30</height>
+           <height>0</height>
           </size>
          </property>
-         <property name="styleSheet">
-          <string notr="true">color: rgb(70,70,70);
+         <property name="title">
+          <string/>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>10</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="pushButton_LoadFolder">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Arial</family>
+              <pointsize>9</pointsize>
+              <weight>25</weight>
+              <italic>false</italic>
+              <bold>false</bold>
+              <stylestrategy>PreferAntialias</stylestrategy>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton:hover#pushButton_LoadFolder
+{
+background-color: #99b6a4;
+border-color:rgb(150,150,150);
+color: rgb(255, 255, 255);
+}
+QPushButton:pressed#pushButton_LoadFolder {background-color:rgb(185,216,197);}
+QPushButton#pushButton_LoadFolder
+{
+background-color: rgb(185,216,197);
+color: rgb(70,70,70);
+border-style: outset;
+border-width: 0px;
+border-color:rgb(220,220,220);
+border-radius: 4px;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
+padding:6px;
+border-style: solid;
+}</string>
+            </property>
+            <property name="text">
+             <string>Load Datasets</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_ResetView">
+            <property name="styleSheet">
+             <string notr="true">QPushButton:hover#pushButton_ResetView
+{
+background-color: #99b6a4;
+border-color:rgb(150,150,150);
+color: rgb(255, 255, 255);
+}
+QPushButton:pressed#pushButton_ResetView {background-color:rgb(185,216,197);}
+QPushButton#pushButton_ResetView
+{
+background-color: rgb(185,216,197);
+color: rgb(70,70,70);
+border-style: outset;
+border-width: 0px;
+border-color:rgb(220,220,220);
+border-radius: 4px;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
+padding:6px;
+border-style: solid;
+}</string>
+            </property>
+            <property name="text">
+             <string>Reset Views</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_Capture">
+            <property name="styleSheet">
+             <string notr="true">QPushButton:hover#pushButton_Capture{
+background-color: #99b6a4;
+border-color:rgb(150,150,150);
+color: rgb(255, 255, 255);
+}
+QPushButton:pressed#pushButton_Capture {background-color:rgb(185,216,197);}
+QPushButton#pushButton_Capture
+{
+background-color: rgb(185,216,197);
+color: rgb(70,70,70);
+border-style: outset;
+border-width: 0px;
+border-color:rgb(220,220,220);
+border-radius: 4px;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
+padding:6px;
+border-style: solid;
+}</string>
+            </property>
+            <property name="text">
+             <string>Captures</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_9">
+           <property name="styleSheet">
+            <string notr="true">color:rgb(70,70,70);
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
+border-width: 0px;</string>
+           </property>
+           <property name="text">
+            <string>Path</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_DatasetFolder">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(70,70,70);
 border-color: rgb(230,230,230);
 background-color: rgb(255,255,255);
 border-style: solid;
 border-width: 1px;
 border-radius: 2px;
 font: 9pt &quot;Arial&quot;;</string>
-         </property>
-         <property name="text">
-          <string>D:\OneDrive - University of Bergen\Datasets\MS_Longitudinal\Subject1</string>
-         </property>
-        </widget>
+           </property>
+           <property name="text">
+            <string>D:\OneDrive - University of Bergen\Datasets\MS_Longitudinal\Subject1</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -745,13 +822,14 @@ background-color:rgb(255,255,255);</string>
                  <property name="styleSheet">
                   <string notr="true">QPushButton:hover#pushButton_Compare
 {
-background-color: rgb(185,216,197);
+background-color: #99b6a4;
 border-color:rgb(150,150,150);
+color: rgb(255, 255, 255);
 }
-QPushButton:pressed#pushButton_Compare {background-color:rgb(255,255,255);}
+QPushButton:pressed#pushButton_Compare {background-color:rgb(185,216,197);}
 QPushButton#pushButton_Compare
 {
-background-color: rgb(255,255,255);
+background-color: rgb(185,216,197);
 color: rgb(70,70,70);
 border-style: outset;
 border-width: 0px;
@@ -908,22 +986,24 @@ background-color:rgb(247,247,247);</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
-              <widget class="QGroupBox" name="groupBox_3">
+              <widget class="QLabel" name="label_8">
                <property name="styleSheet">
                 <string notr="true">font: 9pt &quot;Arial&quot;;
-font-weight:200;</string>
+font-weight:bold;
+</string>
                </property>
-               <property name="title">
-                <string>Surface</string>
+               <property name="text">
+                <string>Context</string>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_5">
-                <property name="topMargin">
-                 <number>30</number>
-                </property>
-                <item>
-                 <widget class="QRadioButton" name="radioButton_White">
-                  <property name="styleSheet">
-                   <string notr="true">QRadioButton {
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="radioButton_White">
+               <property name="styleSheet">
+                <string notr="true">QRadioButton {
 font: 9pt &quot;Arial&quot;;
 font-weight:200;
 color:rgb(70,70,70);
@@ -947,22 +1027,22 @@ QRadioButton::indicator:unchecked {
     border:                 2px solid gray;
 	border-color:  rgb(163,163,163);
 }</string>
-                  </property>
-                  <property name="text">
-                   <string>White</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                  <attribute name="buttonGroup">
-                   <string notr="true">radioGroup_BrainSurface</string>
-                  </attribute>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QRadioButton" name="radioButton_Inflated">
-                  <property name="styleSheet">
-                   <string notr="true">QRadioButton {
+               </property>
+               <property name="text">
+                <string>WM Surface</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">radioGroup_BrainSurface</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="radioButton_Inflated">
+               <property name="styleSheet">
+                <string notr="true">QRadioButton {
 font: 9pt &quot;Arial&quot;;
 font-weight:200;
 color:rgb(70,70,70);
@@ -986,19 +1066,16 @@ QRadioButton::indicator:unchecked {
     border:                 2px solid gray;
 	border-color:  rgb(163,163,163);
 }</string>
-                  </property>
-                  <property name="text">
-                   <string>Pial</string>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                  <attribute name="buttonGroup">
-                   <string notr="true">radioGroup_BrainSurface</string>
-                  </attribute>
-                 </widget>
-                </item>
-               </layout>
+               </property>
+               <property name="text">
+                <string>Pial Surface</string>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">radioGroup_BrainSurface</string>
+               </attribute>
               </widget>
              </item>
              <item>
@@ -1022,7 +1099,7 @@ font-weight:bold;
 </string>
                </property>
                <property name="text">
-                <string>Set Followup Interval</string>
+                <string>Followup Interval</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -1030,7 +1107,7 @@ font-weight:bold;
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label_7">
+              <widget class="QLabel" name="label_FollowupInterval">
                <property name="styleSheet">
                 <string notr="true">color:rgb(70,70,70);
 font: 12pt &quot;Arial&quot;;
@@ -1046,7 +1123,7 @@ border-width: 0px;</string>
               </widget>
              </item>
              <item>
-              <widget class="QSlider" name="horizontalSlider">
+              <widget class="QSlider" name="horizontalSlider_FollowupInterval">
                <property name="maximumSize">
                 <size>
                  <width>200</width>
@@ -1079,8 +1156,46 @@ border-color:rgb(150,150,150);
         }
 </string>
                </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>5</number>
+               </property>
+               <property name="pageStep">
+                <number>1</number>
+               </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_ApplyFollowupInterval">
+               <property name="styleSheet">
+                <string notr="true">QPushButton:hover#pushButton_ApplyFollowupInterval
+{
+background-color: #99b6a4;
+border-color:rgb(150,150,150);
+color: rgb(255, 255, 255);
+}
+QPushButton:pressed#pushButton_ApplyFollowupInterval {background-color:rgb(185,216,197);}
+QPushButton#pushButton_ApplyFollowupInterval
+{
+background-color: rgb(185,216,197);
+color: rgb(70,70,70);
+border-style: outset;
+border-width: 0px;
+border-color:rgb(220,220,220);
+border-radius: 4px;
+font: 9pt &quot;Arial&quot;;
+font-weight:200;
+padding:6px;
+border-style: solid;
+}</string>
+               </property>
+               <property name="text">
+                <string>Apply</string>
                </property>
               </widget>
              </item>
@@ -1092,7 +1207,7 @@ font-weight:bold;
 </string>
                </property>
                <property name="text">
-                <string>Visualization</string>
+                <string>Choose Visualization</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -1195,6 +1310,9 @@ QRadioButton::indicator:unchecked {
                </property>
                <property name="text">
                 <string>Absolute View</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>

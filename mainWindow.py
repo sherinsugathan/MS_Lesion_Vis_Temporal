@@ -154,6 +154,7 @@ class mainWindow(Qt.QMainWindow):
         self.pushButton_Compare.clicked.connect(self.compareDataAndUpdateSurface) # Attaching button click handler.
         #self.pushButton_IntensityAnalysis.clicked.connect(self.loadIntensityAnalysisPage) # Attaching button click handler for intensity analysis page.
         self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
+        self.horizontalSlider_FollowupInterval.valueChanged.connect(self.on_sliderChangedFollowupInterval)  # Attaching slider value changed handler for change in followup interval.
         self.horizontalSlider_Riso.valueChanged.connect(self.on_sliderChangedRiso) # Attaching slider value (Riso) changed handler.
         self.comboBox_LesionAttributes.currentTextChanged.connect(self.on_combobox_changed_LesionAttributes) # Attaching handler for lesion filter combobox selection change.
         self.comboBox_ProjectionMethods.currentTextChanged.connect(self.on_combobox_changed_ProjectionMethods) # Attaching handler for projection methods combobox selection change.
@@ -296,6 +297,13 @@ class mainWindow(Qt.QMainWindow):
         self.buttonGroupModalities.setExclusive(True)
         self.buttonGroupModalities.buttonClicked.connect(self.on_buttonGroupModalityChanged)
 
+        self.buttonGroupLesionView = QButtonGroup()
+        self.buttonGroupLesionView.addButton(self.radioButton_LesionMeshView)
+        self.buttonGroupLesionView.addButton(self.radioButton_LesionAbstractView)
+        self.buttonGroupLesionView.addButton(self.radioButton_LesionAbsoluteView)
+        self.buttonGroupLesionView.setExclusive(True)
+        self.buttonGroupLesionView.buttonClicked.connect(self.on_buttonGroupLesionViewChanged)
+
         # Hide some buttons (things here soon going to get removed/replaced.)
         self.horizontalSlider_Riso.hide()
         self.radioButton_T1.hide()
@@ -339,6 +347,7 @@ class mainWindow(Qt.QMainWindow):
         #print("i am called", pickedLesionID)
         currentTimeIndex = self.horizontalSlider_TimePoint.value()
         linkedLesionIds = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex)
+        #print(linkedLesionIds)
 
         lesionSurfaceArray = []
         rendererArray = []
@@ -356,10 +365,23 @@ class mainWindow(Qt.QMainWindow):
                 renderer.RemoveAllViewProps()
                 continue
             else:  # Add valid lesion to renderer.
-                for lesion in self.LesionActorList[currentTimeIndex - 2 + (i-1)]:
+                if i != 3:  # Set camera of middle renderer to the rest.
+                    renderer.SetActiveCamera(rendererCollection.GetItemAsObject(3).GetActiveCamera())
+                for lesion in self.LesionActorListForLesionView[currentTimeIndex - 2 + (i-1)]:
                     lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
                     #lesion.GetMapper().SetVertexShaderCode(vert)
                     #lesion.GetMapper().SetFragmentShaderCode(frag)
+                    if self.lesionViewStyle == 2:  # Contour/silhouette memoryview
+                        lesion.SetVisibility(False)
+                    if self.lesionViewStyle == 1:  # Abstract View
+                        lesion.SetVisibility(True)
+                        lesion.GetProperty().SetRepresentationToSurface()
+                    if self.lesionViewStyle == 0:  # Mesh View
+                        lesion.SetVisibility(True)
+                        lesion.GetProperty().SetRepresentationToWireframe()
+
+                    lesion.GetMapper().ScalarVisibilityOff()
+                    lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish highlight color
 
                     silhouette = vtk.vtkPolyDataSilhouette()
                     silhouette.SetInputData(lesion.GetMapper().GetInput())
@@ -371,12 +393,20 @@ class mainWindow(Qt.QMainWindow):
                     silhouetteActor = vtk.vtkActor()
                     silhouetteActor.SetMapper(silhouetteMapper)
                     silhouetteActor.GetProperty().SetColor(0.1, 0.1, 0.1)
-                    silhouetteActor.GetProperty().SetLineWidth(2)
+                    silhouetteActor.GetProperty().SetLineWidth(1)
+
 
                     if lesionID == linkedLesionIds[i-1] - 1:
-                        #renderer.AddActor(lesion)
+                        renderer.AddActor(lesion)
+                        renderer.UseHiddenLineRemovalOn() # To hide unnecessary back edge lines especially during wireframe display.
+                        self.lesionViewSurfaces.append(lesion)
+                        self.lesionViewSilhouettes.append(silhouetteActor)
                         renderer.AddActor(silhouetteActor)
+
                         #print("adding actor")
+
+
+
                 renderer.ResetCamera()
                 renderer.Render()
 
@@ -399,13 +429,24 @@ class mainWindow(Qt.QMainWindow):
 
             if itemIndex == temporalDataListLength-1:
                 linkedLesionIds[2] = temporalData[itemIndex][1]
-            if (itemIndex + 2) < temporalDataListLength:  # Check overflow towards right
+            # RIGHT ITEMS
+            if (itemIndex) < temporalDataListLength:
                 linkedLesionIds[2] = temporalData[itemIndex][1]
+            if (itemIndex + 1) < temporalDataListLength:
                 linkedLesionIds[3] = temporalData[itemIndex+1][1]
+            if (itemIndex + 2) < temporalDataListLength:
                 linkedLesionIds[4] = temporalData[itemIndex+2][1]
+
+            # if (itemIndex + 2) < temporalDataListLength:
+            #     linkedLesionIds[2] = temporalData[itemIndex][1]
+            #     linkedLesionIds[3] = temporalData[itemIndex+1][1]
+            #     linkedLesionIds[4] = temporalData[itemIndex+2][1]
+            # LEFT ITEMS
+            if (itemIndex - 1) >= 0:
+                linkedLesionIds[1] = temporalData[itemIndex - 1][1]
             if (itemIndex - 2) >= 0:
-                linkedLesionIds[0] = temporalData[itemIndex-1][1]
-                linkedLesionIds[1] = temporalData[itemIndex-2][1]
+                linkedLesionIds[0] = temporalData[itemIndex - 2][1]
+
 
 
             return linkedLesionIds   # Success
@@ -458,7 +499,7 @@ class mainWindow(Qt.QMainWindow):
     @pyqtSlot(QAbstractButton)
     def on_buttonGroupSurfaceChanged(self, btn):
         if(self.dataFolderInitialized == True):
-            if(self.buttonGroupSurfaces.checkedButton().text() == "White"):
+            if(self.buttonGroupSurfaces.checkedButton().text() == "WM Surface"):
                 self.renDual.RemoveActor(self.surfaceActors[3])
                 self.renDual.RemoveActor(self.surfaceActors[4])
                 self.renDual.AddActor(self.surfaceActors[1])
@@ -474,6 +515,31 @@ class mainWindow(Qt.QMainWindow):
                 self.surfaceActors[4].GetMapper().GetInput().GetPointData().SetActiveScalars("projection")
             self.irenDual.Render()
 
+    # Handler for lesion view change inside button group (lesion view)
+    @pyqtSlot(QAbstractButton)
+    def on_buttonGroupLesionViewChanged(self, btn):
+        if self.buttonGroupLesionView.checkedButton().text() == "Mesh View":
+            for lesionActor in self.lesionViewSurfaces:
+                lesionActor.SetVisibility(True)
+                lesionActor.GetProperty().SetRepresentationToWireframe()
+            for silhouetteActor in self.lesionViewSilhouettes:
+                silhouetteActor.SetVisibility(False)
+            self.lesionViewStyle = 0
+        if self.buttonGroupLesionView.checkedButton().text() == "Abstract View":
+            for lesionActor in self.lesionViewSurfaces:
+                lesionActor.SetVisibility(True)
+                lesionActor.GetProperty().SetRepresentationToSurface()
+            for silhouetteActor in self.lesionViewSilhouettes:
+                silhouetteActor.SetVisibility(False)
+            self.lesionViewStyle = 1
+        if self.buttonGroupLesionView.checkedButton().text() == "Absolute View":
+            for lesionActor in self.lesionViewSurfaces:
+                lesionActor.SetVisibility(False)
+            for silhouetteActor in self.lesionViewSilhouettes:
+                silhouetteActor.SetVisibility(True)
+            self.lesionViewStyle = 2
+        self.irenDual.Render()
+
     # Handler for mode change inside button group (modality)
     @pyqtSlot(QAbstractButton)
     def on_buttonGroupModalityChanged(self, btn):
@@ -485,8 +551,14 @@ class mainWindow(Qt.QMainWindow):
         for key in self.overlayDataMain.keys():
             overlayText = overlayText + "\n" + str(key) + ": " + str(self.overlayDataMain[key])
         self.textActorLesionStatistics.SetInput(overlayText)
+
+    def initializeAppVariables(self):
+        self.lesionViewStyle = 2  # 0: Mesh View  1: Abstract View 2: Absolute View
+        self.lesionViewSurfaces = []
+        self.lesionViewSilhouettes = []
         
     def renderData(self):
+        self.initializeAppVariables()
         Utils.smoothSurface(self.surfaceActors[0])
         self.dataCount = len(self.LesionActorList)
         self.spinBox_RangeMin.setMinimum(0)
@@ -697,10 +769,10 @@ class mainWindow(Qt.QMainWindow):
         self.axesActor.SetYPlusFaceText('A')
         self.axesActor.SetZMinusFaceText('I')
         self.axesActor.SetZPlusFaceText('S')
-        self.axesActor.GetTextEdgesProperty().SetColor(1.0,1.0,1.0)
+        self.axesActor.GetTextEdgesProperty().SetColor(1,1,1)
         self.axesActor.GetTextEdgesProperty().SetLineWidth(1)
-        #self.axesActor.GetCubeProperty().SetColor(0.7255, 0.8470, 0.7725)
-        self.axesActor.GetCubeProperty().SetColor(0.4, 0.4, 0.4)
+        self.axesActor.GetCubeProperty().SetColor(0.7255, 0.8470, 0.7725)
+        #self.axesActor.GetCubeProperty().SetColor(0.4, 0.4, 0.4)
         self.axes = vtk.vtkOrientationMarkerWidget()
         self.axes.SetOrientationMarker(self.axesActor)
         self.axes.SetViewport( 0.93, 0.9, 1.0, 1.0 )
@@ -717,8 +789,8 @@ class mainWindow(Qt.QMainWindow):
         self.axesActorDual.SetZPlusFaceText('S')
         self.axesActorDual.GetTextEdgesProperty().SetColor(1,1,1)
         self.axesActorDual.GetTextEdgesProperty().SetLineWidth(1)
-        #self.axesActorDual.GetCubeProperty().SetColor(0.7255, 0.8470, 0.7725)
-        self.axesActorDual.GetCubeProperty().SetColor(0.4, 0.4, 0.4)
+        self.axesActorDual.GetCubeProperty().SetColor(0.7255, 0.8470, 0.7725)
+        #self.axesActorDual.GetCubeProperty().SetColor(0.4, 0.4, 0.4)
         self.axesDual = vtk.vtkOrientationMarkerWidget()
         self.axesDual.SetOrientationMarker(self.axesActorDual)
         self.axesDual.SetViewport( 0.93, 0.9, 1.0, 1.0 )
@@ -1089,7 +1161,7 @@ class mainWindow(Qt.QMainWindow):
         ys = []
         self.dataArray = []
         self.graphLegendLabelList = []
-        print("node order", self.nodeOrderForGraph)
+        #print("node order", self.nodeOrderForGraph)
         for id in self.nodeOrderForGraph:
             #print("Node order", id)
             self.graphLegendLabelList.append(str(id))
@@ -1486,6 +1558,12 @@ class mainWindow(Qt.QMainWindow):
         #self.ren.ResetCamera()
         self.iren.Render()
 
+    # Handler for followup interval change.
+    @pyqtSlot()
+    def on_sliderChangedFollowupInterval(self):
+        sliderValue = self.horizontalSlider_FollowupInterval.value()
+        self.label_FollowupInterval.setText(str(sliderValue))
+
     # Handler for capturing the screenshot.
     @pyqtSlot()
     def on_click_CaptureScreeshot(self):
@@ -1577,11 +1655,12 @@ class mainWindow(Qt.QMainWindow):
         if self.folder:
             self.lineEdit_DatasetFolder.setText(self.folder)
             self.LesionActorList = [[] for i in range(81)]
+            self.LesionActorListForLesionView = [[] for i in range(81)]
             self.surfaceActors = []
             if(self.readThread != None):
                 self.readThread.terminate()
             self.readThread = QThread()
-            self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.surfaceActors, self.keyType, self.keyID)
+            self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.LesionActorListForLesionView, self.surfaceActors, self.keyType, self.keyID)
             self.worker.moveToThread(self.readThread)
             self.readThread.started.connect(self.worker.run)
             self.worker.progress.connect(self.reportProgress)
