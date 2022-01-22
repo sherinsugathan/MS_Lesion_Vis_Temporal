@@ -314,40 +314,12 @@ class mainWindow(Qt.QMainWindow):
         self.label_6.hide()
 
     def updateContourComparisonView(self, pickedLesionID):
-        vert = """
-            //VTK::System::Dec
-            attribute vec4 vertexMC;
-            attribute vec3 normalMC;
-            uniform mat3 normalMatrix;
-            uniform mat4 MCDCMatrix;
-            uniform mat4 MCVCMatrix;  // Combined model to view transform.
-            varying vec3 normalVCVSOutput2;
-            varying vec4 vertexVCVSOutput2;
-            attribute vec2 tcoordMC;
-            out vec3 color;
-            varying vec2 tcoordVCVSOutput;
-            void main () {
-              normalVCVSOutput2 = normalMatrix * normalMC;
-              tcoordVCVSOutput = tcoordMC;
-              vertexVCVSOutput2 = MCVCMatrix * vertexMC;
-              gl_Position = MCDCMatrix * vertexMC;
-            }
-        """
-        frag = """
-           //VTK::System::Dec
-           varying vec4 vColor;
-           in vec3 color;
-           void main()
-           {
-               gl_FragColor = vec4(1.0,0.0,0.0,0.5);
-               //gl_FragColor = vColor;
-            }
-        """
-
         #print("i am called", pickedLesionID)
         currentTimeIndex = self.horizontalSlider_TimePoint.value()
-        linkedLesionIds = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex)
-        #print(linkedLesionIds)
+        linkedLesionIds, linkedLesionIdsForShifting = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex)
+        #linkedLesionIds2 = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex-1)
+        #print("ids1", linkedLesionIds)
+        #print("ids2", linkedLesionIdsForShifting)
 
         lesionSurfaceArray = []
         rendererArray = []
@@ -356,11 +328,14 @@ class mainWindow(Qt.QMainWindow):
         currentTimeRenderer = rendererCollection.GetItemAsObject(2)
         #print(rendererCollection.GetNumberOfItems())  # TODO: Check why this is giving 7!!
 
+        # REAL TIMELINE DATA ADDACTOR AND RENDER
         for i in range(rendererCollection.GetNumberOfItems()-1):
             if i == 0:  # ignore brain surface renderer
                 continue
             renderer = rendererCollection.GetItemAsObject(i)
             renderer.RemoveAllViewProps()
+
+            # REAL TIMELINE DATA ADDACTOR AND RENDER
             if linkedLesionIds[i-1] is None:
                 renderer.RemoveAllViewProps()
                 continue
@@ -369,8 +344,6 @@ class mainWindow(Qt.QMainWindow):
                     renderer.SetActiveCamera(rendererCollection.GetItemAsObject(3).GetActiveCamera())
                 for lesion in self.LesionActorListForLesionView[currentTimeIndex - 2 + (i-1)]:
                     lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
-                    #lesion.GetMapper().SetVertexShaderCode(vert)
-                    #lesion.GetMapper().SetFragmentShaderCode(frag)
                     if self.lesionViewStyle == 2:  # Contour/silhouette memoryview
                         lesion.SetVisibility(False)
                     if self.lesionViewStyle == 1:  # Abstract View
@@ -401,14 +374,58 @@ class mainWindow(Qt.QMainWindow):
                         renderer.UseHiddenLineRemovalOn() # To hide unnecessary back edge lines especially during wireframe display.
                         self.lesionViewSurfaces.append(lesion)
                         self.lesionViewSilhouettes.append(silhouetteActor)
+                        # print("adding actor")
                         renderer.AddActor(silhouetteActor)
-
-                        #print("adding actor")
-
-
 
                 renderer.ResetCamera()
                 renderer.Render()
+
+        # SHIFTED TIMELINE DATA ADDACTOR AND RENDER
+        for i in range(rendererCollection.GetNumberOfItems()-1):
+            if i == 0:  # ignore brain surface renderer
+                continue
+            renderer = rendererCollection.GetItemAsObject(i)
+
+            if linkedLesionIdsForShifting[i - 1] is None:
+                continue
+
+            for lesion in self.LesionActorListForLesionView[currentTimeIndex - 1 - 2 + (i - 1)]: # First subtraction(-1) used to shift reading starting 1 position left.
+                lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
+                if self.lesionViewStyle == 2:  # Contour/silhouette memoryview
+                    lesion.SetVisibility(False)
+                if self.lesionViewStyle == 1:  # Abstract View
+                    lesion.SetVisibility(True)
+                    lesion.GetProperty().SetRepresentationToSurface()
+                if self.lesionViewStyle == 0:  # Mesh View
+                    lesion.SetVisibility(True)
+                    lesion.GetProperty().SetRepresentationToWireframe()
+
+                lesion.GetMapper().ScalarVisibilityOff()
+                lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish highlight color
+
+                silhouette = vtk.vtkPolyDataSilhouette()
+                silhouette.SetInputData(lesion.GetMapper().GetInput())
+                silhouette.SetCamera(renderer.GetActiveCamera())
+                silhouette.SetEnableFeatureAngle(0)
+
+                silhouetteMapper = vtk.vtkPolyDataMapper()
+                silhouetteMapper.SetInputConnection(silhouette.GetOutputPort())
+                silhouetteActor = vtk.vtkActor()
+                silhouetteActor.SetMapper(silhouetteMapper)
+                silhouetteActor.GetProperty().SetColor(1.0, 0.0, 0.0)  # Red Color
+                silhouetteActor.GetProperty().SetLineWidth(1)
+
+                if linkedLesionIdsForShifting[i - 1] is not None: # Sometimes center elements can be None here. Avoiding processing that.
+                    if lesionID == linkedLesionIdsForShifting[i - 1] - 1: # First -1 to adjust position in array and second -1 to fix lesion number.
+                        renderer.AddActor(lesion)
+                        renderer.UseHiddenLineRemovalOn()  # To hide unnecessary back edge lines especially during wireframe display.
+                        self.lesionViewSurfaces.append(lesion)
+                        self.lesionViewSilhouettes.append(silhouetteActor)
+                        # print("adding actor")
+                        renderer.AddActor(silhouetteActor)
+
+
+            renderer.Render()
 
         self.irenDual.Render()
 
@@ -417,6 +434,7 @@ class mainWindow(Qt.QMainWindow):
     def getLinkedLesionIDFromLeftAndRight(self, currentLesionID, currentTimeIndex):
         nodeIDList = list(self.G.nodes)
         linkedLesionIds = [None] * 5
+        linkedLesionIdsForShifting = [None] * 6
         for id in nodeIDList:
             timeList = self.G.nodes[id]["time"]
             labelList = self.G.nodes[id]["lesionLabel"]
@@ -437,20 +455,18 @@ class mainWindow(Qt.QMainWindow):
             if (itemIndex + 2) < temporalDataListLength:
                 linkedLesionIds[4] = temporalData[itemIndex+2][1]
 
-            # if (itemIndex + 2) < temporalDataListLength:
-            #     linkedLesionIds[2] = temporalData[itemIndex][1]
-            #     linkedLesionIds[3] = temporalData[itemIndex+1][1]
-            #     linkedLesionIds[4] = temporalData[itemIndex+2][1]
             # LEFT ITEMS
             if (itemIndex - 1) >= 0:
                 linkedLesionIds[1] = temporalData[itemIndex - 1][1]
             if (itemIndex - 2) >= 0:
                 linkedLesionIds[0] = temporalData[itemIndex - 2][1]
+            if (itemIndex - 3) >= 0:
+                linkedLesionIdsForShifting[0] = temporalData[itemIndex - 3][1]
 
 
-
-            return linkedLesionIds   # Success
-        return None  # Failure
+            linkedLesionIdsForShifting[1:6] = linkedLesionIds
+            return linkedLesionIds, linkedLesionIdsForShifting[0:5]   # Success
+        return [None] * 5  # Failure
 
     def spinBoxMinChanged(self, val):
         if(val>=self.spinBox_RangeMax.value()):
