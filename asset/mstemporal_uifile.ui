@@ -1309,7 +1309,7 @@ QRadioButton::indicator:unchecked {
 }</string>
                </property>
                <property name="text">
-                <string>Absolute View</string>
+                <string>Contour View</string>
                </property>
                <property name="checked">
                 <bool>true</bool>

@@ -16,11 +16,12 @@ import matplotlib.pyplot as plt
 class ReadThread(QObject): 
     progress = pyqtSignal(int)
     finished = pyqtSignal()
-    def __init__(self, folder_name, actorList, actorListForLesionView, SurfacesList, keyType, keyID, parent=None):
+    def __init__(self, folder_name, actorList, actorListForLesionView, actorListForLesionViewOverlay, SurfacesList, keyType, keyID, parent=None):
         super(ReadThread, self).__init__(parent) 
         self.read_folder_name = folder_name + "\\surfaces\\lesions\\"
         self.surfaceList = actorList
         self.surfaceListForLesionView = actorListForLesionView
+        self.surfaceListForLesionViewOverlay = actorListForLesionViewOverlay
         self.surfaceActor = SurfacesList
         self.keyType = keyType
         self.keyID = keyID
@@ -48,6 +49,11 @@ class ReadThread(QObject):
                     mapper2.SetScalarModeToUseCellData()
                     mapper2.Update()
 
+                    mapper3 = vtk.vtkOpenGLPolyDataMapper()
+                    mapper3.SetInputData(polyData)
+                    mapper3.SetScalarModeToUseCellData()
+                    mapper3.Update()
+
                     info = vtk.vtkInformation()
                     info.Set(self.keyType, "lesion")
                     info.Set(self.keyID, str(blockIndex))
@@ -55,6 +61,10 @@ class ReadThread(QObject):
                     info2 = vtk.vtkInformation()
                     info2.Set(self.keyType, "lesion")
                     info2.Set(self.keyID, str(blockIndex))
+
+                    info3 = vtk.vtkInformation()
+                    info3.Set(self.keyType, "lesion")
+                    info3.Set(self.keyID, str(blockIndex))
 
                     actor = vtk.vtkActor()
                     actor.SetMapper(mapper)
@@ -74,8 +84,18 @@ class ReadThread(QObject):
                     actor2.GetMapper().ScalarVisibilityOff()
                     mapper2.Update()
 
+                    actor3 = vtk.vtkActor()
+                    actor3.SetMapper(mapper3)
+                    actor3.GetProperty().SetColor(0.6196078431372549, 0.7372549019607843, 0.8549019607843137)
+                    #actor2.GetProperty().SetColor(0.9411764705882353, 0.2313725490196078, 0.1254901960784314)
+                    actor3.GetProperty().SetInformation(info3)
+                    smoothSurface(actor3)
+                    actor3.GetMapper().ScalarVisibilityOff()
+                    mapper3.Update()
+
                     self.surfaceList[i].append(actor)
                     self.surfaceListForLesionView[i].append(actor2)
+                    self.surfaceListForLesionViewOverlay[i].append(actor3)
             self.progress.emit(int((i/80)*100))
         #self.surfaceActor.append(self.loadSurfaces()) # Load ventricle mesh
         self.loadSurfaces()
@@ -103,7 +123,8 @@ class ReadThread(QObject):
             if(fileName == "ventricleMesh"):
                 actor.GetProperty().SetColor(0.5607843137254902, 0.7058823529411765, 0.5725490196078431) # green
             else:
-                actor.GetProperty().SetColor(1.0, 1.0, 1.0)
+                actor.GetProperty().SetColor(0.9961, 0.6980, 0.2980)
+                actor.GetProperty().SetOpacity(0.1)
             actor.GetProperty().SetInformation(info)
             self.surfaceActor.append(actor)
         return

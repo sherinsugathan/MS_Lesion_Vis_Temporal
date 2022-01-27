@@ -208,6 +208,13 @@ class mainWindow(Qt.QMainWindow):
         self.ren4.SetBackground(colorsLesionRenderers.GetColor3d(ren_bkg[4]))
         self.ren5.SetBackground(colorsLesionRenderers.GetColor3d(ren_bkg[5]))
 
+        # Depth peeling setup
+        # self.vtkWidgetDual.GetRenderWindow().SetAlphaBitPlanes(True)
+        # self.vtkWidgetDual.GetRenderWindow().SetMultiSamples(0)
+        # self.renDual.SetUseDepthPeeling(True)
+        # self.renDual.SetMaximumNumberOfPeels(4)
+        # self.renDual.SetOcclusionRatio(0.0)
+
         self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.renDual)
         self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.ren1)
         self.vtkWidgetDual.GetRenderWindow().AddRenderer(self.ren2)
@@ -284,6 +291,20 @@ class mainWindow(Qt.QMainWindow):
         self.textActorLesionStatistics.GetTextProperty().SetLineSpacing(1.6)
         self.textActorLesionStatistics.GetTextProperty().SetColor(0.1,0.1,0.1)
 
+        self.textActorsLesionView = []
+        for i in range(5):
+            self.textActorLV = vtk.vtkTextActor()
+            self.textActorLV.SetPosition(1, 0)
+            self.textActorLV.UseBorderAlignOff()
+            self.textActorLV.GetTextProperty().SetFontFamily(4)
+            self.textActorLV.GetTextProperty().SetFontFile("asset\\arial.ttf")
+            self.textActorLV.GetTextProperty().SetFontSize(12)
+            self.textActorLV.GetTextProperty().ShadowOn()
+            self.textActorLV.GetTextProperty().SetLineSpacing(1.6)
+            self.textActorLV.GetTextProperty().SetColor(0.1, 0.1, 0.1)
+            self.textActorLV.SetInput("")
+            self.textActorsLesionView.append(self.textActorLV)
+
         self.buttonGroupSurfaces = QButtonGroup()
         self.buttonGroupSurfaces.addButton(self.radioButton_White)
         self.buttonGroupSurfaces.addButton(self.radioButton_Inflated)
@@ -321,12 +342,15 @@ class mainWindow(Qt.QMainWindow):
         #print("ids1", linkedLesionIds)
         #print("ids2", linkedLesionIdsForShifting)
 
+
         lesionSurfaceArray = []
         rendererArray = []
 
         rendererCollection = self.irenDual.GetRenderWindow().GetRenderers()
-        currentTimeRenderer = rendererCollection.GetItemAsObject(2)
+        currentTimeRenderer = rendererCollection.GetItemAsObject(3)
         #print(rendererCollection.GetNumberOfItems())  # TODO: Check why this is giving 7!!
+
+        self.updateIndividualLesionViewOverlayText(rendererCollection, currentTimeIndex)
 
         # REAL TIMELINE DATA ADDACTOR AND RENDER
         for i in range(rendererCollection.GetNumberOfItems()-1):
@@ -348,34 +372,41 @@ class mainWindow(Qt.QMainWindow):
                         lesion.SetVisibility(False)
                     if self.lesionViewStyle == 1:  # Abstract View
                         lesion.SetVisibility(True)
+                        lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish highlight color
                         lesion.GetProperty().SetRepresentationToSurface()
                     if self.lesionViewStyle == 0:  # Mesh View
                         lesion.SetVisibility(True)
-                        lesion.GetProperty().SetRepresentationToWireframe()
+                        lesion.GetProperty().SetColor(0.1961, 0.2863, 0.4588)  # Dark blue color.
+                        lesion.GetProperty().SetRepresentationToSurface()
 
                     lesion.GetMapper().ScalarVisibilityOff()
-                    lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish highlight color
+                    #lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish highlight color
 
                     silhouette = vtk.vtkPolyDataSilhouette()
                     silhouette.SetInputData(lesion.GetMapper().GetInput())
                     silhouette.SetCamera(renderer.GetActiveCamera())
-                    silhouette.SetEnableFeatureAngle(0)
+                    silhouette.SetEnableFeatureAngle(45)
 
                     silhouetteMapper = vtk.vtkPolyDataMapper()
                     silhouetteMapper.SetInputConnection(silhouette.GetOutputPort())
                     silhouetteActor = vtk.vtkActor()
                     silhouetteActor.SetMapper(silhouetteMapper)
                     silhouetteActor.GetProperty().SetColor(0.1, 0.1, 0.1)
-                    silhouetteActor.GetProperty().SetLineWidth(1)
+                    silhouetteActor.GetProperty().SetLineWidth(2)
 
 
                     if lesionID == linkedLesionIds[i-1] - 1:
                         renderer.AddActor(lesion)
-                        renderer.UseHiddenLineRemovalOn() # To hide unnecessary back edge lines especially during wireframe display.
+                        #renderer.UseHiddenLineRemovalOn() # To hide unnecessary back edge lines especially during wireframe display.
                         self.lesionViewSurfaces.append(lesion)
                         self.lesionViewSilhouettes.append(silhouetteActor)
                         # print("adding actor")
                         renderer.AddActor(silhouetteActor)
+                        if self.lesionViewStyle == 2:  # Contour View
+                            silhouetteActor.SetVisibility(True)
+                        else:
+                            silhouetteActor.SetVisibility(False)
+                        renderer.AddActor(self.textActorsLesionView[i-1])
 
                 renderer.ResetCamera()
                 renderer.Render()
@@ -389,7 +420,7 @@ class mainWindow(Qt.QMainWindow):
             if linkedLesionIdsForShifting[i - 1] is None:
                 continue
 
-            for lesion in self.LesionActorListForLesionView[currentTimeIndex - 1 - 2 + (i - 1)]: # First subtraction(-1) used to shift reading starting 1 position left.
+            for lesion in self.LesionActorListForLesionViewOverlay[currentTimeIndex - 1 - 2 + (i - 1)]: # First subtraction(-1) used to shift reading starting 1 position left.
                 lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
                 if self.lesionViewStyle == 2:  # Contour/silhouette memoryview
                     lesion.SetVisibility(False)
@@ -399,9 +430,11 @@ class mainWindow(Qt.QMainWindow):
                 if self.lesionViewStyle == 0:  # Mesh View
                     lesion.SetVisibility(True)
                     lesion.GetProperty().SetRepresentationToWireframe()
+                    lesion.GetProperty().SetColor(1.0, 0, 0)
+                    lesion.GetProperty().SetLineWidth(2)
 
                 lesion.GetMapper().ScalarVisibilityOff()
-                lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish highlight color
+                #lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish highlight color
 
                 silhouette = vtk.vtkPolyDataSilhouette()
                 silhouette.SetInputData(lesion.GetMapper().GetInput())
@@ -413,20 +446,42 @@ class mainWindow(Qt.QMainWindow):
                 silhouetteActor = vtk.vtkActor()
                 silhouetteActor.SetMapper(silhouetteMapper)
                 silhouetteActor.GetProperty().SetColor(1.0, 0.0, 0.0)  # Red Color
-                silhouetteActor.GetProperty().SetLineWidth(1)
+                silhouetteActor.GetProperty().SetLineWidth(2)
 
                 if linkedLesionIdsForShifting[i - 1] is not None: # Sometimes center elements can be None here. Avoiding processing that.
                     if lesionID == linkedLesionIdsForShifting[i - 1] - 1: # First -1 to adjust position in array and second -1 to fix lesion number.
                         renderer.AddActor(lesion)
                         renderer.UseHiddenLineRemovalOn()  # To hide unnecessary back edge lines especially during wireframe display.
-                        self.lesionViewSurfaces.append(lesion)
+                        self.lesionViewSurfacesOverlay.append(lesion)
                         self.lesionViewSilhouettes.append(silhouetteActor)
                         # print("adding actor")
                         renderer.AddActor(silhouetteActor)
+                        if self.lesionViewStyle == 2:  # Contour View
+                            silhouetteActor.SetVisibility(True)
+                        else:
+                            silhouetteActor.SetVisibility(False)
 
 
             renderer.Render()
 
+        self.irenDual.Render()
+        # Append current selected lesion data to the brain surface context view.
+        self.addSelectedLesiontoBrainContextDisplay(currentTimeRenderer)
+
+    def addSelectedLesiontoBrainContextDisplay(self, currentTimeRenderer):
+        actorCollection = currentTimeRenderer.GetActors()
+        numberOfActors = actorCollection.GetNumberOfItems()
+
+        for actor in self.focusLesionActors:
+            self.renDual.RemoveActor(actor)
+
+        self.focusLesionActors = []
+
+        for i in range(numberOfActors):
+            self.renDual.AddActor(actorCollection.GetItemAsObject(i))
+            self.focusLesionActors.append(actorCollection.GetItemAsObject(i))
+
+        self.renDual.AddActor(self.surfaceActors[0])
         self.irenDual.Render()
 
 
@@ -462,7 +517,6 @@ class mainWindow(Qt.QMainWindow):
                 linkedLesionIds[0] = temporalData[itemIndex - 2][1]
             if (itemIndex - 3) >= 0:
                 linkedLesionIdsForShifting[0] = temporalData[itemIndex - 3][1]
-
 
             linkedLesionIdsForShifting[1:6] = linkedLesionIds
             return linkedLesionIds, linkedLesionIdsForShifting[0:5]   # Success
@@ -537,7 +591,13 @@ class mainWindow(Qt.QMainWindow):
         if self.buttonGroupLesionView.checkedButton().text() == "Mesh View":
             for lesionActor in self.lesionViewSurfaces:
                 lesionActor.SetVisibility(True)
+                lesionActor.GetProperty().SetRepresentationToSurface()
+                lesionActor.GetProperty().SetColor(0.1961, 0.2863, 0.4588)  # Dark blue color.
+            for lesionActor in self.lesionViewSurfacesOverlay:
+                lesionActor.SetVisibility(True)
                 lesionActor.GetProperty().SetRepresentationToWireframe()
+                lesionActor.GetProperty().SetColor(1.0, 0, 0)  # red color
+                lesionActor.GetProperty().SetLineWidth(2)
             for silhouetteActor in self.lesionViewSilhouettes:
                 silhouetteActor.SetVisibility(False)
             self.lesionViewStyle = 0
@@ -545,11 +605,19 @@ class mainWindow(Qt.QMainWindow):
             for lesionActor in self.lesionViewSurfaces:
                 lesionActor.SetVisibility(True)
                 lesionActor.GetProperty().SetRepresentationToSurface()
+                lesionActor.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish highlight color
+            for lesionActor in self.lesionViewSurfacesOverlay:
+                lesionActor.SetVisibility(True)
+                lesionActor.GetProperty().SetRepresentationToSurface()
+                lesionActor.GetProperty().SetColor(1.0, 0, 0)  # red color
+                lesionActor.GetProperty().SetLineWidth(2)
             for silhouetteActor in self.lesionViewSilhouettes:
                 silhouetteActor.SetVisibility(False)
             self.lesionViewStyle = 1
-        if self.buttonGroupLesionView.checkedButton().text() == "Absolute View":
+        if self.buttonGroupLesionView.checkedButton().text() == "Contour View":
             for lesionActor in self.lesionViewSurfaces:
+                lesionActor.SetVisibility(False)
+            for lesionActor in self.lesionViewSurfacesOverlay:
                 lesionActor.SetVisibility(False)
             for silhouetteActor in self.lesionViewSilhouettes:
                 silhouetteActor.SetVisibility(True)
@@ -568,10 +636,19 @@ class mainWindow(Qt.QMainWindow):
             overlayText = overlayText + "\n" + str(key) + ": " + str(self.overlayDataMain[key])
         self.textActorLesionStatistics.SetInput(overlayText)
 
+    def updateIndividualLesionViewOverlayText(self, rendererCollection, currentTimeIndex):
+        overlayLabels = np.arange(currentTimeIndex-2, currentTimeIndex + 3)
+        for i in range(1, rendererCollection.GetNumberOfItems() - 1):
+            renderer = rendererCollection.GetItemAsObject(i)
+            self.textActorsLesionView[i-1].SetInput(str(overlayLabels[i-1]))
+            renderer.Render()
+
     def initializeAppVariables(self):
-        self.lesionViewStyle = 2  # 0: Mesh View  1: Abstract View 2: Absolute View
+        self.lesionViewStyle = 2  # 0: Mesh View  1: Abstract View 2: Contour View
         self.lesionViewSurfaces = []
+        self.lesionViewSurfacesOverlay = []
         self.lesionViewSilhouettes = []
+        self.focusLesionActors = []
         
     def renderData(self):
         self.initializeAppVariables()
@@ -592,6 +669,24 @@ class mainWindow(Qt.QMainWindow):
         self.iren.Render()
         openglRendererInUse = self.ren.GetRenderWindow().ReportCapabilities().splitlines()[1].split(":")[1].strip()
         self.textEdit_Information.append("GPU: " + str(openglRendererInUse))
+
+        # Read cras translation for translating brain surfaces.
+        translationFilePath = self.folder + "\\meta\\cras.txt"
+        print(translationFilePath)
+        f = open(translationFilePath, "r")
+        t_vector = []
+        for t in f:
+            t_vector.append(t)
+        t_vector = list(map(float, t_vector))
+        transform = vtk.vtkTransform()
+        transform.PostMultiply()
+        transform.Translate(t_vector[0], t_vector[1], t_vector[2])
+        f.close()
+
+        self.surfaceActors[1].SetUserTransform(transform) # transform white matter.
+        self.surfaceActors[2].SetUserTransform(transform) # transform white matter
+        self.surfaceActors[3].SetUserTransform(transform) # transform pial surface
+        self.surfaceActors[4].SetUserTransform(transform) # transform pial surface
 
         self.renDual.AddActor(self.surfaceActors[1])
         self.renDual.AddActor(self.surfaceActors[2])
@@ -1672,11 +1767,12 @@ class mainWindow(Qt.QMainWindow):
             self.lineEdit_DatasetFolder.setText(self.folder)
             self.LesionActorList = [[] for i in range(81)]
             self.LesionActorListForLesionView = [[] for i in range(81)]
+            self.LesionActorListForLesionViewOverlay = [[] for i in range(81)]
             self.surfaceActors = []
             if(self.readThread != None):
                 self.readThread.terminate()
             self.readThread = QThread()
-            self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.LesionActorListForLesionView, self.surfaceActors, self.keyType, self.keyID)
+            self.worker = Utils.ReadThread(self.folder, self.LesionActorList, self.LesionActorListForLesionView, self.LesionActorListForLesionViewOverlay, self.surfaceActors, self.keyType, self.keyID)
             self.worker.moveToThread(self.readThread)
             self.readThread.started.connect(self.worker.run)
             self.worker.progress.connect(self.reportProgress)
