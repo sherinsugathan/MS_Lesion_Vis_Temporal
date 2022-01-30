@@ -334,7 +334,7 @@ class mainWindow(Qt.QMainWindow):
         self.label_Riso.hide()
         self.label_6.hide()
 
-    def updateContourComparisonView(self, pickedLesionID):
+    def updateContourComparisonView(self, pickedLesionID, camResetRequired = True):
         #print("i am called", pickedLesionID)
         currentTimeIndex = self.horizontalSlider_TimePoint.value()
         linkedLesionIds, linkedLesionIdsForShifting = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex)
@@ -433,7 +433,8 @@ class mainWindow(Qt.QMainWindow):
                             silhouetteActor.SetVisibility(False)
                         renderer.AddActor(self.textActorsLesionView[i-1])
 
-                renderer.ResetCamera()
+                if camResetRequired is True:
+                    renderer.ResetCamera()
                 renderer.Render()
 
         # SHIFTED TIMELINE DATA ADDACTOR AND RENDER
@@ -683,16 +684,11 @@ class mainWindow(Qt.QMainWindow):
         self.textActorLesionStatistics.SetInput(overlayText)
 
     def updateIndividualLesionViewOverlayText(self, rendererCollection, currentTimeIndex, lesionTimeIndex):
-        #overlayLabels = np.arange(currentTimeIndex-2, currentTimeIndex + 3)
-
         for i in range(1, rendererCollection.GetNumberOfItems() - 1):
             if lesionTimeIndex[i-1] is not None:
                 renderer = rendererCollection.GetItemAsObject(i)
                 self.textActorsLesionView[i - 1].SetInput(str(lesionTimeIndex[i - 1]))
                 renderer.Render()
-            #renderer = rendererCollection.GetItemAsObject(i)
-            #self.textActorsLesionView[i-1].SetInput(str(overlayLabels[i-1]))
-            #renderer.Render()
 
     def initializeAppVariables(self):
         self.lesionViewStyle = 2  # 0: Mesh View  1: Abstract View 2: Contour View
@@ -1724,7 +1720,7 @@ class mainWindow(Qt.QMainWindow):
     @pyqtSlot()
     def on_sliderChangedFollowupInterval(self):
         sliderValue = self.horizontalSlider_FollowupInterval.value()
-        self.updateContourComparisonView(self.userPickedLesionID)
+        self.updateContourComparisonView(self.userPickedLesionID, False)
         self.label_FollowupInterval.setText(str(sliderValue))
 
     # Handler for capturing the screenshot.
