@@ -339,9 +339,9 @@ class mainWindow(Qt.QMainWindow):
         currentTimeIndex = self.horizontalSlider_TimePoint.value()
         linkedLesionIds, linkedLesionIdsForShifting = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex)
         #linkedLesionIds2 = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex-1)
-        #print("ids1", linkedLesionIds)
-        #print("ids2", linkedLesionIdsForShifting)
-
+        print("ids1", linkedLesionIds)
+        print("ids2", linkedLesionIdsForShifting)
+        followupInterval = self.horizontalSlider_FollowupInterval.value()
 
         lesionSurfaceArray = []
         rendererArray = []
@@ -350,7 +350,24 @@ class mainWindow(Qt.QMainWindow):
         currentTimeRenderer = rendererCollection.GetItemAsObject(3)
         #print(rendererCollection.GetNumberOfItems())  # TODO: Check why this is giving 7!!
 
-        self.updateIndividualLesionViewOverlayText(rendererCollection, currentTimeIndex)
+        lesionTimeIndex = [None] * 5
+        lesionTimeIndex[0] = currentTimeIndex - (2 * followupInterval)
+        lesionTimeIndex[1] = currentTimeIndex - (1 * followupInterval)
+        lesionTimeIndex[2] = currentTimeIndex
+        lesionTimeIndex[3] = currentTimeIndex + (1 * followupInterval)
+        lesionTimeIndex[4] = currentTimeIndex + (2 * followupInterval)
+
+        print("Lesion time index is", lesionTimeIndex)
+
+        self.updateIndividualLesionViewOverlayText(rendererCollection, currentTimeIndex, lesionTimeIndex)
+
+        if lesionTimeIndex[3] > self.dataCount:
+            lesionTimeIndex[3] = None
+        if(lesionTimeIndex[4] > self.dataCount):
+            lesionTimeIndex[4] = None
+
+        print("Lesion Time Index", lesionTimeIndex)
+
 
         # REAL TIMELINE DATA ADDACTOR AND RENDER
         for i in range(rendererCollection.GetNumberOfItems()-1):
@@ -366,7 +383,15 @@ class mainWindow(Qt.QMainWindow):
             else:  # Add valid lesion to renderer.
                 if i != 3:  # Set camera of middle renderer to the rest.
                     renderer.SetActiveCamera(rendererCollection.GetItemAsObject(3).GetActiveCamera())
-                for lesion in self.LesionActorListForLesionView[currentTimeIndex - 2 + (i-1)]:
+                print("i value is", i)
+                print("evaluation value is", [currentTimeIndex - 2 + (i-1)])
+                print("current time index is", currentTimeIndex)
+                #for lesion in self.LesionActorListForLesionView[currentTimeIndex - 2 + (i-1)]:
+                #print("data count", self.dataCount)
+                print("timeindex mine", lesionTimeIndex[i - 1])
+                if lesionTimeIndex[i - 1] == None:
+                    continue
+                for lesion in self.LesionActorListForLesionView[lesionTimeIndex[i-1]]:
                     lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
                     if self.lesionViewStyle == 2:  # Contour/silhouette memoryview
                         lesion.SetVisibility(False)
@@ -419,8 +444,10 @@ class mainWindow(Qt.QMainWindow):
 
             if linkedLesionIdsForShifting[i - 1] is None:
                 continue
-
-            for lesion in self.LesionActorListForLesionViewOverlay[currentTimeIndex - 1 - 2 + (i - 1)]: # First subtraction(-1) used to shift reading starting 1 position left.
+            if lesionTimeIndex[i - 2] == None:
+                continue
+            #for lesion in self.LesionActorListForLesionViewOverlay[currentTimeIndex - 1 - 2 + (i - 1)]:  # First subtraction(-1) used to shift reading starting 1 position left.
+            for lesion in self.LesionActorListForLesionViewOverlay[lesionTimeIndex[i - 2]]:
                 lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
                 if self.lesionViewStyle == 2:  # Contour/silhouette memoryview
                     lesion.SetVisibility(False)
@@ -487,6 +514,7 @@ class mainWindow(Qt.QMainWindow):
 
     # Given lesion ID and current time step, extract n number of lesion IDs from left and right
     def getLinkedLesionIDFromLeftAndRight(self, currentLesionID, currentTimeIndex):
+        followupInterval = self.horizontalSlider_FollowupInterval.value()
         nodeIDList = list(self.G.nodes)
         linkedLesionIds = [None] * 5
         linkedLesionIdsForShifting = [None] * 6
@@ -502,21 +530,39 @@ class mainWindow(Qt.QMainWindow):
 
             if itemIndex == temporalDataListLength-1:
                 linkedLesionIds[2] = temporalData[itemIndex][1]
+
+            print("#########################################:")
             # RIGHT ITEMS
             if (itemIndex) < temporalDataListLength:
                 linkedLesionIds[2] = temporalData[itemIndex][1]
-            if (itemIndex + 1) < temporalDataListLength:
-                linkedLesionIds[3] = temporalData[itemIndex+1][1]
-            if (itemIndex + 2) < temporalDataListLength:
-                linkedLesionIds[4] = temporalData[itemIndex+2][1]
+            if (itemIndex + (followupInterval * 1)) < temporalDataListLength:
+                linkedLesionIds[3] = temporalData[itemIndex+(followupInterval * 1)][1]
+            if (itemIndex + (followupInterval * 2)) < temporalDataListLength:
+                linkedLesionIds[4] = temporalData[itemIndex+(followupInterval * 2)][1]
 
             # LEFT ITEMS
-            if (itemIndex - 1) >= 0:
-                linkedLesionIds[1] = temporalData[itemIndex - 1][1]
-            if (itemIndex - 2) >= 0:
-                linkedLesionIds[0] = temporalData[itemIndex - 2][1]
-            if (itemIndex - 3) >= 0:
-                linkedLesionIdsForShifting[0] = temporalData[itemIndex - 3][1]
+            if (itemIndex - (followupInterval * 1)) >= 0:
+                linkedLesionIds[1] = temporalData[itemIndex - (followupInterval * 1)][1]
+            if (itemIndex - (followupInterval * 2)) >= 0:
+                linkedLesionIds[0] = temporalData[itemIndex - (followupInterval * 2)][1]
+            if (itemIndex - (followupInterval * 3)) >= 0:
+                linkedLesionIdsForShifting[0] = temporalData[itemIndex - (followupInterval * 3)][1]
+
+            # # RIGHT ITEMS
+            # if (itemIndex) < temporalDataListLength:
+            #     linkedLesionIds[2] = temporalData[itemIndex][1]
+            # if itemIndex + 1 < temporalDataListLength:
+            #     linkedLesionIds[3] = temporalData[itemIndex+1][1]
+            # if itemIndex + 2 < temporalDataListLength:
+            #     linkedLesionIds[4] = temporalData[itemIndex+2][1]
+            #
+            # # LEFT ITEMS
+            # if (itemIndex - 1) >= 0:
+            #     linkedLesionIds[1] = temporalData[itemIndex - 1][1]
+            # if (itemIndex - 2) >= 0:
+            #     linkedLesionIds[0] = temporalData[itemIndex - 2][1]
+            # if (itemIndex - 3) >= 0:
+            #     linkedLesionIdsForShifting[0] = temporalData[itemIndex - 3][1]
 
             linkedLesionIdsForShifting[1:6] = linkedLesionIds
             return linkedLesionIds, linkedLesionIdsForShifting[0:5]   # Success
@@ -636,12 +682,17 @@ class mainWindow(Qt.QMainWindow):
             overlayText = overlayText + "\n" + str(key) + ": " + str(self.overlayDataMain[key])
         self.textActorLesionStatistics.SetInput(overlayText)
 
-    def updateIndividualLesionViewOverlayText(self, rendererCollection, currentTimeIndex):
-        overlayLabels = np.arange(currentTimeIndex-2, currentTimeIndex + 3)
+    def updateIndividualLesionViewOverlayText(self, rendererCollection, currentTimeIndex, lesionTimeIndex):
+        #overlayLabels = np.arange(currentTimeIndex-2, currentTimeIndex + 3)
+
         for i in range(1, rendererCollection.GetNumberOfItems() - 1):
-            renderer = rendererCollection.GetItemAsObject(i)
-            self.textActorsLesionView[i-1].SetInput(str(overlayLabels[i-1]))
-            renderer.Render()
+            if lesionTimeIndex[i-1] is not None:
+                renderer = rendererCollection.GetItemAsObject(i)
+                self.textActorsLesionView[i - 1].SetInput(str(lesionTimeIndex[i - 1]))
+                renderer.Render()
+            #renderer = rendererCollection.GetItemAsObject(i)
+            #self.textActorsLesionView[i-1].SetInput(str(overlayLabels[i-1]))
+            #renderer.Render()
 
     def initializeAppVariables(self):
         self.lesionViewStyle = 2  # 0: Mesh View  1: Abstract View 2: Contour View
@@ -1673,6 +1724,7 @@ class mainWindow(Qt.QMainWindow):
     @pyqtSlot()
     def on_sliderChangedFollowupInterval(self):
         sliderValue = self.horizontalSlider_FollowupInterval.value()
+        self.updateContourComparisonView(self.userPickedLesionID)
         self.label_FollowupInterval.setText(str(sliderValue))
 
     # Handler for capturing the screenshot.
