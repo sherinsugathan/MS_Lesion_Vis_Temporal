@@ -383,12 +383,12 @@ class mainWindow(Qt.QMainWindow):
             else:  # Add valid lesion to renderer.
                 if i != 3:  # Set camera of middle renderer to the rest.
                     renderer.SetActiveCamera(rendererCollection.GetItemAsObject(3).GetActiveCamera())
-                print("i value is", i)
-                print("evaluation value is", [currentTimeIndex - 2 + (i-1)])
-                print("current time index is", currentTimeIndex)
+                #print("i value is", i)
+                #print("evaluation value is", [currentTimeIndex - 2 + (i-1)])
+                #print("current time index is", currentTimeIndex)
                 #for lesion in self.LesionActorListForLesionView[currentTimeIndex - 2 + (i-1)]:
                 #print("data count", self.dataCount)
-                print("timeindex mine", lesionTimeIndex[i - 1])
+                #print("timeindex mine", lesionTimeIndex[i - 1])
                 if lesionTimeIndex[i - 1] == None:
                     continue
                 for lesion in self.LesionActorListForLesionView[lesionTimeIndex[i-1]]:
@@ -1694,6 +1694,7 @@ class mainWindow(Qt.QMainWindow):
                 self.overlayData = self.getLesionData(highlightLesionID-1)
                 self.updateLesionOverlayText()
                 self.computeApplyProjection(highlightLesionID, self.surfaceActors[1], self.surfaceActors[2], sliderValue)
+                self.updateContourComparisonView(self.userPickedLesionID, False)
             else:
                 self.textActorLesionStatistics.SetInput("")
                 self.userPickedLesionID = None
