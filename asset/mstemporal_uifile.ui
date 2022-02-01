@@ -477,7 +477,7 @@ border-style: solid;
 }</string>
             </property>
             <property name="text">
-             <string>Reset Views</string>
+             <string>Reset All Views</string>
             </property>
            </widget>
           </item>
@@ -770,7 +770,7 @@ border-radius: 2px;
 background-color:rgb(255,255,255);</string>
                    </property>
                    <property name="readOnly">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>

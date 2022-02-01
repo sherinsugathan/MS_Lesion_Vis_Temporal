@@ -152,7 +152,8 @@ class mainWindow(Qt.QMainWindow):
         # Handlers
         #self.pushButton_LoadFolder.clicked.connect(self.on_click_browseFolder) # Attaching button click handler.
         self.pushButton_LoadFolder.clicked.connect(self.autoLoadData) # Attaching button click handler.
-        self.pushButton_Compare.clicked.connect(self.compareDataAndUpdateSurface) # Attaching button click handler.
+        self.pushButton_Compare.clicked.connect(self.compareDataAndUpdateSurface)  # Attaching button click handler.
+        self.pushButton_ResetView.clicked.connect(self.resetViewAllRenderers)  # Attaching button click handler.
         #self.pushButton_IntensityAnalysis.clicked.connect(self.loadIntensityAnalysisPage) # Attaching button click handler for intensity analysis page.
         self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
         self.horizontalSlider_FollowupInterval.valueChanged.connect(self.on_sliderChangedFollowupInterval)  # Attaching slider value changed handler for change in followup interval.
@@ -1880,6 +1881,15 @@ class mainWindow(Qt.QMainWindow):
     def graphRangeSliderChanged(self,val):
         print("graph slider changed", val)
 
+    # Reset cameras of all the main VTK renderers.
+    def resetViewAllRenderers(self):
+        self.ren.ResetCamera()
+        self.renDual.ResetCamera()
+        self.renNodeGraph.ResetCamera()
+        self.iren.Render()
+        self.irenDual.Render()
+        self.irenNodeGraph.Render()
+
     # Compare lesion changes between two time points and then update lesion surface display.
     def compareDataAndUpdateSurface(self):
         if self.dataFolderInitialized is False:
@@ -2038,7 +2048,6 @@ class mainWindow(Qt.QMainWindow):
         self.ren.AddActor2D(self.textActorInfoAllLesionsView)  # Add information overlay in renderer 1.
         self.comparisonDataAvailable = True
         self.iren.Render()
-
 
     # # Load intensity analysis page.
     # def loadIntensityAnalysisPage(self):
