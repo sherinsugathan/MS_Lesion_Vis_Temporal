@@ -70,6 +70,7 @@ class mainWindow(Qt.QMainWindow):
     # Initialization
     def __init__(self):
         super(mainWindow, self).__init__()
+
         self.intensityImage = None
         # font_dirs = [os.path.dirname(os.path.realpath(__file__))+"\\asset\\fonts"]
         # font_files = font_manager.findSystemFonts(fontpaths=font_dirs)
@@ -181,6 +182,7 @@ class mainWindow(Qt.QMainWindow):
         self.style.SetDefaultRenderer(self.ren)
         self.style.main = self
         self.iren.SetInteractorStyle(self.style)
+        self.iren.AddObserver("KeyPressEvent", self.keyPressRen1)
         self.readThread = None
         self.show()
         self.iren.Initialize()
@@ -290,6 +292,18 @@ class mainWindow(Qt.QMainWindow):
         self.textActorLesionStatistics.GetTextProperty().SetLineSpacing(1.6)
         self.textActorLesionStatistics.GetTextProperty().SetColor(0.1,0.1,0.1)
 
+        self.textActorInfoAllLesionsView = vtk.vtkTextActor()
+        self.textActorInfoAllLesionsView.UseBorderAlignOff()
+        self.textActorInfoAllLesionsView.GetPositionCoordinate().SetCoordinateSystemToNormalizedViewport()
+        self.textActorInfoAllLesionsView.GetPosition2Coordinate().SetCoordinateSystemToNormalizedViewport()
+        self.textActorInfoAllLesionsView.SetPosition(0.0,0.92)
+        self.textActorInfoAllLesionsView.GetTextProperty().SetFontFamily(4)
+        self.textActorInfoAllLesionsView.GetTextProperty().SetFontFile("asset\\arial.ttf")
+        self.textActorInfoAllLesionsView.GetTextProperty().SetFontSize(12)
+        self.textActorInfoAllLesionsView.GetTextProperty().ShadowOn()
+        self.textActorInfoAllLesionsView.GetTextProperty().SetLineSpacing(1.6)
+        self.textActorInfoAllLesionsView.GetTextProperty().SetColor(0.1,0.1,0.1)
+
         self.textActorsLesionView = []
         for i in range(5):
             self.textActorLV = vtk.vtkTextActor()
@@ -333,6 +347,35 @@ class mainWindow(Qt.QMainWindow):
         self.label_Riso.hide()
         self.label_6.hide()
 
+    def keyPressRen1(self, obj, event):
+        if self.comparisonDataAvailable is False:
+            return
+        key = obj.GetKeySym()
+        sliderValue = self.horizontalSlider_TimePoint.value()
+        if key == 't' or key == 'T':  # Toggle between normal view and comparison view.
+            if self.toggleComparisonAndNormalView is False:  # then switch to normal view
+                self.toggleComparisonAndNormalView = True
+                for actor in self.comparison_actorlist:
+                    actor.SetVisibility(False)
+                for lesion in self.LesionActorList[sliderValue]:
+                    self.ren.AddActor(lesion)
+                    lesion.SetVisibility(True)
+                if self.userPickedLesionID is not None: # Display lesion details if there was already a highlight done
+                    self.ren.AddActor(self.textActorLesionStatistics)
+                    self.textActorLesionStatistics.SetVisibility(True)
+                self.iren.Render()
+            else:  # then switch to comparison view
+                self.toggleComparisonAndNormalView = False
+                for actor in self.comparison_actorlist:
+                    actor.SetVisibility(True)
+                for lesion in self.LesionActorList[sliderValue]:
+                    lesion.SetVisibility(False)
+                self.ren.AddActor(self.surfaceActors[0])  # ventricle
+                if self.userPickedLesionID is not None:
+                    self.textActorLesionStatistics.SetVisibility(False)
+                self.iren.Render()
+        return
+
     def updateContourComparisonView(self, pickedLesionID, camResetRequired = True):
         #print("i am called", pickedLesionID)
         currentTimeIndex = self.horizontalSlider_TimePoint.value()
@@ -369,7 +412,7 @@ class mainWindow(Qt.QMainWindow):
         if lesionTimeIndex[5] > self.dataCount:
             lesionTimeIndex[5] = None
 
-        print("Lesion Time Index", lesionTimeIndex)
+        #print("Lesion Time Index", lesionTimeIndex)
 
         # REAL TIMELINE DATA ADDACTOR AND RENDER
         for i in range(rendererCollection.GetNumberOfItems()-1):
@@ -701,6 +744,9 @@ class mainWindow(Qt.QMainWindow):
         self.lesionViewSurfacesOverlay = []
         self.lesionViewSilhouettes = []
         self.focusLesionActors = []
+        self.comparison_actorlist = []
+        self.toggleComparisonAndNormalView = False
+        self.comparisonDataAvailable = False
         
     def renderData(self):
         self.initializeAppVariables()
@@ -711,7 +757,7 @@ class mainWindow(Qt.QMainWindow):
         self.spinBox_RangeMin.setValue(0)
         self.spinBox_RangeMax.setMinimum(0)
         self.spinBox_RangeMax.setMaximum(int(self.dataCount-1))
-        self.spinBox_RangeMax.setValue(5)
+        self.spinBox_RangeMax.setValue(1)
         self.horizontalSlider_TimePoint.setMaximum(self.dataCount-1)
         for lesion in self.LesionActorList[0]:
             self.ren.AddActor(lesion)
@@ -1676,6 +1722,8 @@ class mainWindow(Qt.QMainWindow):
     @pyqtSlot()
     def on_sliderChangedTimePoint(self):
         sliderValue = self.horizontalSlider_TimePoint.value()
+        self.comparisonDataAvailable = False
+        self.spinBox_RangeMax.setValue(sliderValue)
         self.updateDefaultGraph(sliderValue, None) # update graph
         if(self.userPickedLesionID!=None):
             highlightLesionID = self.getLinkedLesionIDFromTimeStep(self.userPickedLesionID, sliderValue)
@@ -1702,6 +1750,7 @@ class mainWindow(Qt.QMainWindow):
                 if(lesionID == highlightLesionID-1):
                     lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843) # yellowish color
             self.ren.AddActor(lesion)
+            lesion.SetVisibility(True)
         self.ren.AddActor(self.surfaceActors[0]) # ventricle
         self.ren.AddActor(self.textActorLesionStatistics) # Text overlay
 
@@ -1835,6 +1884,7 @@ class mainWindow(Qt.QMainWindow):
     def compareDataAndUpdateSurface(self):
         if self.dataFolderInitialized is False:
             return
+        self.comparison_actorlist = []
         baselineIndex = self.spinBox_RangeMin.value()
         followupIndex = self.spinBox_RangeMax.value()
         #print(baselineIndex, followupIndex)
@@ -1965,7 +2015,6 @@ class mainWindow(Qt.QMainWindow):
         lut.SetTableValue(1,nc.GetColor4d("LightSlateGray"))
         lut.SetTableValue(2,nc.GetColor4d("PaleGreen"))
 
-        actorList = []
         for i in range(multiBlockDataset.GetNumberOfBlocks()):
             block = multiBlockDataset.GetBlock(i)
             newpoly = Utils.smoothPolyData(block)
@@ -1977,14 +2026,19 @@ class mainWindow(Qt.QMainWindow):
             mapper.SetLookupTable(lut)
             lesionActor = vtk.vtkActor()
             lesionActor.SetMapper(mapper)
-            actorList.append(lesionActor)
+            self.comparison_actorlist.append(lesionActor)
         
         # Update renderer
         self.ren.RemoveAllViewProps()
-        for lesion in actorList:
+        for lesion in self.comparison_actorlist:
             self.ren.AddActor(lesion)
         self.ren.AddActor(self.surfaceActors[0]) # ventricle
+
+        self.textActorInfoAllLesionsView.SetInput("Comparison data available between time points " + str(self.spinBox_RangeMin.value()) + " and " + str(self.spinBox_RangeMax.value()) + "\n" + "Press [T] for toggling normal and comparison data")
+        self.ren.AddActor2D(self.textActorInfoAllLesionsView)  # Add information overlay in renderer 1.
+        self.comparisonDataAvailable = True
         self.iren.Render()
+
 
     # # Load intensity analysis page.
     # def loadIntensityAnalysisPage(self):
