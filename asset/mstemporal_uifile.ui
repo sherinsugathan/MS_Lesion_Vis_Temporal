@@ -699,21 +699,23 @@ border-radius:2px;
               </widget>
              </item>
              <item>
-              <widget class="QCheckBox" name="checkBox_RangeCompare">
-               <property name="enabled">
-                <bool>false</bool>
+              <widget class="QLabel" name="label_7">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
                <property name="styleSheet">
                 <string notr="true">font: 9pt &quot;Arial&quot;;
-font-weight:200;
-color:rgb(70,70,70);
-border-width: 0px;</string>
+font-weight:bold;
+</string>
                </property>
                <property name="text">
                 <string>Range Compare</string>
                </property>
-               <property name="checked">
-                <bool>false</bool>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
                </property>
               </widget>
              </item>
@@ -751,7 +753,7 @@ border-width: 0px;</string>
                  <item row="1" column="2">
                   <widget class="QSpinBox" name="spinBox_RangeMax">
                    <property name="enabled">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                    <property name="maximumSize">
                     <size>
@@ -775,7 +777,7 @@ background-color:rgb(255,255,255);</string>
                  <item row="1" column="1">
                   <widget class="QSpinBox" name="spinBox_RangeMin">
                    <property name="enabled">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                    <property name="maximumSize">
                     <size>
@@ -817,7 +819,7 @@ background-color:rgb(255,255,255);</string>
                <item>
                 <widget class="QPushButton" name="pushButton_Compare">
                  <property name="enabled">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </property>
                  <property name="styleSheet">
                   <string notr="true">QPushButton:hover#pushButton_Compare
@@ -1207,7 +1209,7 @@ font-weight:bold;
 </string>
                </property>
                <property name="text">
-                <string>Choose Visualization</string>
+                <string>Choose View</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -2030,7 +2032,7 @@ border-style: solid;
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="radioGroup_Modality"/>
   <buttongroup name="radioGroup_BrainSurface"/>
+  <buttongroup name="radioGroup_Modality"/>
  </buttongroups>
 </ui>

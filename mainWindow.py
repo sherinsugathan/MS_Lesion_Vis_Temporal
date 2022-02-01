@@ -159,7 +159,6 @@ class mainWindow(Qt.QMainWindow):
         self.comboBox_LesionAttributes.currentTextChanged.connect(self.on_combobox_changed_LesionAttributes) # Attaching handler for lesion filter combobox selection change.
         self.comboBox_ProjectionMethods.currentTextChanged.connect(self.on_combobox_changed_ProjectionMethods) # Attaching handler for projection methods combobox selection change.
         self.checkBox_ShowClasses.stateChanged.connect(self.checkBox_ShowClasses_changed) # Display lesion classes in the intensity graph.
-        self.checkBox_RangeCompare.stateChanged.connect(self.checkBox_RangeCompare_changed) # Enables comparison view for lesions.
         self.pushButton_Capture.clicked.connect(self.on_click_CaptureScreeshot)  # Attaching button click Handlers
         self.spinBox_RangeMin.valueChanged.connect(self.spinBoxMinChanged)
         self.spinBox_RangeMax.valueChanged.connect(self.spinBoxMaxChanged)
@@ -337,10 +336,13 @@ class mainWindow(Qt.QMainWindow):
     def updateContourComparisonView(self, pickedLesionID, camResetRequired = True):
         #print("i am called", pickedLesionID)
         currentTimeIndex = self.horizontalSlider_TimePoint.value()
-        linkedLesionIds, linkedLesionIdsForShifting = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex)
+        #linkedLesionIds, linkedLesionIdsForShifting = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex)
+        linkedLesionIdsFull = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex)
         #linkedLesionIds2 = self.getLinkedLesionIDFromLeftAndRight(pickedLesionID, currentTimeIndex-1)
-        print("ids1", linkedLesionIds)
-        print("ids2", linkedLesionIdsForShifting)
+        linkedLesionIds = linkedLesionIdsFull[1:6]
+        linkedLesionIdsPrevious = linkedLesionIdsFull[0:5]
+        #print("ids1", linkedLesionIds)
+        #print("ids2", linkedLesionIdsForShifting)
         followupInterval = self.horizontalSlider_FollowupInterval.value()
 
         lesionSurfaceArray = []
@@ -350,24 +352,24 @@ class mainWindow(Qt.QMainWindow):
         currentTimeRenderer = rendererCollection.GetItemAsObject(3)
         #print(rendererCollection.GetNumberOfItems())  # TODO: Check why this is giving 7!!
 
-        lesionTimeIndex = [None] * 5
-        lesionTimeIndex[0] = currentTimeIndex - (2 * followupInterval)
-        lesionTimeIndex[1] = currentTimeIndex - (1 * followupInterval)
-        lesionTimeIndex[2] = currentTimeIndex
-        lesionTimeIndex[3] = currentTimeIndex + (1 * followupInterval)
-        lesionTimeIndex[4] = currentTimeIndex + (2 * followupInterval)
+        lesionTimeIndex = [None] * 6
+        lesionTimeIndex[0] = currentTimeIndex - (3 * followupInterval)
+        lesionTimeIndex[1] = currentTimeIndex - (2 * followupInterval)
+        lesionTimeIndex[2] = currentTimeIndex - (1 * followupInterval)
+        lesionTimeIndex[3] = currentTimeIndex
+        lesionTimeIndex[4] = currentTimeIndex + (1 * followupInterval)
+        lesionTimeIndex[5] = currentTimeIndex + (2 * followupInterval)
 
-        print("Lesion time index is", lesionTimeIndex)
+        #print("Lesion time index is", lesionTimeIndex)
 
         self.updateIndividualLesionViewOverlayText(rendererCollection, currentTimeIndex, lesionTimeIndex)
 
-        if lesionTimeIndex[3] > self.dataCount:
-            lesionTimeIndex[3] = None
-        if(lesionTimeIndex[4] > self.dataCount):
+        if lesionTimeIndex[4] > self.dataCount:
             lesionTimeIndex[4] = None
+        if lesionTimeIndex[5] > self.dataCount:
+            lesionTimeIndex[5] = None
 
         print("Lesion Time Index", lesionTimeIndex)
-
 
         # REAL TIMELINE DATA ADDACTOR AND RENDER
         for i in range(rendererCollection.GetNumberOfItems()-1):
@@ -389,9 +391,9 @@ class mainWindow(Qt.QMainWindow):
                 #for lesion in self.LesionActorListForLesionView[currentTimeIndex - 2 + (i-1)]:
                 #print("data count", self.dataCount)
                 #print("timeindex mine", lesionTimeIndex[i - 1])
-                if lesionTimeIndex[i - 1] == None:
+                if lesionTimeIndex[i] == None:
                     continue
-                for lesion in self.LesionActorListForLesionView[lesionTimeIndex[i-1]]:
+                for lesion in self.LesionActorListForLesionView[lesionTimeIndex[i]]:
                     lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
                     if self.lesionViewStyle == 2:  # Contour/silhouette memoryview
                         lesion.SetVisibility(False)
@@ -419,7 +421,6 @@ class mainWindow(Qt.QMainWindow):
                     silhouetteActor.GetProperty().SetColor(0.1, 0.1, 0.1)
                     silhouetteActor.GetProperty().SetLineWidth(2)
 
-
                     if lesionID == linkedLesionIds[i-1] - 1:
                         renderer.AddActor(lesion)
                         #renderer.UseHiddenLineRemovalOn() # To hide unnecessary back edge lines especially during wireframe display.
@@ -431,11 +432,15 @@ class mainWindow(Qt.QMainWindow):
                             silhouetteActor.SetVisibility(True)
                         else:
                             silhouetteActor.SetVisibility(False)
+
+                        # Add time overlay text actor
                         renderer.AddActor(self.textActorsLesionView[i-1])
 
                 if camResetRequired is True:
                     renderer.ResetCamera()
                 renderer.Render()
+
+
 
         # SHIFTED TIMELINE DATA ADDACTOR AND RENDER
         for i in range(rendererCollection.GetNumberOfItems()-1):
@@ -443,12 +448,12 @@ class mainWindow(Qt.QMainWindow):
                 continue
             renderer = rendererCollection.GetItemAsObject(i)
 
-            if linkedLesionIdsForShifting[i - 1] is None:
+            if linkedLesionIdsPrevious[i - 1] is None:
                 continue
-            if lesionTimeIndex[i - 2] == None:
+            if lesionTimeIndex[i - 1] == None:
                 continue
             #for lesion in self.LesionActorListForLesionViewOverlay[currentTimeIndex - 1 - 2 + (i - 1)]:  # First subtraction(-1) used to shift reading starting 1 position left.
-            for lesion in self.LesionActorListForLesionViewOverlay[lesionTimeIndex[i - 2]]:
+            for lesion in self.LesionActorListForLesionViewOverlay[lesionTimeIndex[i - 1]]:
                 lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
                 if self.lesionViewStyle == 2:  # Contour/silhouette memoryview
                     lesion.SetVisibility(False)
@@ -476,8 +481,8 @@ class mainWindow(Qt.QMainWindow):
                 silhouetteActor.GetProperty().SetColor(1.0, 0.0, 0.0)  # Red Color
                 silhouetteActor.GetProperty().SetLineWidth(2)
 
-                if linkedLesionIdsForShifting[i - 1] is not None: # Sometimes center elements can be None here. Avoiding processing that.
-                    if lesionID == linkedLesionIdsForShifting[i - 1] - 1: # First -1 to adjust position in array and second -1 to fix lesion number.
+                if linkedLesionIdsPrevious[i - 1] is not None: # Sometimes center elements can be None here. Avoiding processing that.
+                    if lesionID == linkedLesionIdsPrevious[i - 1] - 1: # First -1 to adjust position in array and second -1 to fix lesion number.
                         renderer.AddActor(lesion)
                         renderer.UseHiddenLineRemovalOn()  # To hide unnecessary back edge lines especially during wireframe display.
                         self.lesionViewSurfacesOverlay.append(lesion)
@@ -517,8 +522,8 @@ class mainWindow(Qt.QMainWindow):
     def getLinkedLesionIDFromLeftAndRight(self, currentLesionID, currentTimeIndex):
         followupInterval = self.horizontalSlider_FollowupInterval.value()
         nodeIDList = list(self.G.nodes)
-        linkedLesionIds = [None] * 5
-        linkedLesionIdsForShifting = [None] * 6
+        linkedLesionIds = [None] * 6
+        #linkedLesionIdsForShifting = [None] * 6
         for id in nodeIDList:
             timeList = self.G.nodes[id]["time"]
             labelList = self.G.nodes[id]["lesionLabel"]
@@ -530,24 +535,24 @@ class mainWindow(Qt.QMainWindow):
                 continue
 
             if itemIndex == temporalDataListLength-1:
-                linkedLesionIds[2] = temporalData[itemIndex][1]
+                linkedLesionIds[3] = temporalData[itemIndex][1]
 
-            print("#########################################:")
+            #print("#########################################:")
             # RIGHT ITEMS
             if (itemIndex) < temporalDataListLength:
-                linkedLesionIds[2] = temporalData[itemIndex][1]
+                linkedLesionIds[3] = temporalData[itemIndex][1]
             if (itemIndex + (followupInterval * 1)) < temporalDataListLength:
-                linkedLesionIds[3] = temporalData[itemIndex+(followupInterval * 1)][1]
+                linkedLesionIds[4] = temporalData[itemIndex+(followupInterval * 1)][1]
             if (itemIndex + (followupInterval * 2)) < temporalDataListLength:
-                linkedLesionIds[4] = temporalData[itemIndex+(followupInterval * 2)][1]
+                linkedLesionIds[5] = temporalData[itemIndex+(followupInterval * 2)][1]
 
             # LEFT ITEMS
             if (itemIndex - (followupInterval * 1)) >= 0:
-                linkedLesionIds[1] = temporalData[itemIndex - (followupInterval * 1)][1]
+                linkedLesionIds[2] = temporalData[itemIndex - (followupInterval * 1)][1]
             if (itemIndex - (followupInterval * 2)) >= 0:
-                linkedLesionIds[0] = temporalData[itemIndex - (followupInterval * 2)][1]
+                linkedLesionIds[1] = temporalData[itemIndex - (followupInterval * 2)][1]
             if (itemIndex - (followupInterval * 3)) >= 0:
-                linkedLesionIdsForShifting[0] = temporalData[itemIndex - (followupInterval * 3)][1]
+                linkedLesionIds[0] = temporalData[itemIndex - (followupInterval * 3)][1]
 
             # # RIGHT ITEMS
             # if (itemIndex) < temporalDataListLength:
@@ -565,9 +570,9 @@ class mainWindow(Qt.QMainWindow):
             # if (itemIndex - 3) >= 0:
             #     linkedLesionIdsForShifting[0] = temporalData[itemIndex - 3][1]
 
-            linkedLesionIdsForShifting[1:6] = linkedLesionIds
-            return linkedLesionIds, linkedLesionIdsForShifting[0:5]   # Success
-        return [None] * 5  # Failure
+            #linkedLesionIdsForShifting[1:6] = linkedLesionIds
+            return linkedLesionIds#, linkedLesionIdsForShifting[0:5]   # Success
+        return [None] * 6  # Failure
 
     def spinBoxMinChanged(self, val):
         if(val>=self.spinBox_RangeMax.value()):
@@ -610,7 +615,7 @@ class mainWindow(Qt.QMainWindow):
         self.on_sliderChangedTimePoint()
 
     def enableControls(self):
-        self.checkBox_RangeCompare.setEnabled(True)
+        pass #TODO add control button here
 
     # Handler for mode change inside button group (surfaces)
     @pyqtSlot(QAbstractButton)
@@ -685,9 +690,9 @@ class mainWindow(Qt.QMainWindow):
 
     def updateIndividualLesionViewOverlayText(self, rendererCollection, currentTimeIndex, lesionTimeIndex):
         for i in range(1, rendererCollection.GetNumberOfItems() - 1):
-            if lesionTimeIndex[i-1] is not None:
+            if lesionTimeIndex[i] is not None:
                 renderer = rendererCollection.GetItemAsObject(i)
-                self.textActorsLesionView[i - 1].SetInput(str(lesionTimeIndex[i - 1]))
+                self.textActorsLesionView[i - 1].SetInput(str(lesionTimeIndex[i]))
                 renderer.Render()
 
     def initializeAppVariables(self):
@@ -1667,20 +1672,6 @@ class mainWindow(Qt.QMainWindow):
         self.plotIntensityGraph()
         self.canvasIntensity.draw()
 
-    # Handler for displaying range comparison for lesions
-    @pyqtSlot()
-    def checkBox_RangeCompare_changed(self):
-        if(self.checkBox_RangeCompare.isChecked() == True):
-            self.spinBox_RangeMin.setEnabled(True)
-            self.spinBox_RangeMax.setEnabled(True)
-            self.pushButton_Compare.setEnabled(True)
-            #self.slider3DCompare.setEnabled(True) #  TODO remove completely
-        else:
-            self.spinBox_RangeMin.setEnabled(False)
-            self.spinBox_RangeMax.setEnabled(False)
-            self.pushButton_Compare.setEnabled(False)
-            #self.slider3DCompare.setEnabled(False)
-
     # Handler for time point slider change
     @pyqtSlot()
     def on_sliderChangedTimePoint(self):
@@ -1842,13 +1833,15 @@ class mainWindow(Qt.QMainWindow):
 
     # Compare lesion changes between two time points and then update lesion surface display.
     def compareDataAndUpdateSurface(self):
+        if self.dataFolderInitialized is False:
+            return
         baselineIndex = self.spinBox_RangeMin.value()
         followupIndex = self.spinBox_RangeMax.value()
         #print(baselineIndex, followupIndex)
         rootFolder = "asset\\dataset\\Subject1\\"
         connectedComponentOutputFileName = rootFolder + "lesionMask\\ConnectedComponentsTemp.nii"
         
-        # Creating uinion image
+        # Creating union image
         maskFileName1 = rootFolder + "lesionMask\\Consensus" + str(baselineIndex) + ".nii"
         maskFileName2 = rootFolder + "lesionMask\\Consensus" + str(followupIndex) + ".nii"
         niftiReaderLesionMask1 = vtk.vtkNIFTIImageReader()
