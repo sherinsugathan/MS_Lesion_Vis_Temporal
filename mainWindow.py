@@ -140,6 +140,14 @@ class mainWindow(Qt.QMainWindow):
         self.comboBox_LesionAttributes.addItem("Flatness")
         self.comboBox_LesionAttributes.addItem("Roundness")
 
+        self.comboBox_NodeGraphNodeSizeAttributes.addItem("Physical Size")
+        self.comboBox_NodeGraphNodeSizeAttributes.addItem("Elongation")
+        self.comboBox_NodeGraphNodeSizeAttributes.addItem("Perimeter")
+        self.comboBox_NodeGraphNodeSizeAttributes.addItem("Spherical Radius")
+        self.comboBox_NodeGraphNodeSizeAttributes.addItem("Spherical Perimeter")
+        self.comboBox_NodeGraphNodeSizeAttributes.addItem("Flatness")
+        self.comboBox_NodeGraphNodeSizeAttributes.addItem("Roundness")
+
         self.comboBox_ProjectionMethods.addItem("DTI")
         self.comboBox_ProjectionMethods.addItem("Heat Equation")
         self.comboBox_ProjectionMethods.addItem("Danielsson")
@@ -160,6 +168,7 @@ class mainWindow(Qt.QMainWindow):
         self.horizontalSlider_Riso.valueChanged.connect(self.on_sliderChangedRiso) # Attaching slider value (Riso) changed handler.
         self.comboBox_LesionAttributes.currentTextChanged.connect(self.on_combobox_changed_LesionAttributes) # Attaching handler for lesion filter combobox selection change.
         self.comboBox_ProjectionMethods.currentTextChanged.connect(self.on_combobox_changed_ProjectionMethods) # Attaching handler for projection methods combobox selection change.
+        self.comboBox_NodeGraphNodeSizeAttributes.currentTextChanged.connect(self.on_combobox_changed_NodeGraphNodeSizeAttributes)  # Attaching handler for change in lesion attribute for node graph.
         self.checkBox_ShowClasses.stateChanged.connect(self.checkBox_ShowClasses_changed) # Display lesion classes in the intensity graph.
         self.pushButton_Capture.clicked.connect(self.on_click_CaptureScreeshot)  # Attaching button click Handlers
         self.spinBox_RangeMin.valueChanged.connect(self.spinBoxMinChanged)
@@ -325,12 +334,12 @@ class mainWindow(Qt.QMainWindow):
         self.buttonGroupSurfaces.setExclusive(True)
         self.buttonGroupSurfaces.buttonClicked.connect(self.on_buttonGroupSurfaceChanged)
 
-        self.buttonGroupModalities = QButtonGroup()
-        self.buttonGroupModalities.addButton(self.radioButton_T1)
-        self.buttonGroupModalities.addButton(self.radioButton_T2)
-        self.buttonGroupModalities.addButton(self.radioButton_FLAIR)
-        self.buttonGroupModalities.setExclusive(True)
-        self.buttonGroupModalities.buttonClicked.connect(self.on_buttonGroupModalityChanged)
+        # self.buttonGroupModalities = QButtonGroup()
+        # self.buttonGroupModalities.addButton(self.radioButton_T1)
+        # self.buttonGroupModalities.addButton(self.radioButton_T2)
+        # self.buttonGroupModalities.addButton(self.radioButton_FLAIR)
+        # self.buttonGroupModalities.setExclusive(True)
+        # self.buttonGroupModalities.buttonClicked.connect(self.on_buttonGroupModalityChanged)
 
         self.buttonGroupLesionView = QButtonGroup()
         self.buttonGroupLesionView.addButton(self.radioButton_LesionMeshView)
@@ -341,9 +350,9 @@ class mainWindow(Qt.QMainWindow):
 
         # Hide some buttons (things here soon going to get removed/replaced.)
         self.horizontalSlider_Riso.hide()
-        self.radioButton_T1.hide()
-        self.radioButton_T2.hide()
-        self.radioButton_FLAIR.hide()
+        # self.radioButton_T1.hide()
+        # self.radioButton_T2.hide()
+        # self.radioButton_FLAIR.hide()
         self.checkBox_ShowClasses.hide()
         self.label_Riso.hide()
         self.label_6.hide()
@@ -658,6 +667,11 @@ class mainWindow(Qt.QMainWindow):
     def on_combobox_changed_ProjectionMethods(self): 
         self.on_sliderChangedTimePoint()
 
+    # Handler for change in lesion attribute for node graph.
+    @pyqtSlot()
+    def on_combobox_changed_NodeGraphNodeSizeAttributes(self):
+        print("All good")
+
     def enableControls(self):
         pass #TODO add control button here
 
@@ -851,12 +865,16 @@ class mainWindow(Qt.QMainWindow):
         if(refreshData == True):
             self.slice_MPRA = np.fliplr(np.rot90(self.slice_MPRA))
             self.sliceMask_MPRA = np.fliplr(np.rot90(self.sliceMask_MPRA))
-        if(self.radioButton_FLAIR.isChecked() == True):
-            aspectCoronalData = self.spacingData[2]/self.spacingData[1]
-            aspectCoronalMask = self.spacingMask[2]/self.spacingMask[1]
-        else:
-            aspectCoronalData = self.spacingData[2]/self.spacingData[0]
-            aspectCoronalMask = self.spacingMask[2]/self.spacingMask[0]
+
+        # TODO enable following block when using FLAIR
+        # if(self.radioButton_FLAIR.isChecked() == True):
+        #     aspectCoronalData = self.spacingData[2]/self.spacingData[1]
+        #     aspectCoronalMask = self.spacingMask[2]/self.spacingMask[1]
+        # else:
+        #     aspectCoronalData = self.spacingData[2]/self.spacingData[0]
+        #     aspectCoronalMask = self.spacingMask[2]/self.spacingMask[0]
+        aspectCoronalData = self.spacingData[2] / self.spacingData[0]
+        aspectCoronalMask = self.spacingMask[2]/self.spacingMask[0]
 
         my_cmap = self.MPROverlayColorMap
         my_cmap.set_under('k', alpha=0) # For setting background to alpha 0
@@ -874,12 +892,16 @@ class mainWindow(Qt.QMainWindow):
         if(refreshData == True):
             self.slice_MPRB = np.rot90(self.slice_MPRB)
             self.sliceMask_MPRB = np.rot90(self.sliceMask_MPRB)
-        if(self.radioButton_FLAIR.isChecked() == True):
-            aspectAxialData = self.spacingData[1]/self.spacingData[0]
-            aspectAxialMask = self.spacingMask[1]/self.spacingMask[0]
-        else:
-            aspectAxialData = self.spacingData[2]/self.spacingData[1]
-            aspectAxialMask = self.spacingMask[2]/self.spacingMask[1]
+
+        # TODO enable following block when using FLAIR
+        # if(self.radioButton_FLAIR.isChecked() == True):
+        #     aspectAxialData = self.spacingData[1]/self.spacingData[0]
+        #     aspectAxialMask = self.spacingMask[1]/self.spacingMask[0]
+        # else:
+        #     aspectAxialData = self.spacingData[2]/self.spacingData[1]
+        #     aspectAxialMask = self.spacingMask[2]/self.spacingMask[1]
+        aspectAxialData = self.spacingData[2] / self.spacingData[1]
+        aspectAxialMask = self.spacingMask[2]/self.spacingMask[1]
         self.MPRB = plt.imshow(self.slice_MPRB, cmap='Greys_r', aspect=aspectAxialData)
         self.MPRBMask = plt.imshow(self.sliceMask_MPRB, cmap=my_cmap, aspect=aspectCoronalMask,  alpha=maskAlpha, interpolation='none', clim=[0.9, 1])
         self.sliceNumberHandleMPRB = self.axMPRB.text(5, 5, str(self.midSliceY), verticalalignment='top', horizontalalignment='left', color='green', fontsize=12)
@@ -897,12 +919,16 @@ class mainWindow(Qt.QMainWindow):
                 self.slice_MPRC = np.rot90(self.slice_MPRC, 3)
                 self.sliceMask_MPRC = np.rot90(self.sliceMask_MPRC, 3)
 
-        if(self.radioButton_FLAIR.isChecked() == True):
-            aspectSagittalData = self.spacingData[1]/self.spacingData[0]
-            aspectSagittalMask = self.spacingMask[1]/self.spacingMask[0]
-        else:
-            aspectSagittalData = self.spacingData[1]/self.spacingData[0]
-            aspectSagittalMask = self.spacingMask[1]/self.spacingMask[0]
+        # TODO enable following block when using FLAIR
+        # if(self.radioButton_FLAIR.isChecked() == True):
+        #     aspectSagittalData = self.spacingData[1]/self.spacingData[0]
+        #     aspectSagittalMask = self.spacingMask[1]/self.spacingMask[0]
+        # else:
+        #     aspectSagittalData = self.spacingData[1]/self.spacingData[0]
+        #     aspectSagittalMask = self.spacingMask[1]/self.spacingMask[0]
+        aspectSagittalData = self.spacingData[1] / self.spacingData[0]
+        aspectSagittalMask = self.spacingMask[1]/self.spacingMask[0]
+
         self.MPRC = plt.imshow(self.slice_MPRC, cmap='Greys_r', aspect=aspectSagittalData)
         self.MPRCMask = plt.imshow(self.sliceMask_MPRC, cmap=my_cmap, aspect=aspectCoronalMask,  alpha=maskAlpha, interpolation='none', clim=[0.9, 1])
         self.sliceNumberHandleMPRC = self.axMPRC.text(5, 5, str(self.midSliceZ), verticalalignment='top', horizontalalignment='left', color='green', fontsize=12)
@@ -2044,7 +2070,7 @@ class mainWindow(Qt.QMainWindow):
             self.ren.AddActor(lesion)
         self.ren.AddActor(self.surfaceActors[0]) # ventricle
 
-        self.textActorInfoAllLesionsView.SetInput("Comparison data available between time points " + str(self.spinBox_RangeMin.value()) + " and " + str(self.spinBox_RangeMax.value()) + "\n" + "Press [T] for toggling normal and comparison data")
+        self.textActorInfoAllLesionsView.SetInput("Comparison data available between time points " + str(self.spinBox_RangeMin.value()) + " and " + str(self.spinBox_RangeMax.value()) + "\n" + "Press [ T ] for toggling normal and comparison data")
         self.ren.AddActor2D(self.textActorInfoAllLesionsView)  # Add information overlay in renderer 1.
         self.comparisonDataAvailable = True
         self.iren.Render()
