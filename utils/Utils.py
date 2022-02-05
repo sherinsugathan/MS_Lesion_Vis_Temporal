@@ -574,16 +574,113 @@ class ZoomPan:
         return onMotion
 
 
+'''
+##########################################################################
+    Function for updating VTK based node-graph
+##########################################################################
+'''
+
+
+def updateNodeGraph(selfObject, graph_layout_view, graphNodeColors):
+    #print(selfObject.timeListArray)
+    currentTimeStep = selfObject.horizontalSlider_TimePoint.value()
+    nodeSizeArray = [item[currentTimeStep] for item in selfObject.ysDefaultGraph]
+    #print(nodeSizeArray)
+
+    minPerLesion = []
+    maxPerLesion = []
+    for i in range(len(selfObject.timeListArray)):
+        minPerLesion.append(np.min(selfObject.ysDefaultGraph[i][selfObject.timeListArray[i]]))
+        maxPerLesion.append(np.max(selfObject.ysDefaultGraph[i][selfObject.timeListArray[i]]))
+
+    minAttributeValue = np.min(minPerLesion)
+    maxAttributeValue = np.max(maxPerLesion)
+
+
+
+    #print(selfObject.ysDefaultGraph)
+    #print("len1 is", len(selfObject.ysDefaultGraph))
+    #print("len2 is", len(selfObject.timeListArray))
+
+
+    #print("min is", minAttributeValue)
+    #print("max is", maxAttributeValue)
+
+    nodes = selfObject.G.nodes()
+
+    # For scaling vertices or nodes.
+    scales = vtk.vtkFloatArray()
+    scales.SetNumberOfComponents(1)
+    scales.SetName('Scales')
+
+    # for i in range(len(nodes)):
+    #     nodeOrderArrayIndex = selfObject.nodeOrderForGraph.index(str(i + 1))
+    #     if currentTimeStep in selfObject.timeListArray[nodeOrderArrayIndex]:
+    #         dataValue = selfObject.ysDefaultGraph[nodeOrderArrayIndex][currentTimeStep]
+    #         normalizedDataValue = (dataValue - minAttributeValue) / (maxAttributeValue - minAttributeValue)
+    #         scaleValue = 3 + normalizedDataValue * 3
+    #         scales.InsertNextValue(scaleValue)
+    #     else:
+    #         scales.InsertNextValue(3)
+
+    lookupTableVertices = vtk.vtkLookupTable()
+    lookupTableVertices.SetNumberOfTableValues(len(nodes))
+    for i in range(len(nodes)):
+        nodeOrderArrayIndex = selfObject.nodeOrderForGraph.index(str(i + 1))
+        correspondingTimeArray = selfObject.timeListArray[nodeOrderArrayIndex]
+        if currentTimeStep not in correspondingTimeArray:
+            clr = [1, 1, 1]
+            scales.InsertNextValue(3)
+        else:
+            clr = list(graphNodeColors[i])
+            dataValue = selfObject.ysDefaultGraph[nodeOrderArrayIndex][currentTimeStep]
+            normalizedDataValue = (dataValue - minAttributeValue) / (maxAttributeValue - minAttributeValue)
+            scaleValue = 3 + normalizedDataValue * 3
+            scales.InsertNextValue(scaleValue)
+
+        clr.append(1.0)  # A 4 element list is expected. last element is alpha
+        lookupTableVertices.SetTableValue(i, clr)
+
+
+
+    selfObject.vtkGraph.GetVertexData().AddArray(scales)
+
+    #selfObject.graph_layout_view.SetVertexLabelVisibility(False)
+    graphViewTheme = vtk.vtkViewTheme()
+    graphViewTheme.SetLineWidth(3.0)
+    graphViewTheme.SetOutlineColor(0.0, 0.0, 0.0)
+    graphViewTheme.SetVertexLabelColor(0.0, 0.0, 0.0)
+    graphViewTheme.SetPointLookupTable(lookupTableVertices)
+    #graphViewTheme.SetCellLookupTable(lookupTableEdges)
+    graphViewTheme.SetVertexLabelColor(0, 0, 0)
+
+    labelTextProperty = vtk.vtkTextProperty()
+    labelTextProperty.SetColor(0.1, 0.1, 0.1)
+    labelTextProperty.SetFontSize(14)
+    labelTextProperty.ShadowOn()
+    labelTextProperty.BoldOn()
+
+    graphViewTheme.SetPointTextProperty(labelTextProperty)
+    #test = selfObject.graphViewTheme.GetCellLookUpTable()
+    #.SetTableValude(0, [0, 0, 0])
+    selfObject.graph_layout_view.GetRepresentation().ApplyViewTheme(graphViewTheme)
 
 '''
 ##########################################################################
     Function for plotting VTK based node-graph
 ##########################################################################
 '''
-def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
+def drawNodeGraph(selfObject, graph_layout_view, graphNodeColors):
+    #print(selfObject.timeListArray)
+    currentTimeStep = selfObject.horizontalSlider_TimePoint.value()
+    nodeSizeArray = [item[currentTimeStep] for item in selfObject.ysDefaultGraph]
+
+    minAttributeValue = np.min(selfObject.ysDefaultGraph)
+    maxAttributeValue = np.max(selfObject.ysDefaultGraph)
+
     colors = vtk.vtkNamedColors()
     # Read data
-    G = nx.read_gml(graphPath)
+    #G = nx.read_gml(graphPath)
     #print(list(G.edges()))
     #print(G.nodes())
     # For scaling vertices or nodes.
@@ -594,9 +691,9 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     vertex_labels = vtk.vtkStringArray()
     vertex_labels.SetName("VertexLabels")
 
-    nodes = G.nodes()
-    edges = list(G.edges())
-    vtkGraph = vtk.vtkMutableDirectedGraph()
+    nodes = selfObject.G.nodes()
+    edges = list(selfObject.G.edges())
+    selfObject.vtkGraph = vtk.vtkMutableDirectedGraph()
     vertices = [0] * len(nodes)
 
     # Create the color array for the vertices
@@ -612,7 +709,12 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     lookupTableVertices = vtk.vtkLookupTable()
     lookupTableVertices.SetNumberOfTableValues(len(nodes))
     for i in range(len(nodes)):
-        clr = list(graphNodeColors[i])
+        nodeOrderArrayIndex = selfObject.nodeOrderForGraph.index(str(i+1))
+        correspondingTimeArray = selfObject.timeListArray[nodeOrderArrayIndex]
+        if currentTimeStep not in correspondingTimeArray:
+            clr = [1, 1, 1]
+        else:
+            clr = list(graphNodeColors[i])
         clr.append(1.0)  # A 4 element list is expected. last element is alpha
         lookupTableVertices.SetTableValue(i, clr)
     # lookupTableVertices.SetTableValue(1, colors.GetColor4d('Red'))
@@ -630,7 +732,7 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     lookupTableEdges.SetNumberOfTableValues(len(edges))
 
     for i in range(len(nodes)):
-        vertices[i] = vtkGraph.AddVertex()  # Add vertex to the graph
+        vertices[i] = selfObject.vtkGraph.AddVertex()  # Add vertex to the graph
         scales.InsertNextValue(3)
         vertex_labels.InsertValue(vertices[i], str(int(vertices[i]) + 1))  # Add label.
         vertexColors.InsertNextValue(i)
@@ -649,19 +751,19 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     #     colorsArray.SetTuple(c, [255, 0, 0])
 
     for item in edges:
-        vtkGraph.AddEdge(int(item[0]) - 1, int(item[1]) - 1)
+        selfObject.vtkGraph.AddEdge(int(item[0]) - 1, int(item[1]) - 1)
 
     # Add the scale array to the graph
-    vtkGraph.GetVertexData().AddArray(scales)
+    selfObject.vtkGraph.GetVertexData().AddArray(scales)
 
     # Add vertex labels to the graph
-    vtkGraph.GetVertexData().AddArray(vertex_labels)
+    selfObject.vtkGraph.GetVertexData().AddArray(vertex_labels)
 
     # Add color data to vertices
-    vtkGraph.GetVertexData().AddArray(vertexColors)
+    selfObject.vtkGraph.GetVertexData().AddArray(vertexColors)
 
     # Add color array to edges
-    vtkGraph.GetEdgeData().AddArray(edgeColors)
+    selfObject.vtkGraph.GetEdgeData().AddArray(edgeColors)
 
     #graph_layout_view = vtk.vtkGraphLayoutView()
     #graph_layout_view.SetRenderWindow(selfObject.vtkWidgetNodeGraph.GetRenderWindow())
@@ -669,7 +771,7 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     layout = vtk.vtkGraphLayout()
     strategy = vtk.vtkSimple2DLayoutStrategy()
     strategy.SetRestDistance(100.0)
-    layout.SetInputData(vtkGraph)
+    layout.SetInputData(selfObject.vtkGraph)
     layout.SetLayoutStrategy(strategy)
     graph_layout_view.SetLayoutStrategyToPassThrough()
     graph_layout_view.SetEdgeLayoutStrategyToPassThrough()
@@ -744,13 +846,13 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     #graph_layout_view.GetRenderer().AddActor(vertexActor)
     graph_layout_view.GetRenderer().AddActor(textActorTitle)
 
-    viewTheme = vtk.vtkViewTheme()
-    viewTheme.SetLineWidth(3.0)
-    viewTheme.SetOutlineColor(0.0, 0.0, 0.0)
-    viewTheme.SetVertexLabelColor(0.0, 0.0, 0.0)
-    viewTheme.SetPointLookupTable(lookupTableVertices)
-    viewTheme.SetCellLookupTable(lookupTableEdges)
-    viewTheme.SetVertexLabelColor(0, 0, 0)
+    graphViewTheme = vtk.vtkViewTheme()
+    graphViewTheme.SetLineWidth(3.0)
+    graphViewTheme.SetOutlineColor(0.0, 0.0, 0.0)
+    graphViewTheme.SetVertexLabelColor(0.0, 0.0, 0.0)
+    graphViewTheme.SetPointLookupTable(lookupTableVertices)
+    graphViewTheme.SetCellLookupTable(lookupTableEdges)
+    graphViewTheme.SetVertexLabelColor(0, 0, 0)
 
     labelTextProperty = vtk.vtkTextProperty()
     labelTextProperty.SetColor(0.1, 0.1, 0.1)
@@ -758,9 +860,9 @@ def drawNodeGraph(selfObject, graphPath, graph_layout_view, graphNodeColors):
     labelTextProperty.ShadowOn()
     labelTextProperty.BoldOn()
 
-    viewTheme.SetPointTextProperty(labelTextProperty)
+    graphViewTheme.SetPointTextProperty(labelTextProperty)
 
-    graph_layout_view.GetRepresentation().ApplyViewTheme(viewTheme)
+    graph_layout_view.GetRepresentation().ApplyViewTheme(graphViewTheme)
     graph_layout_view.GetRepresentation().ScalingOn()
     graph_layout_view.GetRepresentation().SetScalingArrayName('Scales')
 

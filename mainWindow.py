@@ -140,6 +140,7 @@ class mainWindow(Qt.QMainWindow):
         self.comboBox_LesionAttributes.addItem("Flatness")
         self.comboBox_LesionAttributes.addItem("Roundness")
 
+        self.comboBox_NodeGraphNodeSizeAttributes.addItem("None")
         self.comboBox_NodeGraphNodeSizeAttributes.addItem("Physical Size")
         self.comboBox_NodeGraphNodeSizeAttributes.addItem("Elongation")
         self.comboBox_NodeGraphNodeSizeAttributes.addItem("Perimeter")
@@ -670,7 +671,25 @@ class mainWindow(Qt.QMainWindow):
     # Handler for change in lesion attribute for node graph.
     @pyqtSlot()
     def on_combobox_changed_NodeGraphNodeSizeAttributes(self):
-        print("All good")
+        if (str(self.comboBox_NodeGraphNodeSizeAttributes.currentText()) == "Physical Size"):
+            self.currentNodeGraphNodeSizeVariable = "PhysicalSize"
+        if (str(self.comboBox_NodeGraphNodeSizeAttributes.currentText()) == "Elongation"):
+            self.currentNodeGraphNodeSizeVariable = "Elongation"
+        if (str(self.comboBox_NodeGraphNodeSizeAttributes.currentText()) == "Perimeter"):
+            self.currentNodeGraphNodeSizeVariable = "Perimeter"
+        if (str(self.comboBox_NodeGraphNodeSizeAttributes.currentText()) == "Spherical Radius"):
+            self.currentNodeGraphNodeSizeVariable = "SphericalRadius"
+        if (str(self.comboBox_NodeGraphNodeSizeAttributes.currentText()) == "Spherical Perimeter"):
+            self.currentNodeGraphNodeSizeVariable = "SphericalPerimeter"
+        if (str(self.comboBox_NodeGraphNodeSizeAttributes.currentText()) == "Flatness"):
+            self.currentNodeGraphNodeSizeVariable = "Flatness"
+        if (str(self.comboBox_NodeGraphNodeSizeAttributes.currentText()) == "Roundness"):
+            self.currentNodeGraphNodeSizeVariable = "Roundness"
+        # update data array
+        self.updateDataArrayForCurrentVariable(self.currentNodeGraphNodeSizeVariable)
+        Utils.updateNodeGraph(self, self.graph_layout_view, self.graphNodeColors)
+        self.irenNodeGraph.Render()
+        #Utils.drawNodeGraph(self, "asset\\dataset\\Subject1\\preProcess\\lesionGraph.gml", self.graph_layout_view, self.graphNodeColors)
 
     def enableControls(self):
         pass #TODO add control button here
@@ -762,6 +781,10 @@ class mainWindow(Qt.QMainWindow):
         self.comparison_actorlist = []
         self.toggleComparisonAndNormalView = False
         self.comparisonDataAvailable = False
+        self.ysDefaultGraph = None
+        self.currentNodeGraphNodeSizeVariable = "Physical Size"
+        self.graphNodeColors = None
+        self.timeListArray = []
         
     def renderData(self):
         self.initializeAppVariables()
@@ -1048,10 +1071,10 @@ class mainWindow(Qt.QMainWindow):
     def initializeGraphVis(self):
         print("initializing node graph...")
 
+        self.graphNodeColors = []
         # Colors for actors
-        graphNodeColors = []
         for i in range(1, 10 + 1):
-            graphNodeColors.append(self.plotColors[self.graphLegendLabelList.index(str(i))])
+            self.graphNodeColors.append(self.plotColors[self.graphLegendLabelList.index(str(i))])
 
         self.vlNodeGraph = Qt.QVBoxLayout()
         self.vtkWidgetNodeGraph = QVTKRenderWindowInteractor(self.frame_NodeGraph)
@@ -1074,7 +1097,7 @@ class mainWindow(Qt.QMainWindow):
         self.renNodeGraph.ResetCamera()
         self.frame_NodeGraph.setLayout(self.vlNodeGraph)
         self.irenNodeGraph.Initialize()
-        Utils.drawNodeGraph(self, "asset\\dataset\\Subject1\\preProcess\\lesionGraph.gml", self.graph_layout_view, graphNodeColors)
+        Utils.drawNodeGraph(self, self.graph_layout_view, self.graphNodeColors)
 
         #self.vl_graph = Qt.QVBoxLayout()
         #self.figureGraph = plt.figure(num = 4, frameon=False, clear=True)
@@ -1084,7 +1107,7 @@ class mainWindow(Qt.QMainWindow):
         #self.canvasGraph.mpl_connect('pick_event', self.nodeGraphPickEventHandler)
 
     def nodeGraphPickEventHandler(self):
-        print("pick evenet trigerred")
+        print("pick event triggered")
 
     def on_press_intensityGlyph(self, event):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
@@ -1215,11 +1238,10 @@ class mainWindow(Qt.QMainWindow):
         # edges = G.edges()
         # weights = [3 for u, v in edges]
         #
-        # graphNodeColors = []
         # for i in range(1, 10+1):
         #     graphNodeColors.append(self.plotColors[self.graphLegendLabelList.index(str(i))])
         #
-        # nx.draw_planar(G, with_labels=True, node_size=700, node_color=graphNodeColors, node_shape="h", edge_color="#4c80b3", font_color="#112840", font_weight="normal", alpha=0.5, linewidths=2, width=weights, arrowsize=20)
+        # nx.draw_planar(G, with_labels=True, node_size=700, node_color=self.graphNodeColors, node_shape="h", edge_color="#4c80b3", font_color="#112840", font_weight="normal", alpha=0.5, linewidths=2, width=weights, arrowsize=20)
         # self.canvasGraph.draw()
 
     def computeNodeOrderForGraph(self, G): #TODO NEED TO UPDATE CODE to support multilevel activity (eg split and merge in one sequence)
@@ -1369,6 +1391,35 @@ class mainWindow(Qt.QMainWindow):
             self.intensityImage.set_data(Z)  # update intensity plot data
             self.canvasDefault.draw()
 
+    # update data(lesion statistics) array based on current lesion attribute string
+    def updateDataArrayForCurrentVariable(self, lesionAttributeString):
+        print("lesion atatrinbute string is", lesionAttributeString)
+        self.dataArray = []
+        self.graphLegendLabelList = []
+        self.timeListArray = []
+        #print("node order", self.nodeOrderForGraph)
+        for id in self.nodeOrderForGraph:
+            #print("Node order", id)
+            self.graphLegendLabelList.append(str(id))
+            timeList = self.G.nodes[id]["time"]
+            labelList = self.G.nodes[id]["lesionLabel"]
+            data = []
+            for i in range(len(timeList)):
+                time = timeList[i]
+                label = labelList[i]
+                dataItem = self.getLesionData(label, time, lesionAttributeString)
+                data.append(dataItem)
+            self.timeListArray.append(timeList)
+            buckets = [0] * 81
+            buckets[timeList[0]:timeList[-1]+1] = data
+            #buckets = gaussian_filter1d(buckets, sigma = 2)
+            arr = np.asarray(buckets, dtype=np.float64)
+            self.dataArray.append(arr)
+        print("okay")
+        #x = np.linspace(0, self.dataCount, self.dataCount)
+        #random.shuffle(dataArray)
+        self.ysDefaultGraph = self.dataArray
+
     # plot default graph
     def plotDefaultGraph(self, lesionAttributeString = "PhysicalSize"):
         print("Calling plot default graph")
@@ -1394,33 +1445,12 @@ class mainWindow(Qt.QMainWindow):
         self.sub_graphs = list(nx.connected_components(self.UG))
         self.nodeOrderForGraph, self.plotColors = self.computeNodeOrderForGraph(self.G)
 
-        ys = []
-        self.dataArray = []
-        self.graphLegendLabelList = []
-        #print("node order", self.nodeOrderForGraph)
-        for id in self.nodeOrderForGraph:
-            #print("Node order", id)
-            self.graphLegendLabelList.append(str(id))
-            timeList = self.G.nodes[id]["time"]
-            labelList = self.G.nodes[id]["lesionLabel"]
-            data = []
-            for i in range(len(timeList)):
-                time = timeList[i]
-                label = labelList[i]
-                dataItem = self.getLesionData(label, time, lesionAttributeString)
-                data.append(dataItem)
-            buckets = [0] * 81
-            buckets[timeList[0]:timeList[-1]+1] = data
-            #buckets = gaussian_filter1d(buckets, sigma = 2)
-            arr = np.asarray(buckets, dtype=np.float64)
-            self.dataArray.append(arr)
-    
-        #x = np.linspace(0, self.dataCount, self.dataCount)
-        x = list(range(self.dataCount))
-        #random.shuffle(dataArray)
-        ys = self.dataArray
+        # call function for updating data array based on the current lesion attribute string.
+        self.updateDataArrayForCurrentVariable(lesionAttributeString)
 
-        self.polyCollection = self.axDefault.stackplot(x, ys, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList,  colors = self.plotColors, alpha = 0.7,linewidth=0.5, linestyle='solid', edgecolor=(0.6,0.6,0.6,1.0))
+        #print(self.ysDefaultGraph)
+        x = list(range(self.dataCount))
+        self.polyCollection = self.axDefault.stackplot(x, self.ysDefaultGraph, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList,  colors = self.plotColors, alpha = 0.7,linewidth=0.5, linestyle='solid', edgecolor=(0.6,0.6,0.6,1.0))
 
         #print(self.polyCollection)
         # dArray = self.polyCollection[0].get_array()
@@ -1752,6 +1782,12 @@ class mainWindow(Qt.QMainWindow):
         self.comparisonDataAvailable = False
         self.spinBox_RangeMax.setValue(sliderValue)
         self.updateDefaultGraph(sliderValue, None) # update graph
+
+        #Utils.drawNodeGraph(self, "asset\\dataset\\Subject1\\preProcess\\lesionGraph.gml", self.graph_layout_view, self.graphNodeColors)
+        if str(self.comboBox_NodeGraphNodeSizeAttributes.currentText()) != "None":
+            Utils.updateNodeGraph(self, self.graph_layout_view, self.graphNodeColors)
+            self.irenNodeGraph.Render()
+
         if(self.userPickedLesionID!=None):
             highlightLesionID = self.getLinkedLesionIDFromTimeStep(self.userPickedLesionID, sliderValue)
             #print("highlight id is", highlightLesionID)
