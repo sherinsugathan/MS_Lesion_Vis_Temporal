@@ -671,6 +671,8 @@ class mainWindow(Qt.QMainWindow):
     # Handler for change in lesion attribute for node graph.
     @pyqtSlot()
     def on_combobox_changed_NodeGraphNodeSizeAttributes(self):
+        if (str(self.comboBox_NodeGraphNodeSizeAttributes.currentText()) == "None"):
+            self.currentNodeGraphNodeSizeVariable = "None"
         if (str(self.comboBox_NodeGraphNodeSizeAttributes.currentText()) == "Physical Size"):
             self.currentNodeGraphNodeSizeVariable = "PhysicalSize"
         if (str(self.comboBox_NodeGraphNodeSizeAttributes.currentText()) == "Elongation"):
@@ -687,7 +689,10 @@ class mainWindow(Qt.QMainWindow):
             self.currentNodeGraphNodeSizeVariable = "Roundness"
         # update data array
         self.updateDataArrayForCurrentVariable(self.currentNodeGraphNodeSizeVariable)
-        Utils.updateNodeGraph(self, self.graph_layout_view, self.graphNodeColors)
+        if self.currentNodeGraphNodeSizeVariable == "None":
+            Utils.updateNodeGraph(self, self.graph_layout_view, self.graphNodeColors, True)
+        else:
+            Utils.updateNodeGraph(self, self.graph_layout_view, self.graphNodeColors)
         self.irenNodeGraph.Render()
         #Utils.drawNodeGraph(self, "asset\\dataset\\Subject1\\preProcess\\lesionGraph.gml", self.graph_layout_view, self.graphNodeColors)
 
@@ -1393,7 +1398,8 @@ class mainWindow(Qt.QMainWindow):
 
     # update data(lesion statistics) array based on current lesion attribute string
     def updateDataArrayForCurrentVariable(self, lesionAttributeString):
-        print("lesion atatrinbute string is", lesionAttributeString)
+        if lesionAttributeString == "None":
+            return
         self.dataArray = []
         self.graphLegendLabelList = []
         self.timeListArray = []
@@ -1415,7 +1421,6 @@ class mainWindow(Qt.QMainWindow):
             #buckets = gaussian_filter1d(buckets, sigma = 2)
             arr = np.asarray(buckets, dtype=np.float64)
             self.dataArray.append(arr)
-        print("okay")
         #x = np.linspace(0, self.dataCount, self.dataCount)
         #random.shuffle(dataArray)
         self.ysDefaultGraph = self.dataArray
@@ -1781,7 +1786,7 @@ class mainWindow(Qt.QMainWindow):
         sliderValue = self.horizontalSlider_TimePoint.value()
         self.comparisonDataAvailable = False
         self.spinBox_RangeMax.setValue(sliderValue)
-        self.updateDefaultGraph(sliderValue, None) # update graph
+        self.updateDefaultGraph(sliderValue, None)  # update graph
 
         #Utils.drawNodeGraph(self, "asset\\dataset\\Subject1\\preProcess\\lesionGraph.gml", self.graph_layout_view, self.graphNodeColors)
         if str(self.comboBox_NodeGraphNodeSizeAttributes.currentText()) != "None":

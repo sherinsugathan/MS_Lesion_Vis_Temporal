@@ -581,7 +581,7 @@ class ZoomPan:
 '''
 
 
-def updateNodeGraph(selfObject, graph_layout_view, graphNodeColors):
+def updateNodeGraph(selfObject, graph_layout_view, graphNodeColors, noEncoding = False):
     #print(selfObject.timeListArray)
     currentTimeStep = selfObject.horizontalSlider_TimePoint.value()
     nodeSizeArray = [item[currentTimeStep] for item in selfObject.ysDefaultGraph]
@@ -633,10 +633,13 @@ def updateNodeGraph(selfObject, graph_layout_view, graphNodeColors):
             scales.InsertNextValue(3)
         else:
             clr = list(graphNodeColors[i])
-            dataValue = selfObject.ysDefaultGraph[nodeOrderArrayIndex][currentTimeStep]
-            normalizedDataValue = (dataValue - minAttributeValue) / (maxAttributeValue - minAttributeValue)
-            scaleValue = 3 + normalizedDataValue * 3
-            scales.InsertNextValue(scaleValue)
+            if noEncoding is True:
+                scales.InsertNextValue(3)
+            else:
+                dataValue = selfObject.ysDefaultGraph[nodeOrderArrayIndex][currentTimeStep]
+                normalizedDataValue = (dataValue - minAttributeValue) / (maxAttributeValue - minAttributeValue)
+                scaleValue = 3 + normalizedDataValue * 3
+                scales.InsertNextValue(scaleValue)
 
         clr.append(1.0)  # A 4 element list is expected. last element is alpha
         lookupTableVertices.SetTableValue(i, clr)
