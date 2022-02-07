@@ -1475,6 +1475,31 @@ class mainWindow(Qt.QMainWindow):
         #for
         self.polyCollection = self.axDefault.stackplot(x, self.ysDefaultGraph, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList,  colors = self.plotColors, alpha = 0.7,linewidth=0.5, linestyle='solid', edgecolor=(0.6,0.6,0.6,1.0))
 
+        # Calculations to check and plot glyphs indicating new lesions.
+        w1 = mpatches.Wedge([0, 0], 80, theta1=0, theta2=180)
+        mod1glyph = w1.get_path()
+        self.stackPlotArtistYcenters = Utils.computeArtistVerticalCenterLocationsForStackPlot(self.polyCollection)
+
+        #print("FDATA lEN is ", len(self.stackPlotArtistYcenters))
+        for i in range(len(self.timeListArray)):
+            #print("DATA is ", self.stackPlotArtistYcenters)
+            yDataNewLesions = [0] * 81
+            if self.timeListArray[i][0] != 0:  # not starting with baseline scan 0
+                yDataNewLesions[self.timeListArray[i][0]] = self.stackPlotArtistYcenters[i][self.timeListArray[i][0]]
+            #print(yDataNewLesions)
+            #print(type(x))
+
+            xDataNewLesions = np.array(x)
+            yDataNewLesions = np.array(yDataNewLesions)
+            xDataNewLesions = xDataNewLesions[yDataNewLesions == self.stackPlotArtistYcenters[i][self.timeListArray[i][0]]]
+            yDataNewLesions = yDataNewLesions[yDataNewLesions == self.stackPlotArtistYcenters[i][self.timeListArray[i][0]]]
+
+            #print(xDataNewLesions)
+            #print(yDataNewLesions)
+            #print("--------------")
+            self.axDefault.scatter(xDataNewLesions, yDataNewLesions, 90, alpha=0.5, c = '#d62728', marker="*")  # , label="Luck")
+
+
         #print(self.polyCollection)
         # dArray = self.polyCollection[0].get_array()
         # print(dArray)
