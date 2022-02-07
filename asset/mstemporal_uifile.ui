@@ -1250,39 +1250,6 @@ QRadioButton::indicator:unchecked {
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton_LesionAbstractView">
-               <property name="styleSheet">
-                <string notr="true">QRadioButton {
-font: 9pt &quot;Arial&quot;;
-font-weight:200;
-color:rgb(70,70,70);
-border-width: 0px;
-}
-
-QRadioButton::indicator {
-    width:                  10px;
-    height:                 10px;
-    border-radius:          7px;
-}
-
-QRadioButton::indicator:checked {
-background-color: rgb(185,216,197);
-border-color:rgb(150,150,150);
-border:                2px solid;
-}
-
-QRadioButton::indicator:unchecked {
-    background-color:       rgb(240,240,240);
-    border:                 2px solid gray;
-	border-color:  rgb(163,163,163);
-}</string>
-               </property>
-               <property name="text">
-                <string>Abstract View</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QRadioButton" name="radioButton_LesionAbsoluteView">
                <property name="styleSheet">
                 <string notr="true">QRadioButton {
@@ -1974,6 +1941,5 @@ border-style: solid;
  <connections/>
  <buttongroups>
   <buttongroup name="radioGroup_BrainSurface"/>
-  <buttongroup name="radioGroup_Modality"/>
  </buttongroups>
 </ui>

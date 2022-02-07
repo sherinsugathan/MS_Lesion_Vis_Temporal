@@ -345,7 +345,6 @@ class mainWindow(Qt.QMainWindow):
 
         self.buttonGroupLesionView = QButtonGroup()
         self.buttonGroupLesionView.addButton(self.radioButton_LesionMeshView)
-        self.buttonGroupLesionView.addButton(self.radioButton_LesionAbstractView)
         self.buttonGroupLesionView.addButton(self.radioButton_LesionAbsoluteView)
         self.buttonGroupLesionView.setExclusive(True)
         self.buttonGroupLesionView.buttonClicked.connect(self.on_buttonGroupLesionViewChanged)
@@ -464,10 +463,10 @@ class mainWindow(Qt.QMainWindow):
                     lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
                     if self.lesionViewStyle == 2:  # Contour/silhouette memoryview
                         lesion.SetVisibility(False)
-                    if self.lesionViewStyle == 1:  # Abstract View
-                        lesion.SetVisibility(True)
-                        lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish highlight color
-                        lesion.GetProperty().SetRepresentationToSurface()
+                    # if self.lesionViewStyle == 1:  # Abstract View
+                    #     lesion.SetVisibility(True)
+                    #     lesion.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish highlight color
+                    #     lesion.GetProperty().SetRepresentationToSurface()
                     if self.lesionViewStyle == 0:  # Mesh View
                         lesion.SetVisibility(True)
                         lesion.GetProperty().SetColor(0.1961, 0.2863, 0.4588)  # Dark blue color.
@@ -527,9 +526,9 @@ class mainWindow(Qt.QMainWindow):
                 lesionID = int(lesion.GetProperty().GetInformation().Get(self.keyID))
                 if self.lesionViewStyle == 2:  # Contour/silhouette memoryview
                     lesion.SetVisibility(False)
-                if self.lesionViewStyle == 1:  # Abstract View
-                    lesion.SetVisibility(True)
-                    lesion.GetProperty().SetRepresentationToSurface()
+                # if self.lesionViewStyle == 1:  # Abstract View
+                #     lesion.SetVisibility(True)
+                #     lesion.GetProperty().SetRepresentationToSurface()
                 if self.lesionViewStyle == 0:  # Mesh View
                     lesion.SetVisibility(True)
                     lesion.GetProperty().SetRepresentationToWireframe()
@@ -751,19 +750,19 @@ class mainWindow(Qt.QMainWindow):
             for silhouetteActor in self.lesionViewSilhouettes:
                 silhouetteActor.SetVisibility(False)
             self.lesionViewStyle = 0
-        if self.buttonGroupLesionView.checkedButton().text() == "Abstract View":
-            for lesionActor in self.lesionViewSurfaces:
-                lesionActor.SetVisibility(True)
-                lesionActor.GetProperty().SetRepresentationToSurface()
-                lesionActor.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish highlight color
-            for lesionActor in self.lesionViewSurfacesOverlay:
-                lesionActor.SetVisibility(True)
-                lesionActor.GetProperty().SetRepresentationToSurface()
-                lesionActor.GetProperty().SetColor(1.0, 0, 0)  # red color
-                lesionActor.GetProperty().SetLineWidth(2)
-            for silhouetteActor in self.lesionViewSilhouettes:
-                silhouetteActor.SetVisibility(False)
-            self.lesionViewStyle = 1
+        # if self.buttonGroupLesionView.checkedButton().text() == "Abstract View":
+        #     for lesionActor in self.lesionViewSurfaces:
+        #         lesionActor.SetVisibility(True)
+        #         lesionActor.GetProperty().SetRepresentationToSurface()
+        #         lesionActor.GetProperty().SetColor(1.0, 0.9686274509803922, 0.7372549019607843)  # yellowish highlight color
+        #     for lesionActor in self.lesionViewSurfacesOverlay:
+        #         lesionActor.SetVisibility(True)
+        #         lesionActor.GetProperty().SetRepresentationToSurface()
+        #         lesionActor.GetProperty().SetColor(1.0, 0, 0)  # red color
+        #         lesionActor.GetProperty().SetLineWidth(2)
+        #     for silhouetteActor in self.lesionViewSilhouettes:
+        #         silhouetteActor.SetVisibility(False)
+        #     self.lesionViewStyle = 1
         if self.buttonGroupLesionView.checkedButton().text() == "Contour View":
             for lesionActor in self.lesionViewSurfaces:
                 lesionActor.SetVisibility(False)
@@ -794,7 +793,7 @@ class mainWindow(Qt.QMainWindow):
                 renderer.Render()
 
     def initializeAppVariables(self):
-        self.lesionViewStyle = 2  # 0: Mesh View  1: Abstract View 2: Contour View
+        self.lesionViewStyle = 2  # 0: Mesh View  2: Contour View
         self.lesionViewSurfaces = []
         self.lesionViewSurfacesOverlay = []
         self.lesionViewSilhouettes = []
