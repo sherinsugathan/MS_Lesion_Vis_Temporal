@@ -251,6 +251,7 @@ class mainWindow(Qt.QMainWindow):
         #self.styleSurface.main = self
         #self.irenDual.SetInteractorStyle(self.styleSurface)
         self.irenDual.SetInteractorStyle(self.actor_style)
+        self.irenDual.AddObserver("InteractionEvent", self.irenDualInteraction)
         self.irenDual.Initialize()
 
         self.vl_MPRA = Qt.QVBoxLayout()
@@ -358,6 +359,15 @@ class mainWindow(Qt.QMainWindow):
         self.label_Riso.hide()
         self.label_6.hide()
 
+
+    def irenDualInteraction(self, obj, event):
+        brainContextRenderer = self.irenDual.GetRenderWindow().GetRenderers().GetItemAsObject(0)
+        lesionRenderer = self.irenDual.GetRenderWindow().GetRenderers().GetItemAsObject(3)
+        camera = vtk.vtkCamera()
+        camera.DeepCopy(lesionRenderer.GetActiveCamera())
+        brainContextRenderer.SetActiveCamera(camera)
+
+
     def keyPressRen1(self, obj, event):
         if self.comparisonDataAvailable is False:
             return
@@ -423,13 +433,16 @@ class mainWindow(Qt.QMainWindow):
         if lesionTimeIndex[5] > self.dataCount:
             lesionTimeIndex[5] = None
 
+        brainContextRenderer = None
         #print("Lesion Time Index", lesionTimeIndex)
-
         # REAL TIMELINE DATA ADDACTOR AND RENDER
         for i in range(rendererCollection.GetNumberOfItems()-1):
-            if i == 0:  # ignore brain surface renderer
-                continue
             renderer = rendererCollection.GetItemAsObject(i)
+            if i == 0:  # ignore brain surface renderer
+                brainContextRenderer = renderer
+                #renderer.SetActiveCamera(rendererCollection.GetItemAsObject(3).GetActiveCamera())
+                continue
+            #renderer = rendererCollection.GetItemAsObject(i)
             renderer.RemoveAllViewProps()
 
             # REAL TIMELINE DATA ADDACTOR AND RENDER
@@ -494,6 +507,9 @@ class mainWindow(Qt.QMainWindow):
                     renderer.ResetCamera()
                 renderer.Render()
 
+        camera = vtk.vtkCamera()
+        camera.DeepCopy(rendererCollection.GetItemAsObject(3).GetActiveCamera())
+        brainContextRenderer.SetActiveCamera(camera)
 
 
         # SHIFTED TIMELINE DATA ADDACTOR AND RENDER
@@ -1455,6 +1471,8 @@ class mainWindow(Qt.QMainWindow):
 
         #print(self.ysDefaultGraph)
         x = list(range(self.dataCount))
+        #print(self.timeListArray)
+        #for
         self.polyCollection = self.axDefault.stackplot(x, self.ysDefaultGraph, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList,  colors = self.plotColors, alpha = 0.7,linewidth=0.5, linestyle='solid', edgecolor=(0.6,0.6,0.6,1.0))
 
         #print(self.polyCollection)
