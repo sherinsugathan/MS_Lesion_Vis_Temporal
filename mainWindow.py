@@ -1081,7 +1081,10 @@ class mainWindow(Qt.QMainWindow):
         self.vl_default = Qt.QVBoxLayout()
         #self.figureDefault = plt.figure(num = 3, frameon=False, clear=True)
         self.figureDefault, (self.axDefaultIntensity, self.axDefault) = plt.subplots(2, 1, num=3, sharex = True, gridspec_kw={'height_ratios': [1, 4]})
-
+        self.axDefaultIntensity.spines['right'].set_visible(False)
+        self.axDefaultIntensity.spines['top'].set_visible(False)
+        self.axDefaultIntensity.spines['bottom'].set_visible(False)
+        self.axDefaultIntensity.spines['left'].set_visible(False)
         self.canvasDefault = FigureCanvas(self.figureDefault)
         self.vl_default.addWidget(self.canvasDefault)
         self.frameDefaultGraph.setLayout(self.vl_default)
@@ -1384,11 +1387,9 @@ class mainWindow(Qt.QMainWindow):
     # plot intensity graph for main streamgraph
     def plotIntensityAnalysisPlot(self, nodeID):
         if self.intensityImage is None:  # check if the plot is empty
-            print("Entereing here with ", nodeID)
             # Z = np.random.rand(2, dataCount)
             realNodeID = self.graphLegendLabelList.index(str(nodeID))
             Z = np.vstack((self.intensityArray[realNodeID], self.intensityArrayT2[realNodeID]))
-            print(Z.shape)
             self.intensityImage = self.axDefaultIntensity.imshow(Z, aspect='auto', cmap='gray') #  , vmin=0, vmax=255)
             #self.intensityImage = self.axDefaultIntensity.pcolormesh(Z)
             self.axDefaultIntensity.set_yticks([0, 1])  # Set two values as ticks.
@@ -1410,7 +1411,6 @@ class mainWindow(Qt.QMainWindow):
         else:  # if already plotted, then just update data
             realNodeID = self.graphLegendLabelList.index(str(nodeID))
             Z = np.vstack((self.intensityArray[realNodeID], self.intensityArrayT2[realNodeID]))
-            print(Z.shape)
             self.intensityImage.set_data(Z)  # update intensity plot data
         self.canvasDefault.draw()
 
@@ -1436,7 +1436,7 @@ class mainWindow(Qt.QMainWindow):
             self.timeListArray.append(timeList)
             buckets = [0] * 81
             buckets[timeList[0]:timeList[-1]+1] = data
-            #buckets = gaussian_filter1d(buckets, sigma = 2)
+            buckets = gaussian_filter1d(buckets, sigma = 1.5)
             arr = np.asarray(buckets, dtype=np.float64)
             self.dataArray.append(arr)
         #x = np.linspace(0, self.dataCount, self.dataCount)

@@ -1173,35 +1173,6 @@ border-color:rgb(150,150,150);
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_ApplyFollowupInterval">
-               <property name="styleSheet">
-                <string notr="true">QPushButton:hover#pushButton_ApplyFollowupInterval
-{
-background-color: #99b6a4;
-border-color:rgb(150,150,150);
-color: rgb(255, 255, 255);
-}
-QPushButton:pressed#pushButton_ApplyFollowupInterval {background-color:rgb(185,216,197);}
-QPushButton#pushButton_ApplyFollowupInterval
-{
-background-color: rgb(185,216,197);
-color: rgb(70,70,70);
-border-style: outset;
-border-width: 0px;
-border-color:rgb(220,220,220);
-border-radius: 4px;
-font: 9pt &quot;Arial&quot;;
-font-weight:200;
-padding:6px;
-border-style: solid;
-}</string>
-               </property>
-               <property name="text">
-                <string>Apply</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QLabel" name="label_3">
                <property name="styleSheet">
                 <string notr="true">font: 9pt &quot;Arial&quot;;
