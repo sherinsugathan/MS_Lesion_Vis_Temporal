@@ -11,6 +11,7 @@ from vtkmodules.vtkCommonColor import vtkNamedColors
 import itertools
 import keyboard as kb
 from datetime import datetime
+import SimpleITK as sitk
 import matplotlib.pyplot as plt
 
 class ReadThread(QObject): 
@@ -234,6 +235,7 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
                     #self.lesionvis.on_sliderChangedTimePoint() # DO NOT ENABLE. BUG
                     self.lesionvis.updateLesionOverlayText()
                     self.lesionvis.updateContourComparisonView(self.lesionvis.userPickedLesionID)
+                    self.autoNavigateSlices()
                 else:
                     self.resetToDefaultViewLesions()
                     self.lesionvis.userPickedLesionID = None
@@ -247,6 +249,18 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
 
         self.OnLeftButtonUp()
         return
+
+    def autoNavigateSlices(self):
+        print("hello")
+        currentTimeStep = self.lesionvis.horizontalSlider_TimePoint.value()
+        test = self.lesionvis.userPickedLesionID
+        sliceNumbers = computeSlicePositionFrom3DCoordinates(self.lesionvis.folder, self.lesionvis.structureInfo[str(currentTimeStep)][0][str(test)][0]['Centroid'][0:3])
+        print("Slice numbers ", sliceNumbers)
+        self.lesionvis.mprA_Slice_Slider.setValue(sliceNumbers[0])
+        self.lesionvis.mprB_Slice_Slider.setValue(sliceNumbers[1])
+        self.lesionvis.mprC_Slice_Slider.setValue(sliceNumbers[2])
+        #print(self.lesionvis.structureInfo[str(currentTimeStep)][0][str(label+1)][0]['Centroid'][0]))
+        #print(self.lesionvis.structureInfo[str(currentTimeStep)][0][str(test)][0]['Centroid'][0:3])
 
     def resetToDefaultViewLesions(self):
         if(self.LastPickedActor!=None):
@@ -924,3 +938,20 @@ def captureScreenshot(renderWindow):
     writer.SetFileName(fileName)
     writer.SetInputConnection(windowToImageFilter.GetOutputPort())
     writer.Write()
+
+'''
+##########################################################################
+    Compute slide numbers from 3D world coordinates.
+    Returns: IJK coordinates (slice positions).
+##########################################################################
+'''
+def computeSlicePositionFrom3DCoordinates(subjectFolder, pt):
+    fileNameT1 = str(subjectFolder + "\\structural\\T1.nii")
+    # Read T1 data.
+    readerT1 = sitk.ImageFileReader()
+    readerT1.SetFileName(fileNameT1)
+    readerT1.LoadPrivateTagsOn()
+    readerT1.ReadImageInformation()
+    readerT1.LoadPrivateTagsOn()
+    imageT1 = sitk.ReadImage(fileNameT1)
+    return imageT1.TransformPhysicalPointToIndex(pt) # Return IJK coordinates
