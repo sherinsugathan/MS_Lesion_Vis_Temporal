@@ -1382,11 +1382,13 @@ class mainWindow(Qt.QMainWindow):
             #print('data coords %f %f' % (event.xdata, event.ydata))
 
     # plot intensity graph for main streamgraph
-    def plotIntensityAnalysisPlot(self, nodeID=None):
-        if(nodeID == None): # no manual pick from user
-            nodeID = 0
+    def plotIntensityAnalysisPlot(self, nodeID):
+        if self.intensityImage is None:  # check if the plot is empty
+            print("Entereing here with ", nodeID)
             # Z = np.random.rand(2, dataCount)
-            Z = np.vstack((self.intensityArray[nodeID], self.intensityArrayT2[nodeID]))
+            realNodeID = self.graphLegendLabelList.index(str(nodeID))
+            Z = np.vstack((self.intensityArray[realNodeID], self.intensityArrayT2[realNodeID]))
+            print(Z.shape)
             self.intensityImage = self.axDefaultIntensity.imshow(Z, aspect='auto', cmap='gray') #  , vmin=0, vmax=255)
             #self.intensityImage = self.axDefaultIntensity.pcolormesh(Z)
             self.axDefaultIntensity.set_yticks([0, 1])  # Set two values as ticks.
@@ -1405,11 +1407,12 @@ class mainWindow(Qt.QMainWindow):
             minor_locator = AutoMinorLocator(2)
             self.axDefaultIntensity.xaxis.set_minor_locator(minor_locator)
             self.axDefaultIntensity.grid(which='minor', color='#ffffff', alpha=0.2, linestyle='-', linewidth=1)
-        else:  # user picked an item from streamgraph
+        else:  # if already plotted, then just update data
             realNodeID = self.graphLegendLabelList.index(str(nodeID))
             Z = np.vstack((self.intensityArray[realNodeID], self.intensityArrayT2[realNodeID]))
+            print(Z.shape)
             self.intensityImage.set_data(Z)  # update intensity plot data
-            self.canvasDefault.draw()
+        self.canvasDefault.draw()
 
     # update data(lesion statistics) array based on current lesion attribute string
     def updateDataArrayForCurrentVariable(self, lesionAttributeString):
@@ -1516,7 +1519,7 @@ class mainWindow(Qt.QMainWindow):
         # # PLOTTING OVERLAY GLYPHS. (new)
         self.intensityArray = self.getIntensityDataForStackplotArtist(self.nodeOrderForGraph)
         self.intensityArrayT2 = self.getIntensityDataForStackplotArtist(self.nodeOrderForGraph, "MeanT2")
-        self.plotIntensityAnalysisPlot()
+        #self.plotIntensityAnalysisPlot()
         #print("Type of array is ", type(self.intensityArray[0]))
         #print(self.intensityArray[0].shape)
 
@@ -2147,7 +2150,10 @@ class mainWindow(Qt.QMainWindow):
             lesionActor.SetMapper(mapper)
             self.comparison_actorlist.append(lesionActor)
         
-        # Update renderer
+        # Upd╔═╦═╦╗╔══╦═╦═╗
+        # ║╬║║║║╚║║╣╔╣╦╝
+        # ║╔╣║║╚╦║║╣╚╣╩╗
+        # ╚╝╚═╩═╩══╩═╩═╝ate renderer
         self.ren.RemoveAllViewProps()
         for lesion in self.comparison_actorlist:
             self.ren.AddActor(lesion)
