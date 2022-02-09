@@ -1499,7 +1499,7 @@ class mainWindow(Qt.QMainWindow):
             #print(xDataNewLesions)
             #print(yDataNewLesions)
             #print("--------------")
-            self.axDefault.scatter(xDataNewLesions, yDataNewLesions, 90, alpha=0.5, c = '#d62728', marker="*")  # , label="Luck")
+            self.axDefault.scatter(xDataNewLesions, yDataNewLesions, 90, alpha=0.5, c = '#464646', marker="^", label="New Lesion")
 
 
         #print(self.polyCollection)
