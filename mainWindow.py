@@ -165,6 +165,7 @@ class mainWindow(Qt.QMainWindow):
         self.pushButton_ResetView.clicked.connect(self.resetViewAllRenderers)  # Attaching button click handler.
         #self.pushButton_IntensityAnalysis.clicked.connect(self.loadIntensityAnalysisPage) # Attaching button click handler for intensity analysis page.
         self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
+        self.horizontalSlider_DeltaThreshold.valueChanged.connect(self.on_sliderChangedDeltaThreshold)  # Attaching slider value changed handler.
         self.horizontalSlider_FollowupInterval.valueChanged.connect(self.on_sliderChangedFollowupInterval)  # Attaching slider value changed handler for change in followup interval.
         self.horizontalSlider_Riso.valueChanged.connect(self.on_sliderChangedRiso) # Attaching slider value (Riso) changed handler.
         self.comboBox_LesionAttributes.currentTextChanged.connect(self.on_combobox_changed_LesionAttributes) # Attaching handler for lesion filter combobox selection change.
@@ -1390,6 +1391,7 @@ class mainWindow(Qt.QMainWindow):
             # Z = np.random.rand(2, dataCount)
             realNodeID = self.graphLegendLabelList.index(str(nodeID))
             Z = np.vstack((self.intensityArray[realNodeID], self.intensityArrayT2[realNodeID]))
+            #print(Z)
             self.intensityImage = self.axDefaultIntensity.imshow(Z, aspect='auto', cmap='gray') #  , vmin=0, vmax=255)
             #self.intensityImage = self.axDefaultIntensity.pcolormesh(Z)
             self.axDefaultIntensity.set_yticks([0, 1])  # Set two values as ticks.
@@ -1660,10 +1662,12 @@ class mainWindow(Qt.QMainWindow):
 
         #dataArray = self.getIntensityDataMatrix(nodeID)
         dataArray = self.getIntensityDataArray(nodeID)
+
         #print("DIM IS ", dataArray.shape)
         #print("ARRAY IS", intensityArray)
         dataArrayDerivative = diff(dataArray)
         #print("how many items", len(dataArrayDerivative))
+        #print("diff is", dataArrayDerivative)
 
         #y0 = dataArrayDerivative[0]
         #y1 = dataArrayDerivative[1]
@@ -1673,7 +1677,13 @@ class mainWindow(Qt.QMainWindow):
 
         x = list(range(1, self.dataCount))
 
-        threshold = 0.004
+        OldRange = 100
+        NewRange = 0.008
+        threshold = (((self.horizontalSlider_DeltaThreshold.value()) * NewRange) / OldRange) + 0.001
+
+        #print("threshold is", threshold)
+
+        #threshold = self.horizontalSlider_DeltaThreshold.value()/100
 
 
         xTrendUp = [np.nan] * self.dataCount
@@ -1688,7 +1698,7 @@ class mainWindow(Qt.QMainWindow):
 
         for y in range(len(dataArrayDerivative)):
             for x in range(1, self.dataCount):
-                if math.isnan(dataArrayDerivative[y][x-1]): # No data point needed at locations where there is nan
+                if math.isnan(dataArrayDerivative[y][x-1]):  # No data point needed at locations where there is nan
                     continue
                 if dataArrayDerivative[y][x - 1] > threshold:  # A significant increase.
                     xSpikeUp[x] = x
@@ -1704,7 +1714,7 @@ class mainWindow(Qt.QMainWindow):
                     continue
                 if dataArrayDerivative[y][x - 1] < 0:  # A decreasing trend of intensities.
                     xTrendDown[x] = x
-                    xTrendDown[x] = y
+                    yTrendDown[x] = y
                     continue
 
         if (self.overlayGlyphActive == False):
@@ -1729,8 +1739,7 @@ class mainWindow(Qt.QMainWindow):
             self.scatterSpikeUp.set_offsets(offsetValuesSpikeUp)  # significant increase
             self.scatterSpikeDown.set_offsets(offsetValuesSpikeDown)  # significant decrease
 
-            #self.canvasDefault.draw()
-            #self.canvasDefault.draw()
+        self.canvasDefault.draw()
 
     def readIntensityDataFromJSON(self, timeList, labelList, modality = "Mean"):
         intensityList = []
@@ -1869,6 +1878,11 @@ class mainWindow(Qt.QMainWindow):
 
         #self.ren.ResetCamera()
         self.iren.Render()
+
+    # Handler for intensity delta threshold slider change
+    @pyqtSlot()
+    def on_sliderChangedDeltaThreshold(self):
+        self.plotIntensityChangeIndicatorGlyphs(int(self.selectedNodeID))
 
     # Handler for followup interval change.
     @pyqtSlot()

@@ -853,8 +853,8 @@ def drawNodeGraph(selfObject, graph_layout_view, graphNodeColors):
     textActorTitle.GetTextProperty().SetFontFamily(4)
     textActorTitle.GetTextProperty().SetFontFile("asset\\arial.ttf")
     textActorTitle.GetTextProperty().SetFontSize(14)
-    textActorTitle.GetTextProperty().SetColor(0.4, 0.4, 0.4)
-    textActorTitle.SetInput("Lesion Activity Graph")
+    textActorTitle.GetTextProperty().SetColor(0.2, 0.2, 0.2)
+    textActorTitle.SetInput("Lesion Activity Graph\r\nWhite Nodes: Lesions absent in the current followup data \r\n")
 
     rGraph = vtk.vtkRenderedGraphRepresentation()
     gGlyph = vtk.vtkGraphToGlyphs()
