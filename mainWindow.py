@@ -366,12 +366,15 @@ class mainWindow(Qt.QMainWindow):
         pokedRendererID = id(obj.FindPokedRenderer(clickPos[0], clickPos[1]))
         brainContextRenderer = self.irenDual.GetRenderWindow().GetRenderers().GetItemAsObject(0)
         if(id(brainContextRenderer) == pokedRendererID):
+            #print("here1", brainContextRenderer.GetActiveCamera().GetClippingRange())
             return
         lesionRenderer = self.irenDual.GetRenderWindow().GetRenderers().GetItemAsObject(3)
         camera = vtk.vtkCamera()
         camera.DeepCopy(lesionRenderer.GetActiveCamera())
         brainContextRenderer.SetActiveCamera(camera)
-
+        brainContextRenderer.GetActiveCamera().Zoom(self.brainContextZoomLevel)
+        brainContextRenderer.GetActiveCamera().SetClippingRange(0.3124161595600575, 312.4161595600575) #TODO remove this hardcoding
+        #print("here2", brainContextRenderer.GetActiveCamera().GetClippingRange())
 
     def keyPressRen1(self, obj, event):
         if self.comparisonDataAvailable is False:
@@ -593,6 +596,7 @@ class mainWindow(Qt.QMainWindow):
             self.focusLesionActors.append(actorCollection.GetItemAsObject(i))
 
         self.renDual.AddActor(self.surfaceActors[0])
+        self.renDual.GetActiveCamera().Zoom(self.brainContextZoomLevel)
         self.irenDual.Render()
 
 
@@ -839,6 +843,7 @@ class mainWindow(Qt.QMainWindow):
         self.timeListArray = []
         self.selectedNodeID = None
         self.currentLesionAttribute = "PhysicalSize"
+        self.brainContextZoomLevel = 0.3
         
     def renderData(self):
         self.initializeAppVariables()
@@ -1480,7 +1485,7 @@ class mainWindow(Qt.QMainWindow):
 
     # plot default graph
     def plotDefaultGraph(self, lesionAttributeString = "PhysicalSize"):
-        print("Calling plot default graph")
+        #print("Calling plot default graph")
         # clearing old figures
         #self.figureDefault.clear()
         self.axDefault.clear() #TODO: can remove this and implement setdata for performance?
