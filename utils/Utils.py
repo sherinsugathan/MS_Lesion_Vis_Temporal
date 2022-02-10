@@ -251,11 +251,11 @@ class CustomMouseInteractorLesions(vtk.vtkInteractorStyleTrackballCamera):
         return
 
     def autoNavigateSlices(self):
-        print("hello")
+        #print("hello")
         currentTimeStep = self.lesionvis.horizontalSlider_TimePoint.value()
         test = self.lesionvis.userPickedLesionID
         sliceNumbers = computeSlicePositionFrom3DCoordinates(self.lesionvis.folder, self.lesionvis.structureInfo[str(currentTimeStep)][0][str(test)][0]['Centroid'][0:3])
-        print("Slice numbers ", sliceNumbers)
+        #print("Slice numbers ", sliceNumbers)
         self.lesionvis.mprA_Slice_Slider.setValue(sliceNumbers[0])
         self.lesionvis.mprB_Slice_Slider.setValue(sliceNumbers[1])
         self.lesionvis.mprC_Slice_Slider.setValue(sliceNumbers[2])

@@ -701,9 +701,9 @@ class mainWindow(Qt.QMainWindow):
     @pyqtSlot()
     def state_changed_checkBoxEnlargingLesions(self):
         if self.checkBox_EnlargingLesions.isChecked():
-            print("checked")
+            self.plotDefaultGraph(self.currentLesionAttribute)
         else:
-            print("unchecked")
+            self.plotDefaultGraph(self.currentLesionAttribute)
 
     # Handler for projection method selection changed.
     @pyqtSlot()
@@ -1466,7 +1466,7 @@ class mainWindow(Qt.QMainWindow):
             self.timeListArray.append(timeList)
             buckets = [0] * 81
             buckets[timeList[0]:timeList[-1]+1] = data
-            buckets = gaussian_filter1d(buckets, sigma = 1.5)
+            #buckets = gaussian_filter1d(buckets, sigma = 1.5)
             arr = np.asarray(buckets, dtype=np.float64)
             self.dataArray.append(arr)
         #x = np.linspace(0, self.dataCount, self.dataCount)
@@ -1501,10 +1501,15 @@ class mainWindow(Qt.QMainWindow):
         # call function for updating data array based on the current lesion attribute string.
         self.updateDataArrayForCurrentVariable(lesionAttributeString)
 
+        # for ele in self.ysDefaultGraph:
+        #     print(len(ele))
         #print(self.ysDefaultGraph)
         x = list(range(self.dataCount))
         #print(self.timeListArray)
-        #for
+
+        ##################
+        # MAIN STACK PLOT
+        ##################
         self.polyCollection = self.axDefault.stackplot(x, self.ysDefaultGraph, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList,  colors = self.plotColors, alpha = 0.7,linewidth=0.5, linestyle='solid', edgecolor=(0.6,0.6,0.6,1.0))
 
         # Calculations to check and plot glyphs indicating new lesions.
@@ -1514,24 +1519,34 @@ class mainWindow(Qt.QMainWindow):
 
         #print("FDATA lEN is ", len(self.stackPlotArtistYcenters))
         for i in range(len(self.timeListArray)):
+
+            physicalSizeBackwardDiffList = np.diff(self.ysDefaultGraph[i])
+            physicalSizeBackwardDiffList = np.insert(physicalSizeBackwardDiffList, 0, 0)
             #print("DATA is ", self.stackPlotArtistYcenters)
             yDataNewLesions = [0] * 81
+            yDataEnlargingLesions = [0] * 81
+
             if self.timeListArray[i][0] != 0:  # not starting with baseline scan 0
                 yDataNewLesions[self.timeListArray[i][0]] = self.stackPlotArtistYcenters[i][self.timeListArray[i][0]]
-            #print(yDataNewLesions)
-            #print(type(x))
 
             xDataNewLesions = np.array(x)
             yDataNewLesions = np.array(yDataNewLesions)
             xDataNewLesions = xDataNewLesions[yDataNewLesions == self.stackPlotArtistYcenters[i][self.timeListArray[i][0]]]
             yDataNewLesions = yDataNewLesions[yDataNewLesions == self.stackPlotArtistYcenters[i][self.timeListArray[i][0]]]
 
+
+            xDataEnlargingLesions = np.array(x)
+            yDataEnlargingLesions = physicalSizeBackwardDiffList
+            #print(yDataEnlargingLesions)
+            xDataEnlargingLesions = xDataEnlargingLesions[yDataEnlargingLesions > 0]
+            yDataEnlargingLesions = self.stackPlotArtistYcenters[i][yDataEnlargingLesions > 0]
             #print(xDataNewLesions)
             #print(yDataNewLesions)
             #print("--------------")
             if self.checkBox_NewLesions.isChecked():
                 self.axDefault.scatter(xDataNewLesions, yDataNewLesions, 90, alpha=0.5, c = '#464646', marker="^", label="New Lesion")
-
+            if self.checkBox_EnlargingLesions.isChecked():
+                self.axDefault.scatter(xDataEnlargingLesions, yDataEnlargingLesions, 90, alpha=0.5, c='#464646', marker=".", label="Enlarging Lesion")
 
         #print(self.polyCollection)
         # dArray = self.polyCollection[0].get_array()
