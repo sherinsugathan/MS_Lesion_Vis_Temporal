@@ -450,6 +450,7 @@ class mainWindow(Qt.QMainWindow):
                 renderer.RemoveAllViewProps()
                 continue
             else:  # Add valid lesion to renderer.
+                renderer.GetActiveCamera().ParallelProjectionOn()
                 if i != 3:  # Set camera of middle renderer to the rest.
                     renderer.SetActiveCamera(rendererCollection.GetItemAsObject(3).GetActiveCamera())
                 #print("i value is", i)
@@ -1668,7 +1669,7 @@ class mainWindow(Qt.QMainWindow):
         dataArrayDerivative = diff(dataArray)
         #print("how many items", len(dataArrayDerivative))
         #print("diff is", dataArrayDerivative)
-
+        print("Max data driv is", np.nanmax(dataArrayDerivative))
         #y0 = dataArrayDerivative[0]
         #y1 = dataArrayDerivative[1]
 
