@@ -163,6 +163,8 @@ class mainWindow(Qt.QMainWindow):
         self.pushButton_LoadFolder.clicked.connect(self.autoLoadData) # Attaching button click handler.
         self.pushButton_Compare.clicked.connect(self.compareDataAndUpdateSurface)  # Attaching button click handler.
         self.pushButton_ResetView.clicked.connect(self.resetViewAllRenderers)  # Attaching button click handler.
+        self.checkBox_NewLesions.stateChanged.connect(self.state_changed_checkBoxNewLesions)  # Attaching handler for checkbox state change.
+        self.checkBox_EnlargingLesions.stateChanged.connect(self.state_changed_checkBoxEnlargingLesions)  # Attaching handler for checkbox state change.
         #self.pushButton_IntensityAnalysis.clicked.connect(self.loadIntensityAnalysisPage) # Attaching button click handler for intensity analysis page.
         self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
         self.horizontalSlider_DeltaThreshold.valueChanged.connect(self.on_sliderChangedDeltaThreshold)  # Attaching slider value changed handler.
@@ -667,18 +669,41 @@ class mainWindow(Qt.QMainWindow):
     def on_combobox_changed_LesionAttributes(self): 
         if (str(self.comboBox_LesionAttributes.currentText())=="Physical Size"):
             self.plotDefaultGraph("PhysicalSize")
+            self.currentLesionAttribute = "PhysicalSize"
         if (str(self.comboBox_LesionAttributes.currentText())=="Elongation"):
             self.plotDefaultGraph("Elongation")
+            self.currentLesionAttribute = "Elongation"
         if (str(self.comboBox_LesionAttributes.currentText())=="Perimeter"):
             self.plotDefaultGraph("Perimeter")
+            self.currentLesionAttribute = "Perimeter"
         if (str(self.comboBox_LesionAttributes.currentText())=="Spherical Radius"):
             self.plotDefaultGraph("SphericalRadius")
+            self.currentLesionAttribute = "SphericalRadius"
         if (str(self.comboBox_LesionAttributes.currentText())=="Spherical Perimeter"):
             self.plotDefaultGraph("SphericalPerimeter")
+            self.currentLesionAttribute = "SphericalPerimeter"
         if (str(self.comboBox_LesionAttributes.currentText())=="Flatness"):
             self.plotDefaultGraph("Flatness")
+            self.currentLesionAttribute = "Flatness"
         if (str(self.comboBox_LesionAttributes.currentText())=="Roundness"):
-            self.plotDefaultGraph("Roundness") 
+            self.plotDefaultGraph("Roundness")
+            self.currentLesionAttribute = "Roundness"
+
+    # Handler for new lesions checkbox changed.
+    @pyqtSlot()
+    def state_changed_checkBoxNewLesions(self):
+        if self.checkBox_NewLesions.isChecked():
+            self.plotDefaultGraph(self.currentLesionAttribute)
+        else:
+            self.plotDefaultGraph(self.currentLesionAttribute)
+
+    # Handler for enlarging lesions checkbox changed.
+    @pyqtSlot()
+    def state_changed_checkBoxEnlargingLesions(self):
+        if self.checkBox_EnlargingLesions.isChecked():
+            print("checked")
+        else:
+            print("unchecked")
 
     # Handler for projection method selection changed.
     @pyqtSlot()
@@ -808,6 +833,7 @@ class mainWindow(Qt.QMainWindow):
         self.graphNodeColors = None
         self.timeListArray = []
         self.selectedNodeID = None
+        self.currentLesionAttribute = "PhysicalSize"
         
     def renderData(self):
         self.initializeAppVariables()
@@ -1482,8 +1508,8 @@ class mainWindow(Qt.QMainWindow):
         self.polyCollection = self.axDefault.stackplot(x, self.ysDefaultGraph, baseline='zero', picker=True, pickradius=1, labels = self.graphLegendLabelList,  colors = self.plotColors, alpha = 0.7,linewidth=0.5, linestyle='solid', edgecolor=(0.6,0.6,0.6,1.0))
 
         # Calculations to check and plot glyphs indicating new lesions.
-        w1 = mpatches.Wedge([0, 0], 80, theta1=0, theta2=180)
-        mod1glyph = w1.get_path()
+        #w1 = mpatches.Wedge([0, 0], 80, theta1=0, theta2=180)
+        #mod1glyph = w1.get_path()
         self.stackPlotArtistYcenters = Utils.computeArtistVerticalCenterLocationsForStackPlot(self.polyCollection)
 
         #print("FDATA lEN is ", len(self.stackPlotArtistYcenters))
@@ -1503,7 +1529,8 @@ class mainWindow(Qt.QMainWindow):
             #print(xDataNewLesions)
             #print(yDataNewLesions)
             #print("--------------")
-            self.axDefault.scatter(xDataNewLesions, yDataNewLesions, 90, alpha=0.5, c = '#464646', marker="^", label="New Lesion")
+            if self.checkBox_NewLesions.isChecked():
+                self.axDefault.scatter(xDataNewLesions, yDataNewLesions, 90, alpha=0.5, c = '#464646', marker="^", label="New Lesion")
 
 
         #print(self.polyCollection)
