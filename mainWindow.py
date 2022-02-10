@@ -807,6 +807,7 @@ class mainWindow(Qt.QMainWindow):
         self.currentNodeGraphNodeSizeVariable = "Physical Size"
         self.graphNodeColors = None
         self.timeListArray = []
+        self.selectedNodeID = None
         
     def renderData(self):
         self.initializeAppVariables()
@@ -1574,6 +1575,9 @@ class mainWindow(Qt.QMainWindow):
         figZoomDefault = zpDefault.zoom_factory(self.axDefault, base_scale = scale)
         figPanDefault = zpDefault.pan_factory(self.axDefault)
 
+        # If there is already a band selected while switching lesion parameters, maintain the band highlighting
+        if self.selectedNodeID is not None:
+            self.updateDefaultGraph(None, [self.selectedNodeID])
 
     # update default graph
     def updateDefaultGraph(self, vlineXloc=None, updateColorIndex=None):
