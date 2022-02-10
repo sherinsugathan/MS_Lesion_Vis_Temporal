@@ -361,9 +361,12 @@ class mainWindow(Qt.QMainWindow):
         self.label_Riso.hide()
         self.label_6.hide()
 
-
     def irenDualInteraction(self, obj, event):
+        clickPos = obj.GetEventPosition()
+        pokedRendererID = id(obj.FindPokedRenderer(clickPos[0], clickPos[1]))
         brainContextRenderer = self.irenDual.GetRenderWindow().GetRenderers().GetItemAsObject(0)
+        if(id(brainContextRenderer) == pokedRendererID):
+            return
         lesionRenderer = self.irenDual.GetRenderWindow().GetRenderers().GetItemAsObject(3)
         camera = vtk.vtkCamera()
         camera.DeepCopy(lesionRenderer.GetActiveCamera())
@@ -513,6 +516,8 @@ class mainWindow(Qt.QMainWindow):
         camera = vtk.vtkCamera()
         camera.DeepCopy(rendererCollection.GetItemAsObject(3).GetActiveCamera())
         brainContextRenderer.SetActiveCamera(camera)
+        #print(id(camera))
+        #print(id(rendererCollection.GetItemAsObject(3).GetActiveCamera()))
 
 
         # SHIFTED TIMELINE DATA ADDACTOR AND RENDER
