@@ -1700,7 +1700,7 @@ class mainWindow(Qt.QMainWindow):
         dataArrayDerivative = diff(dataArray)
         #print("how many items", len(dataArrayDerivative))
         #print("diff is", dataArrayDerivative)
-        print("Max data driv is", np.nanmax(dataArrayDerivative))
+        #print("Max data driv is", np.nanmax(dataArrayDerivative))
         #y0 = dataArrayDerivative[0]
         #y1 = dataArrayDerivative[1]
 
@@ -1814,10 +1814,11 @@ class mainWindow(Qt.QMainWindow):
     def getIntensityDataArray(self, id):
         intensityArrayT1 = np.empty(self.dataCount)*np.nan
         intensityArrayT2 = np.empty(self.dataCount) * np.nan
-        G = nx.read_gml("asset\\dataset\\Subject1\\preProcess\\lesionGraph.gml")
+        #G = nx.read_gml("asset\\dataset\\Subject1\\preProcess\\lesionGraph.gml")
+
         #connectedComponents = nx.strongly_connected_components(G)
-        timeList = G.nodes[str(id)]["time"]
-        labelList = G.nodes[str(id)]["lesionLabel"]
+        timeList = self.G.nodes[str(id)]["time"]
+        labelList = self.G.nodes[str(id)]["lesionLabel"]
         diffListT1 = self.readIntensityDataFromJSON(timeList, labelList, "Mean")
         diffListT2 = self.readIntensityDataFromJSON(timeList, labelList, "MeanT2")
         intensityArrayT1[timeList] = [elem for elem in diffListT1]
@@ -2196,10 +2197,7 @@ class mainWindow(Qt.QMainWindow):
             lesionActor.SetMapper(mapper)
             self.comparison_actorlist.append(lesionActor)
         
-        # Upd╔═╦═╦╗╔══╦═╦═╗
-        # ║╬║║║║╚║║╣╔╣╦╝
-        # ║╔╣║║╚╦║║╣╚╣╩╗
-        # ╚╝╚═╩═╩══╩═╩═╝ate renderer
+        # Update renderer
         self.ren.RemoveAllViewProps()
         for lesion in self.comparison_actorlist:
             self.ren.AddActor(lesion)
