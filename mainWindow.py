@@ -165,6 +165,7 @@ class mainWindow(Qt.QMainWindow):
         self.pushButton_ResetView.clicked.connect(self.resetViewAllRenderers)  # Attaching button click handler.
         self.checkBox_NewLesions.stateChanged.connect(self.state_changed_checkBoxNewLesions)  # Attaching handler for checkbox state change.
         self.checkBox_EnlargingLesions.stateChanged.connect(self.state_changed_checkBoxEnlargingLesions)  # Attaching handler for checkbox state change.
+        self.checkBox_IntensityGlyphs.stateChanged.connect(self.state_changed_checkBoxIntensityGlyphs)
         #self.pushButton_IntensityAnalysis.clicked.connect(self.loadIntensityAnalysisPage) # Attaching button click handler for intensity analysis page.
         self.horizontalSlider_TimePoint.valueChanged.connect(self.on_sliderChangedTimePoint) # Attaching slider value changed handler.
         self.horizontalSlider_DeltaThreshold.valueChanged.connect(self.on_sliderChangedDeltaThreshold)  # Attaching slider value changed handler.
@@ -480,6 +481,7 @@ class mainWindow(Qt.QMainWindow):
                     if self.lesionViewStyle == 0:  # Mesh View
                         lesion.SetVisibility(True)
                         lesion.GetProperty().SetColor(0.1961, 0.2863, 0.4588)  # Dark blue color.
+                        #lesion.GetProperty().SetColor(0, 1, 0)
                         lesion.GetProperty().SetRepresentationToSurface()
 
                     lesion.GetMapper().ScalarVisibilityOff()
@@ -544,7 +546,8 @@ class mainWindow(Qt.QMainWindow):
                 if self.lesionViewStyle == 0:  # Mesh View
                     lesion.SetVisibility(True)
                     lesion.GetProperty().SetRepresentationToWireframe()
-                    lesion.GetProperty().SetColor(1.0, 0, 0)
+                    #lesion.GetProperty().SetColor(1.0, 0, 0)
+                    lesion.GetProperty().SetColor(0.9882, 0.5529, 0.3490) # Orange color (color brewer)
                     lesion.GetProperty().SetLineWidth(2)
 
                 lesion.GetMapper().ScalarVisibilityOff()
@@ -559,7 +562,8 @@ class mainWindow(Qt.QMainWindow):
                 silhouetteMapper.SetInputConnection(silhouette.GetOutputPort())
                 silhouetteActor = vtk.vtkActor()
                 silhouetteActor.SetMapper(silhouetteMapper)
-                silhouetteActor.GetProperty().SetColor(1.0, 0.0, 0.0)  # Red Color
+                #silhouetteActor.GetProperty().SetColor(1.0, 0.0, 0.0)  # Red Color
+                silhouetteActor.GetProperty().SetColor(0.9882, 0.5529, 0.3490) # Orange color (color brewer)
                 silhouetteActor.GetProperty().SetLineWidth(2)
 
                 if linkedLesionIdsPrevious[i - 1] is not None: # Sometimes center elements can be None here. Avoiding processing that.
@@ -706,6 +710,14 @@ class mainWindow(Qt.QMainWindow):
         else:
             self.plotDefaultGraph(self.currentLesionAttribute)
 
+    # Handler for intensity glyph enable/disable
+    @pyqtSlot()
+    def state_changed_checkBoxIntensityGlyphs(self):
+        if self.checkBox_IntensityGlyphs.isChecked():
+            self.plotDefaultGraph(self.currentLesionAttribute)
+        else:
+            self.plotDefaultGraph(self.currentLesionAttribute)
+
     # Handler for enlarging lesions checkbox changed.
     @pyqtSlot()
     def state_changed_checkBoxEnlargingLesions(self):
@@ -781,7 +793,8 @@ class mainWindow(Qt.QMainWindow):
             for lesionActor in self.lesionViewSurfacesOverlay:
                 lesionActor.SetVisibility(True)
                 lesionActor.GetProperty().SetRepresentationToWireframe()
-                lesionActor.GetProperty().SetColor(1.0, 0, 0)  # red color
+                #lesionActor.GetProperty().SetColor(1.0, 0, 0)  # red color
+                lesionActor.GetProperty().SetColor(0.9882, 0.5529, 0.3490)  # orange color (colorbrewer)
                 lesionActor.GetProperty().SetLineWidth(2)
             for silhouetteActor in self.lesionViewSilhouettes:
                 silhouetteActor.SetVisibility(False)
@@ -1414,7 +1427,8 @@ class mainWindow(Qt.QMainWindow):
 
             #self.plotOverlayGlyphs(nodeID) # deprecated
             self.plotIntensityAnalysisPlot(int(nodeID))
-            self.plotIntensityChangeIndicatorGlyphs(int(nodeID))
+            if self.checkBox_IntensityGlyphs.isChecked():
+                self.plotIntensityChangeIndicatorGlyphs(int(nodeID))
 
     # Graph mouse move.
     def onMouseMoveDefaultStreamGraphCanvas(self, event):
@@ -1554,9 +1568,9 @@ class mainWindow(Qt.QMainWindow):
             #print(yDataNewLesions)
             #print("--------------")
             if self.checkBox_NewLesions.isChecked():
-                self.axDefault.scatter(xDataNewLesions, yDataNewLesions, 90, alpha=0.5, c = '#464646', marker="^", label="New Lesion")
+                self.axDefault.scatter(xDataNewLesions, yDataNewLesions, 90, alpha=0.5, c = '#2F3E8F', marker="*", label="New Lesion")
             if self.checkBox_EnlargingLesions.isChecked():
-                self.axDefault.scatter(xDataEnlargingLesions, yDataEnlargingLesions, 90, alpha=0.5, c='#464646', marker=".", label="Enlarging Lesion")
+                self.axDefault.scatter(xDataEnlargingLesions, yDataEnlargingLesions, 90, alpha=0.5, c='#464646', marker=r'$\Uparrow$' , label="Enlarging Lesion")
 
         #print(self.polyCollection)
         # dArray = self.polyCollection[0].get_array()
@@ -1940,7 +1954,8 @@ class mainWindow(Qt.QMainWindow):
     # Handler for intensity delta threshold slider change
     @pyqtSlot()
     def on_sliderChangedDeltaThreshold(self):
-        self.plotIntensityChangeIndicatorGlyphs(int(self.selectedNodeID))
+        if self.checkBox_IntensityGlyphs.isChecked():
+            self.plotIntensityChangeIndicatorGlyphs(int(self.selectedNodeID))
 
     # Handler for followup interval change.
     @pyqtSlot()
@@ -1954,7 +1969,7 @@ class mainWindow(Qt.QMainWindow):
     def on_click_CaptureScreeshot(self):
         Utils.captureScreenshot(self.ren.GetRenderWindow())
         #Utils.captureScreenshot(self.renDualLeft.GetRenderWindow())
-        Utils.captureScreenshot(self.renNodeGraph.GetRenderWindow())
+        #Utils.captureScreenshot(self.renNodeGraph.GetRenderWindow())
 
     # Handler for Riso slider change
     @pyqtSlot()
@@ -2205,9 +2220,11 @@ class mainWindow(Qt.QMainWindow):
         lut.SetTableRange(-128, 128)
         lut.Build()
 
-        lut.SetTableValue(0,nc.GetColor4d("LightCoral"))
+        #lut.SetTableValue(0,nc.GetColor4d("LightCoral"))
+        lut.SetTableValue(0, 0.9411764705882353, 0.5019607843137255, 0.5019607843137255, 1.0)
         lut.SetTableValue(1,nc.GetColor4d("LightSlateGray"))
-        lut.SetTableValue(2,nc.GetColor4d("PaleGreen"))
+        #lut.SetTableValue(2,nc.GetColor4d("PaleGreen"))
+        lut.SetTableValue(2, 0.596078431372549, 0.984313725490196, 0.596078431372549, 1.0)
 
         for i in range(multiBlockDataset.GetNumberOfBlocks()):
             block = multiBlockDataset.GetBlock(i)

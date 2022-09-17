@@ -1,6 +1,9 @@
 import vtk
+import SimpleITK as sitk
 from vtkmodules.vtkCommonColor import vtkNamedColors
 
+
+test = sitk.Elastix()
 # Create a sphere
 sphere = vtk.vtkSphereSource()
 sphere.SetCenter(0.0, 0.0, 0.0)

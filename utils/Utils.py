@@ -906,9 +906,9 @@ def captureScreenshot(renderWindow):
     windowToImageFilter = vtk.vtkWindowToImageFilter()
     windowToImageFilter.SetInput(renderWindow)
     windowToImageFilter.SetScale(1,1)
-    # windowToImageFilter.SetMagnification(3) #set the resolution of the output image (3 times the current resolution of vtk render window)
+    #windowToImageFilter.SetMagnification(3) #set the resolution of the output image (3 times the current resolution of vtk render window)
     windowToImageFilter.SetInputBufferTypeToRGBA()  # also record the alpha (transparency) channel
-    windowToImageFilter.ReadFrontBufferOff()  # read from the back buffer
+    #windowToImageFilter.ReadFrontBufferOff()  # read from the back buffer
     windowToImageFilter.Update()
 
     if getattr(sys, 'frozen', False):
@@ -932,9 +932,10 @@ def captureScreenshot(renderWindow):
     # writer.Write()
 
     timestr = "MS-LONG" + timestr
-    fileName = dir_path + "\\captures\\" + timestr + ".jpg"
+    fileName = dir_path + "\\captures\\" + timestr + ".png"
     print("filepath is", fileName)
-    writer = vtk.vtkJPEGWriter()
+    #writer = vtk.vtkJPEGWriter()
+    writer = vtk.vtkPNGWriter()
     writer.SetFileName(fileName)
     writer.SetInputConnection(windowToImageFilter.GetOutputPort())
     writer.Write()
